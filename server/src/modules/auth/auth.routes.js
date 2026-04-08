@@ -1,0 +1,15 @@
+import { Router } from 'express';
+import { authenticate } from '../../shared/middleware/authenticate.js';
+import { validate } from '../../shared/middleware/validate.js';
+import { asyncHandler } from '../../shared/utils/async-handler.js';
+import { authController } from './auth.controller.js';
+import { forgotPasswordSchema, loginSchema, refreshSchema, registerSchema, resetPasswordSchema, updateMeSchema } from './auth.validation.js';
+export const authRouter = Router();
+authRouter.post('/register', validate(registerSchema), asyncHandler(authController.register));
+authRouter.post('/login', validate(loginSchema), asyncHandler(authController.login));
+authRouter.post('/logout', asyncHandler(authController.logout));
+authRouter.post('/refresh', validate(refreshSchema), asyncHandler(authController.refresh));
+authRouter.post('/forgot-password', validate(forgotPasswordSchema), asyncHandler(authController.forgotPassword));
+authRouter.post('/reset-password', validate(resetPasswordSchema), asyncHandler(authController.resetPassword));
+authRouter.get('/me', authenticate, asyncHandler(authController.me));
+authRouter.patch('/me', authenticate, validate(updateMeSchema), asyncHandler(authController.updateMe));

@@ -1,0 +1,13 @@
+import { Router } from 'express';
+import { authenticate } from '../../shared/middleware/authenticate.js';
+import { requirePermissions } from '../../shared/middleware/authorize.js';
+import { validate } from '../../shared/middleware/validate.js';
+import { asyncHandler } from '../../shared/utils/async-handler.js';
+import { staffController } from './staff-profile.controller.js';
+import { createStaffSchema, listStaffSchema, staffIdParamsSchema, updateStaffSchema } from './staff-profile.validation.js';
+export const staffRouter = Router();
+staffRouter.use(authenticate);
+staffRouter.get('/', requirePermissions('staff.read'), validate(listStaffSchema), asyncHandler(staffController.list));
+staffRouter.get('/:staffId', requirePermissions('staff.read'), validate(staffIdParamsSchema), asyncHandler(staffController.getById));
+staffRouter.post('/', requirePermissions('staff.create'), validate(createStaffSchema), asyncHandler(staffController.create));
+staffRouter.patch('/:staffId', requirePermissions('staff.update'), validate(staffIdParamsSchema), validate(updateStaffSchema), asyncHandler(staffController.update));

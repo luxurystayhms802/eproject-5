@@ -1,0 +1,18 @@
+import { Router } from 'express';
+import { authenticate } from '../../shared/middleware/authenticate.js';
+import { requirePermissions } from '../../shared/middleware/authorize.js';
+import { validate } from '../../shared/middleware/validate.js';
+import { asyncHandler } from '../../shared/utils/async-handler.js';
+import { reportsController } from './reports.controller.js';
+import { reportsQuerySchema } from './reports.validation.js';
+export const reportsRouter = Router();
+reportsRouter.get('/dashboard/public-summary', asyncHandler(reportsController.publicSummary));
+reportsRouter.use(authenticate);
+reportsRouter.get('/dashboard', requirePermissions('reports.read'), validate(reportsQuerySchema), asyncHandler(reportsController.dashboard));
+reportsRouter.get('/occupancy', requirePermissions('reports.read'), validate(reportsQuerySchema), asyncHandler(reportsController.occupancy));
+reportsRouter.get('/revenue', requirePermissions('reports.read'), validate(reportsQuerySchema), asyncHandler(reportsController.revenue));
+reportsRouter.get('/reservations', requirePermissions('reports.read'), validate(reportsQuerySchema), asyncHandler(reportsController.reservations));
+reportsRouter.get('/housekeeping', requirePermissions('reports.read'), validate(reportsQuerySchema), asyncHandler(reportsController.housekeeping));
+reportsRouter.get('/maintenance', requirePermissions('reports.read'), validate(reportsQuerySchema), asyncHandler(reportsController.maintenance));
+reportsRouter.get('/feedback', requirePermissions('reports.read'), validate(reportsQuerySchema), asyncHandler(reportsController.feedback));
+reportsRouter.get('/export/csv', requirePermissions('reports.read'), validate(reportsQuerySchema), asyncHandler(reportsController.exportCsv));

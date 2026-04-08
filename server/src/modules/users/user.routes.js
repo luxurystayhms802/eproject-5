@@ -1,0 +1,14 @@
+import { Router } from 'express';
+import { authenticate } from '../../shared/middleware/authenticate.js';
+import { requirePermissions } from '../../shared/middleware/authorize.js';
+import { validate } from '../../shared/middleware/validate.js';
+import { asyncHandler } from '../../shared/utils/async-handler.js';
+import { userController } from './user.controller.js';
+import { createUserSchema, listUsersSchema, updateUserSchema, userIdParamsSchema } from './user.validation.js';
+export const usersRouter = Router();
+usersRouter.use(authenticate);
+usersRouter.get('/', requirePermissions('users.read'), validate(listUsersSchema), asyncHandler(userController.list));
+usersRouter.get('/:userId', requirePermissions('users.read'), validate(userIdParamsSchema), asyncHandler(userController.getById));
+usersRouter.post('/', requirePermissions('users.create'), validate(createUserSchema), asyncHandler(userController.create));
+usersRouter.patch('/:userId', requirePermissions('users.update'), validate(userIdParamsSchema), validate(updateUserSchema), asyncHandler(userController.update));
+usersRouter.delete('/:userId', requirePermissions('users.delete'), validate(userIdParamsSchema), asyncHandler(userController.remove));

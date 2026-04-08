@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LuxuryStay Hospitality">
+  <defs>
+    <linearGradient id="luxurystay-favicon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#18314f" />
+      <stop offset="100%" stop-color="#b88c4a" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#luxurystay-favicon)" />
+  <path d="M20 18h6v22h18v6H20V18Z" fill="#f7efe3" />
+  <path d="M32 18h12v6H32z" fill="#f4d5a1" />
+</svg>

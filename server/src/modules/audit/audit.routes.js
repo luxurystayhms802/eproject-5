@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { authenticate } from '../../shared/middleware/authenticate.js';
+import { requirePermissions } from '../../shared/middleware/authorize.js';
+import { validate } from '../../shared/middleware/validate.js';
+import { asyncHandler } from '../../shared/utils/async-handler.js';
+import { auditController } from './audit.controller.js';
+import { listAuditLogsSchema } from './audit.validation.js';
+export const auditRouter = Router();
+auditRouter.use(authenticate);
+auditRouter.get('/', requirePermissions('audit.read'), validate(listAuditLogsSchema), asyncHandler(auditController.list));

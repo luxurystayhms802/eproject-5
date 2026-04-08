@@ -1,0 +1,16 @@
+import { Router } from 'express';
+import { authenticate } from '../../shared/middleware/authenticate.js';
+import { requirePermissions } from '../../shared/middleware/authorize.js';
+import { validate } from '../../shared/middleware/validate.js';
+import { asyncHandler } from '../../shared/utils/async-handler.js';
+import { maintenanceRequestController } from './maintenance-request.controller.js';
+import { assignMaintenanceRequestSchema, createMaintenanceRequestSchema, listMaintenanceRequestsSchema, maintenanceRequestIdParamsSchema, resolveMaintenanceRequestSchema, updateMaintenanceRequestSchema, } from './maintenance-request.validation.js';
+export const maintenanceRouter = Router();
+maintenanceRouter.use(authenticate);
+maintenanceRouter.get('/requests', requirePermissions('maintenance.read'), validate(listMaintenanceRequestsSchema), asyncHandler(maintenanceRequestController.list));
+maintenanceRouter.get('/requests/:requestId', requirePermissions('maintenance.read'), validate(maintenanceRequestIdParamsSchema), asyncHandler(maintenanceRequestController.getById));
+maintenanceRouter.post('/requests', requirePermissions('maintenance.create'), validate(createMaintenanceRequestSchema), asyncHandler(maintenanceRequestController.create));
+maintenanceRouter.patch('/requests/:requestId', requirePermissions('maintenance.update'), validate(maintenanceRequestIdParamsSchema), validate(updateMaintenanceRequestSchema), asyncHandler(maintenanceRequestController.update));
+maintenanceRouter.post('/requests/:requestId/assign', requirePermissions('maintenance.update'), validate(maintenanceRequestIdParamsSchema), validate(assignMaintenanceRequestSchema), asyncHandler(maintenanceRequestController.assign));
+maintenanceRouter.post('/requests/:requestId/resolve', requirePermissions('maintenance.update'), validate(maintenanceRequestIdParamsSchema), validate(resolveMaintenanceRequestSchema), asyncHandler(maintenanceRequestController.resolve));
+maintenanceRouter.post('/requests/:requestId/close', requirePermissions('maintenance.update'), validate(maintenanceRequestIdParamsSchema), asyncHandler(maintenanceRequestController.close));

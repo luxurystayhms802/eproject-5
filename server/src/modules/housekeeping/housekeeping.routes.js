@@ -1,0 +1,14 @@
+import { Router } from 'express';
+import { authenticate } from '../../shared/middleware/authenticate.js';
+import { requirePermissions } from '../../shared/middleware/authorize.js';
+import { validate } from '../../shared/middleware/validate.js';
+import { asyncHandler } from '../../shared/utils/async-handler.js';
+import { housekeepingController } from './housekeeping.controller.js';
+import { housekeepingTaskIdParamsSchema, listHousekeepingTasksSchema } from './housekeeping.validation.js';
+export const housekeepingRouter = Router();
+housekeepingRouter.use(authenticate);
+housekeepingRouter.get('/tasks', requirePermissions('housekeeping.read'), validate(listHousekeepingTasksSchema), asyncHandler(housekeepingController.listTasks));
+housekeepingRouter.get('/tasks/:taskId', requirePermissions('housekeeping.read'), validate(housekeepingTaskIdParamsSchema), asyncHandler(housekeepingController.getTaskById));
+housekeepingRouter.post('/tasks/:taskId/start', requirePermissions('housekeeping.update'), validate(housekeepingTaskIdParamsSchema), asyncHandler(housekeepingController.startTask));
+housekeepingRouter.post('/tasks/:taskId/complete', requirePermissions('housekeeping.update'), validate(housekeepingTaskIdParamsSchema), asyncHandler(housekeepingController.completeTask));
+housekeepingRouter.get('/board', requirePermissions('housekeeping.read'), asyncHandler(housekeepingController.getBoard));

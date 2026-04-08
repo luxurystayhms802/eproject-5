@@ -1,0 +1,15 @@
+import { Router } from 'express';
+import { authenticate } from '../../shared/middleware/authenticate.js';
+import { requirePermissions } from '../../shared/middleware/authorize.js';
+import { validate } from '../../shared/middleware/validate.js';
+import { asyncHandler } from '../../shared/utils/async-handler.js';
+import { roomController } from './room.controller.js';
+import { availabilitySearchSchema, createRoomSchema, listRoomsSchema, roomIdParamsSchema, updateRoomSchema, updateRoomStatusSchema } from './room.validation.js';
+export const roomsRouter = Router();
+roomsRouter.get('/availability/search', validate(availabilitySearchSchema), asyncHandler(roomController.searchAvailability));
+roomsRouter.get('/', validate(listRoomsSchema), asyncHandler(roomController.list));
+roomsRouter.get('/:roomId', validate(roomIdParamsSchema), asyncHandler(roomController.getById));
+roomsRouter.post('/', authenticate, requirePermissions('rooms.create'), validate(createRoomSchema), asyncHandler(roomController.create));
+roomsRouter.patch('/:roomId', authenticate, requirePermissions('rooms.update'), validate(roomIdParamsSchema), validate(updateRoomSchema), asyncHandler(roomController.update));
+roomsRouter.patch('/:roomId/status', authenticate, requirePermissions('rooms.update'), validate(roomIdParamsSchema), validate(updateRoomStatusSchema), asyncHandler(roomController.updateStatus));
+roomsRouter.delete('/:roomId', authenticate, requirePermissions('rooms.delete'), validate(roomIdParamsSchema), asyncHandler(roomController.remove));

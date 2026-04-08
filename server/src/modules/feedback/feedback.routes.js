@@ -1,0 +1,13 @@
+import { Router } from 'express';
+import { authenticate } from '../../shared/middleware/authenticate.js';
+import { requirePermissions } from '../../shared/middleware/authorize.js';
+import { validate } from '../../shared/middleware/validate.js';
+import { asyncHandler } from '../../shared/utils/async-handler.js';
+import { feedbackController } from './feedback.controller.js';
+import { createFeedbackSchema, feedbackIdParamsSchema, listFeedbackSchema, listPublishedFeedbackSchema, publishFeedbackSchema } from './feedback.validation.js';
+export const feedbackRouter = Router();
+feedbackRouter.get('/published', validate(listPublishedFeedbackSchema), asyncHandler(feedbackController.listPublished));
+feedbackRouter.use(authenticate);
+feedbackRouter.get('/', requirePermissions('feedback.read'), validate(listFeedbackSchema), asyncHandler(feedbackController.list));
+feedbackRouter.post('/', requirePermissions('feedback.create'), validate(createFeedbackSchema), asyncHandler(feedbackController.create));
+feedbackRouter.patch('/:feedbackId/publish', requirePermissions('feedback.publish'), validate(feedbackIdParamsSchema), validate(publishFeedbackSchema), asyncHandler(feedbackController.publish));

@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { authenticate } from '../../shared/middleware/authenticate.js';
+import { requirePermissions } from '../../shared/middleware/authorize.js';
+import { validate } from '../../shared/middleware/validate.js';
+import { asyncHandler } from '../../shared/utils/async-handler.js';
+import { settingController } from './setting.controller.js';
+import { updateSettingsSchema } from './setting.validation.js';
+export const settingsRouter = Router();
+settingsRouter.get('/', asyncHandler(settingController.getCurrent));
+settingsRouter.patch('/', authenticate, requirePermissions('settings.update'), validate(updateSettingsSchema), asyncHandler(settingController.updateCurrent));

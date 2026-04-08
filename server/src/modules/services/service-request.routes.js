@@ -1,0 +1,13 @@
+import { Router } from 'express';
+import { authenticate } from '../../shared/middleware/authenticate.js';
+import { requirePermissions } from '../../shared/middleware/authorize.js';
+import { validate } from '../../shared/middleware/validate.js';
+import { asyncHandler } from '../../shared/utils/async-handler.js';
+import { serviceRequestController } from './service-request.controller.js';
+import { createServiceRequestSchema, listServiceRequestsSchema, serviceRequestIdParamsSchema, updateServiceRequestSchema } from './service-request.validation.js';
+export const serviceRequestsRouter = Router();
+serviceRequestsRouter.use(authenticate);
+serviceRequestsRouter.get('/', requirePermissions('serviceRequests.read'), validate(listServiceRequestsSchema), asyncHandler(serviceRequestController.list));
+serviceRequestsRouter.get('/:requestId', requirePermissions('serviceRequests.read'), validate(serviceRequestIdParamsSchema), asyncHandler(serviceRequestController.getById));
+serviceRequestsRouter.post('/', requirePermissions('serviceRequests.create'), validate(createServiceRequestSchema), asyncHandler(serviceRequestController.create));
+serviceRequestsRouter.patch('/:requestId', requirePermissions('serviceRequests.update'), validate(serviceRequestIdParamsSchema), validate(updateServiceRequestSchema), asyncHandler(serviceRequestController.update));

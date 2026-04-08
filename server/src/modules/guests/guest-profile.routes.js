@@ -1,0 +1,13 @@
+import { Router } from 'express';
+import { authenticate } from '../../shared/middleware/authenticate.js';
+import { requirePermissions } from '../../shared/middleware/authorize.js';
+import { validate } from '../../shared/middleware/validate.js';
+import { asyncHandler } from '../../shared/utils/async-handler.js';
+import { guestController } from './guest-profile.controller.js';
+import { createGuestSchema, guestIdParamsSchema, listGuestsSchema, updateGuestSchema } from './guest-profile.validation.js';
+export const guestsRouter = Router();
+guestsRouter.use(authenticate);
+guestsRouter.get('/', requirePermissions('guests.read'), validate(listGuestsSchema), asyncHandler(guestController.list));
+guestsRouter.get('/:guestId', requirePermissions('guests.read'), validate(guestIdParamsSchema), asyncHandler(guestController.getById));
+guestsRouter.post('/', requirePermissions('guests.create'), validate(createGuestSchema), asyncHandler(guestController.create));
+guestsRouter.patch('/:guestId', requirePermissions('guests.update'), validate(guestIdParamsSchema), validate(updateGuestSchema), asyncHandler(guestController.update));

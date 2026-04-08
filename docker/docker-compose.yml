@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  luxurystay-server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.server
+    env_file:
+      - ../server/.env.example
+    ports:
+      - "5000:5000"
+
+  luxurystay-client:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.client
+    env_file:
+      - ../client/.env.example
+    ports:
+      - "5173:5173"

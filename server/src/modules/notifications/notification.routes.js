@@ -1,0 +1,13 @@
+import { Router } from 'express';
+import { authenticate } from '../../shared/middleware/authenticate.js';
+import { requirePermissions } from '../../shared/middleware/authorize.js';
+import { validate } from '../../shared/middleware/validate.js';
+import { asyncHandler } from '../../shared/utils/async-handler.js';
+import { notificationController } from './notification.controller.js';
+import { createNotificationSchema, listNotificationsSchema, notificationIdParamsSchema } from './notification.validation.js';
+export const notificationsRouter = Router();
+notificationsRouter.use(authenticate);
+notificationsRouter.get('/', requirePermissions('notifications.read'), validate(listNotificationsSchema), asyncHandler(notificationController.list));
+notificationsRouter.post('/', requirePermissions('notifications.create'), validate(createNotificationSchema), asyncHandler(notificationController.create));
+notificationsRouter.post('/:notificationId/read', validate(notificationIdParamsSchema), asyncHandler(notificationController.markRead));
+notificationsRouter.post('/read-all', asyncHandler(notificationController.markAllRead));

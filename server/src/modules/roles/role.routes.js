@@ -1,0 +1,12 @@
+import { Router } from 'express';
+import { authenticate } from '../../shared/middleware/authenticate.js';
+import { requirePermissions } from '../../shared/middleware/authorize.js';
+import { validate } from '../../shared/middleware/validate.js';
+import { asyncHandler } from '../../shared/utils/async-handler.js';
+import { roleController } from './role.controller.js';
+import { createRoleSchema, updateRoleSchema } from './role.validation.js';
+export const rolesRouter = Router();
+rolesRouter.get('/', authenticate, requirePermissions('roles.read'), asyncHandler(roleController.listRoles));
+rolesRouter.post('/', authenticate, requirePermissions('roles.create'), validate(createRoleSchema), asyncHandler(roleController.createRole));
+rolesRouter.patch('/:roleId', authenticate, requirePermissions('roles.update'), validate(updateRoleSchema), asyncHandler(roleController.updateRole));
+rolesRouter.delete('/:roleId', authenticate, requirePermissions('roles.delete'), asyncHandler(roleController.deleteRole));

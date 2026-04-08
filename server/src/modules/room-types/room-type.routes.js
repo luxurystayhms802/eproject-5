@@ -1,0 +1,13 @@
+import { Router } from 'express';
+import { authenticate } from '../../shared/middleware/authenticate.js';
+import { requirePermissions } from '../../shared/middleware/authorize.js';
+import { validate } from '../../shared/middleware/validate.js';
+import { asyncHandler } from '../../shared/utils/async-handler.js';
+import { roomTypeController } from './room-type.controller.js';
+import { createRoomTypeSchema, listRoomTypesSchema, roomTypeIdParamsSchema, updateRoomTypeSchema } from './room-type.validation.js';
+export const roomTypesRouter = Router();
+roomTypesRouter.get('/', validate(listRoomTypesSchema), asyncHandler(roomTypeController.list));
+roomTypesRouter.get('/:roomTypeId', validate(roomTypeIdParamsSchema), asyncHandler(roomTypeController.getById));
+roomTypesRouter.post('/', authenticate, requirePermissions('roomTypes.create'), validate(createRoomTypeSchema), asyncHandler(roomTypeController.create));
+roomTypesRouter.patch('/:roomTypeId', authenticate, requirePermissions('roomTypes.update'), validate(roomTypeIdParamsSchema), validate(updateRoomTypeSchema), asyncHandler(roomTypeController.update));
+roomTypesRouter.delete('/:roomTypeId', authenticate, requirePermissions('roomTypes.delete'), validate(roomTypeIdParamsSchema), asyncHandler(roomTypeController.remove));
