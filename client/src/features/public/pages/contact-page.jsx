@@ -80,12 +80,12 @@ export const ContactPage = () => {
         </div>
       </section>
 
-      <section className="px-4 md:px-6">
-        <div className="mx-auto grid max-w-[1380px] gap-8 lg:grid-cols-[0.8fr,1.2fr]">
+      <section className="px-4 md:px-6 mt-8">
+        <div className="mx-auto flex flex-col md:flex-row max-w-[1380px] rounded-[40px] overflow-hidden bg-white shadow-[0_20px_50px_rgba(16,36,63,0.06)] border border-[var(--border)]">
           
           {/* Left Column: Dark Premium Contact Card */}
-          <Card className="rounded-[32px] overflow-hidden border-0 bg-[linear-gradient(145deg,#091220,#132540)] p-8 text-white shadow-2xl relative">
-            <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+          <div className="relative w-full md:w-[40%] xl:w-[35%] shrink-0 bg-[linear-gradient(145deg,#091220,#132540)] p-10 md:p-14 text-white">
+            <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
               <MessageSquare className="w-64 h-64" />
             </div>
 
@@ -156,30 +156,30 @@ export const ContactPage = () => {
                 </div>
 
                 {socialEntries.length > 0 && (
-                  <div className="pt-4 mt-8 border-t border-white/10">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50 mb-4">Connect Socially</p>
-                    <div className="flex flex-wrap gap-3">
-                      {socialEntries.map(([label, value]) => (
-                        <a
-                          key={label}
-                          href={value}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-2.5 text-xs font-semibold tracking-wide text-white transition hover:bg-[#f3d7aa] hover:text-black hover:border-[#f3d7aa]"
-                        >
-                          {label}
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      ))}
-                    </div>
-                  </div>
+                 <div className="pt-4 mt-8 border-t border-white/10">
+                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50 mb-4">Connect Socially</p>
+                   <div className="flex flex-wrap gap-3">
+                     {socialEntries.map(([label, value]) => (
+                       <a
+                         key={label}
+                         href={value}
+                         target="_blank"
+                         rel="noreferrer"
+                         className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-2.5 text-xs font-semibold tracking-wide text-white transition hover:bg-[#f3d7aa] hover:text-black hover:border-[#f3d7aa]"
+                       >
+                         {label}
+                         <ExternalLink className="h-3 w-3" />
+                       </a>
+                     ))}
+                   </div>
+                 </div>
                 )}
               </div>
             </div>
-          </Card>
+          </div>
 
           {/* Right Column: Light Inquiry Form */}
-          <Card className="rounded-[32px] p-8 md:p-10 border border-[var(--border)] bg-white/80 shadow-xl backdrop-blur-xl h-fit">
+          <div className="w-full flex-1 p-10 md:p-14 lg:p-16">
             <div className="max-w-[500px] mb-10">
               <span className="inline-flex rounded-full border border-[rgba(184,140,74,0.22)] bg-[var(--accent-soft)]/65 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-[var(--accent)]">
                 Send a Message
@@ -266,22 +266,24 @@ export const ContactPage = () => {
                    Your trust is our priority. We never share your personal information.
                 </p>
               </div>
-            </form>
-          </Card>
-        </div>
-      </section>
+              </form>
+            </div>
+          </div>
+        </section>
       </div>
 
       <section className="mt-8 md:mt-12 px-4 md:px-6">
         <div className="mx-auto max-w-[1380px] overflow-hidden rounded-[32px] border border-white/55 shadow-2xl">
           {branding.mapEmbedUrl ? (
-            <iframe
-              title={`${branding.hotelName} location map`}
-              src={branding.mapEmbedUrl}
-              className="h-[500px] w-full border-0 grayscale hover:grayscale-0 transition-all duration-700 pointer-events-none hover:pointer-events-auto"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
+            <div className="group h-[500px] w-full">
+              <iframe
+                title={`${branding.hotelName} location map`}
+                src={branding.mapEmbedUrl}
+                className="h-full w-full border-0 grayscale group-hover:grayscale-0 transition-all duration-700 pointer-events-none group-hover:pointer-events-auto"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
           ) : (
             <div className="flex min-h-[500px] items-end bg-[linear-gradient(145deg,#10243f,#18355d,#c1924c)] p-10 text-white relative">
               <div className="max-w-xl rounded-[32px] border border-white/14 bg-white/10 p-8 backdrop-blur-md relative z-10 shadow-2xl transform translate-y-4 hover:translate-y-0 transition-transform">

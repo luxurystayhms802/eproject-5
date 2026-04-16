@@ -14,19 +14,19 @@ export const authenticate = (request, response, next) => {
             id: payload.sub,
             role: payload.role,
             permissions: payload.permissions,
-            forcePasswordReset: payload.forcePasswordReset,
         };
         
-        // Enforce password reset constraint
-        if (payload.forcePasswordReset) {
+
+
+        // Enforce employment suspension constraint
+        if (payload.employmentStatus === 'suspended' && request.method !== 'GET') {
             const path = request.originalUrl || request.path || '';
-            const isMeEndpoint = path.includes('/auth/me');
             const isLogoutEndpoint = path.includes('/auth/logout');
-            
-            if (!isMeEndpoint && !isLogoutEndpoint) {
+
+            if (!isLogoutEndpoint) {
                 return response.status(403).json({
                     success: false,
-                    message: 'Password reset required',
+                    message: 'Your account is currently suspended. You cannot perform any actions. Please contact an administrator.',
                 });
             }
         }

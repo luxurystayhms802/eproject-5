@@ -43,8 +43,8 @@ export const AdminMaintenanceOverviewPage = () => {
 
   const user = useAuthStore((state) => state.user);
   const permissions = user?.permissions ?? [];
-  const isSuperAdmin = user?.role === 'super_admin';
-  const canUpdate = isSuperAdmin || permissions.includes('maintenance.update');
+  const isAdmin = user?.role === 'admin';
+  const canUpdate = isAdmin || permissions.includes('maintenance.update');
 
   const requests = requestsQuery.data ?? [];
   const maintenanceStaff = useMemo(

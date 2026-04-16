@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { AdminImageUploader } from '@/features/admin/components/admin-image-uploader';
 import { validateGuestProfileForm } from '@/features/guest/form-utils';
 import { useGuestProfile, useUpdateGuestProfile } from '@/features/guest/hooks';
+import { Eye, EyeOff } from 'lucide-react';
 
 const inputClassName = 'w-full rounded-2xl border border-[var(--border)] bg-white/80 px-4 py-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]';
 
@@ -13,6 +14,30 @@ export const GuestProfilePage = () => {
   const { data, isLoading } = useGuestProfile();
   const updateProfile = useUpdateGuestProfile();
   const [form, setForm] = useState(null);
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [focusStates, setFocusStates] = useState({ showCurrent: false, showNew: false, showConfirm: false });
+  const [isProfileSaving, setIsProfileSaving] = useState(false);
+  const [isPasswordSaving, setIsPasswordSaving] = useState(false);
+
+  const handlePasswordSubmit = (event) => {
+    event.preventDefault();
+    if (!passwordForm.currentPassword) return toast.error('Current password is required');
+    if (passwordForm.newPassword.length < 6) return toast.error('New password must be at least 6 characters long');
+    if (passwordForm.newPassword === passwordForm.currentPassword) return toast.error('New password cannot be the same as your current password');
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) return toast.error('New passwords do not match');
+
+    setIsPasswordSaving(true);
+    updateProfile.mutate({
+      currentPassword: passwordForm.currentPassword.trim(),
+      password: passwordForm.newPassword.trim(),
+    }, {
+      onSuccess: () => {
+        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        toast.success('Password updated successfully');
+      },
+      onSettled: () => setIsPasswordSaving(false),
+    });
+  };
 
   useEffect(() => {
     if (data) {
@@ -30,6 +55,7 @@ export const GuestProfilePage = () => {
       return;
     }
 
+    setIsProfileSaving(true);
     updateProfile.mutate({
       firstName: form.firstName.trim(),
       lastName: form.lastName.trim(),
@@ -52,6 +78,8 @@ export const GuestProfilePage = () => {
         emergencyContact: form.profile?.emergencyContact ?? {},
         notes: form.profile?.notes ?? null,
       },
+    }, {
+      onSettled: () => setIsProfileSaving(false)
     });
   };
 
@@ -279,13 +307,97 @@ export const GuestProfilePage = () => {
             </label>
 
             <div className="md:col-span-2">
-              <Button type="submit" disabled={updateProfile.isPending}>
-                {updateProfile.isPending ? 'Saving...' : 'Save profile'}
+              <Button type="submit" disabled={isProfileSaving || updateProfile.isPending}>
+                {isProfileSaving ? 'Saving...' : 'Save profile'}
               </Button>
             </div>
           </form>
         )}
       </Card>
+
+      <form className="grid gap-4" onSubmit={handlePasswordSubmit} autoComplete="off">
+        <Card className="space-y-6">
+          <div className="mb-2">
+            <h2 className="text-xl font-semibold text-[var(--primary)] mb-1">Security & Password</h2>
+            <p className="text-sm text-[var(--muted-foreground)]">Rotate your account password securely.</p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {/* HONEYPOT: Chrome Autofill trap far off-screen */}
+            <div style={{ position: 'absolute', top: 0, left: '-9999px', opacity: 0 }} aria-hidden="true" tabIndex={-1}>
+               <input type="text" name="email" autoComplete="username" defaultValue={data?.email || ''} tabIndex={-1} />
+               <input type="password" name="password" autoComplete="current-password" tabIndex={-1} />
+               <input type="password" name="new-password" autoComplete="new-password" tabIndex={-1} />
+            </div>
+
+            <label className="space-y-2">
+              <span className="text-sm font-semibold text-[var(--primary)]">Current password</span>
+              <div className="relative">
+                <input
+                  type={focusStates.showCurrent ? 'text' : (focusStates.isCurrentFoc || passwordForm.currentPassword.length > 0 ? 'password' : 'text')}
+                  autoComplete="new-password"
+                  name="current-password-field"
+                  onFocus={() => setFocusStates(s => ({ ...s, isCurrentFoc: true }))}
+                  onBlur={() => setFocusStates(s => ({ ...s, isCurrentFoc: false }))}
+                  className={inputClassName}
+                  value={passwordForm.currentPassword}
+                  onChange={(event) => setPasswordForm({ ...passwordForm, currentPassword: event.target.value })}
+                  placeholder="Required to set a new password"
+                />
+                <button type="button" tabIndex={-1} className="absolute right-3 top-[55%] -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-600" onClick={() => setFocusStates(s => ({ ...s, showCurrent: !s.showCurrent }))}>
+                  {focusStates.showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </label>
+
+            <label className="space-y-2">
+              <span className="text-sm font-semibold text-[var(--primary)]">New password</span>
+              <div className="relative">
+                <input
+                  type={focusStates.showNew ? 'text' : (focusStates.isNewFoc || passwordForm.newPassword.length > 0 ? 'password' : 'text')}
+                  autoComplete="new-password"
+                  name="new-password-field"
+                  onFocus={() => setFocusStates(s => ({ ...s, isNewFoc: true }))}
+                  onBlur={() => setFocusStates(s => ({ ...s, isNewFoc: false }))}
+                  className={inputClassName}
+                  value={passwordForm.newPassword}
+                  onChange={(event) => setPasswordForm({ ...passwordForm, newPassword: event.target.value })}
+                  placeholder="Minimum 6 characters"
+                />
+                <button type="button" tabIndex={-1} className="absolute right-3 top-[55%] -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-600" onClick={() => setFocusStates(s => ({ ...s, showNew: !s.showNew }))}>
+                  {focusStates.showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </label>
+
+            <label className="space-y-2">
+              <span className="text-sm font-semibold text-[var(--primary)]">Confirm new password</span>
+              <div className="relative">
+                <input
+                  type={focusStates.showConfirm ? 'text' : (focusStates.isConfirmFoc || passwordForm.confirmPassword.length > 0 ? 'password' : 'text')}
+                  autoComplete="new-password"
+                  name="confirm-password-field"
+                  onFocus={() => setFocusStates(s => ({ ...s, isConfirmFoc: true }))}
+                  onBlur={() => setFocusStates(s => ({ ...s, isConfirmFoc: false }))}
+                  className={inputClassName}
+                  value={passwordForm.confirmPassword}
+                  onChange={(event) => setPasswordForm({ ...passwordForm, confirmPassword: event.target.value })}
+                  placeholder="Re-type new password"
+                />
+                <button type="button" tabIndex={-1} className="absolute right-3 top-[55%] -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-600" onClick={() => setFocusStates(s => ({ ...s, showConfirm: !s.showConfirm }))}>
+                  {focusStates.showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </label>
+          </div>
+
+          <div className="md:col-span-2">
+            <Button type="submit" disabled={isPasswordSaving || updateProfile.isPending}>
+              {isPasswordSaving ? 'Updating password...' : 'Update password'}
+            </Button>
+          </div>
+        </Card>
+      </form>
     </div>
   );
 };

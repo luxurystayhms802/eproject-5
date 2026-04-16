@@ -40,10 +40,10 @@ export const AdminFaqsPage = () => {
 
   const user = useAuthStore((state) => state.user);
   const permissions = user?.permissions ?? [];
-  const isSuperAdmin = user?.role === 'super_admin';
-  const canCreate = isSuperAdmin || permissions.includes('faqs.create');
-  const canUpdate = isSuperAdmin || permissions.includes('faqs.update');
-  const canDelete = isSuperAdmin || permissions.includes('faqs.delete');
+  const isAdmin = user?.role === 'admin';
+  const canCreate = isAdmin || permissions.includes('faqs.create');
+  const canUpdate = isAdmin || permissions.includes('faqs.update');
+  const canDelete = isAdmin || permissions.includes('faqs.delete');
 
   const faqsQuery = useAdminFaqs();
   const createFaq = useAdminCreateFaq();

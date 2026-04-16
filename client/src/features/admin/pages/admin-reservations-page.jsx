@@ -227,12 +227,12 @@ export const AdminReservationsPage = () => {
 
   const user = useAuthStore((state) => state.user);
   const permissions = user?.permissions ?? [];
-  const isSuperAdmin = user?.role === 'super_admin';
-  const canUpdate = isSuperAdmin || permissions.includes('reservations.update');
-  const canCreate = isSuperAdmin || permissions.includes('reservations.create');
-  const canConfirm = isSuperAdmin || permissions.includes('reservations.confirm');
-  const canAssignRoom = isSuperAdmin || permissions.includes('reservations.assignRoom');
-  const canCancel = isSuperAdmin || permissions.includes('reservations.cancel');
+  const isAdmin = user?.role === 'admin';
+  const canUpdate = isAdmin || permissions.includes('reservations.update');
+  const canCreate = isAdmin || permissions.includes('reservations.create');
+  const canConfirm = isAdmin || permissions.includes('reservations.confirm');
+  const canAssignRoom = isAdmin || permissions.includes('reservations.assignRoom');
+  const canCancel = isAdmin || permissions.includes('reservations.cancel');
 
   const reservationsQuery = useAdminReservations({
     search: filters.search.trim() || undefined,

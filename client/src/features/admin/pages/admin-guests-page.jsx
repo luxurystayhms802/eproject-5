@@ -118,10 +118,10 @@ export const AdminGuestsPage = () => {
 
   const user = useAuthStore((state) => state.user);
   const permissions = user?.permissions ?? [];
-  const isSuperAdmin = user?.role === 'super_admin';
-  const canUpdate = isSuperAdmin || permissions.includes('guests.update');
-  const canCreate = isSuperAdmin || permissions.includes('guests.create');
-  const canDelete = isSuperAdmin || permissions.includes('guests.delete');
+  const isAdmin = user?.role === 'admin';
+  const canUpdate = isAdmin || permissions.includes('guests.update');
+  const canCreate = isAdmin || permissions.includes('guests.create');
+  const canDelete = isAdmin || permissions.includes('guests.delete');
 
   const guestsQuery = useAdminGuests({
     search: filters.search.trim() || undefined,

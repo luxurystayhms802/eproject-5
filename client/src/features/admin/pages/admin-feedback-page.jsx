@@ -23,8 +23,8 @@ export const AdminFeedbackPage = () => {
 
   const user = useAuthStore((state) => state.user);
   const permissions = user?.permissions ?? [];
-  const isSuperAdmin = user?.role === 'super_admin';
-  const canPublish = isSuperAdmin || permissions.includes('feedback.publish');
+  const isAdmin = user?.role === 'admin';
+  const canPublish = isAdmin || permissions.includes('feedback.publish');
 
   const feedbackQuery = useAdminFeedback({
     rating: filters.rating ? Number(filters.rating) : undefined,

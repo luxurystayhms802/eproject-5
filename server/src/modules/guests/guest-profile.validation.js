@@ -28,6 +28,32 @@ const guestProfileFields = z.object({
     })
         .optional(),
     notes: z.string().trim().nullable().optional(),
+}).superRefine((data, ctx) => {
+    if (data.idType === 'cnic' && data.idNumber) {
+        if (!/^\d{5}-?\d{7}-?\d{1}$/.test(data.idNumber)) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['idNumber'],
+                message: 'CNIC must be a valid 13-digit format (e.g. 12345-1234567-1).',
+            });
+        }
+    } else if (data.idType === 'passport' && data.idNumber) {
+        if (!/^[A-Za-z0-9]{6,15}$/.test(data.idNumber)) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['idNumber'],
+                message: 'Passport number should be 6 to 15 alphanumeric characters.',
+            });
+        }
+    } else if (data.idType === 'driving_license' && data.idNumber) {
+        if (!/^[A-Za-z0-9\-_]{5,20}$/.test(data.idNumber)) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['idNumber'],
+                message: 'Driving license should be 5 to 20 characters.',
+            });
+        }
+    }
 });
 export const guestIdParamsSchema = z.object({
     params: z.object({
@@ -62,6 +88,7 @@ export const updateGuestSchema = z.object({
         lastName: z.string().min(2).max(50).optional(),
         email: z.string().email().optional(),
         phone: z.union([z.string().min(5), z.literal('')]).optional(),
+        currentPassword: z.union([z.string().min(1), z.literal('')]).optional(),
         password: z.union([z.string().min(6), z.literal('')]).optional(),
         status: z.enum(USER_STATUSES).optional(),
         avatarUrl: z.string().url().nullable().optional(),

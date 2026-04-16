@@ -20,7 +20,7 @@ export const AdminInquiriesPage = () => {
   const [filters, setFilters] = useState({ search: '', status: '' });
 
   const user = useAuthStore((state) => state.user);
-  const canUpdate = user?.role === 'super_admin' || (user?.permissions || []).includes('inquiries.update');
+  const canUpdate = user?.role === 'admin' || (user?.permissions || []).includes('inquiries.update');
 
   const inquiriesQuery = useAdminInquiries({
     status: filters.status || undefined,

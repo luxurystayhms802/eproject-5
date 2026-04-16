@@ -45,8 +45,8 @@ export const AdminSettingsPage = () => {
 
   const user = useAuthStore((state) => state.user);
   const permissions = user?.permissions ?? [];
-  const isSuperAdmin = user?.role === 'super_admin';
-  const canUpdate = isSuperAdmin || permissions.includes('settings.update');
+  const isAdmin = user?.role === 'admin';
+  const canUpdate = isAdmin || permissions.includes('settings.update');
 
   useEffect(() => {
     if (data) {
@@ -176,21 +176,94 @@ export const AdminSettingsPage = () => {
           </div>
         </Card>
 
+        <Card className="space-y-6">
+          <SectionHeading title="Home Page Configuration" description="Manage the imagery uniquely associated with the Home page layout." />
+          <div className="grid gap-4 md:grid-cols-3 rounded-xl border border-[var(--border)] bg-[var(--surface-secondary)]/10 p-5">
+            <AdminImageUploader label="Homepage hero gallery" folder="settings" multiple value={form.websiteSettings?.heroGalleryUrls ?? []} onChange={(images) => updateNestedField('websiteSettings', 'heroGalleryUrls', images)} helperText="These images lead the main homepage carousel before guests move into rooms and booking." />
+            <AdminImageUploader label="Home about primary image" folder="settings" multiple={false} value={form.homePageSettings?.aboutPrimaryImageUrl ? [form.homePageSettings.aboutPrimaryImageUrl] : []} onChange={(images) => updateNestedField('homePageSettings', 'aboutPrimaryImageUrl', images[0] ?? '')} helperText="The large main image used in the Home page 'About' section." />
+            <AdminImageUploader label="Home about secondary image" folder="settings" multiple={false} value={form.homePageSettings?.aboutSecondaryImageUrl ? [form.homePageSettings.aboutSecondaryImageUrl] : []} onChange={(images) => updateNestedField('homePageSettings', 'aboutSecondaryImageUrl', images[0] ?? '')} helperText="The smaller overlapping image used in the Home page 'About' section." />
+          </div>
+        </Card>
+
+        <Card className="space-y-6">
+          <SectionHeading title="Amenities Page Configuration" description="Manage the distinct visuals for the curated amenities and services page." />
+          <div className="grid gap-4 md:grid-cols-2 rounded-xl border border-[var(--border)] bg-[var(--surface-secondary)]/10 p-5">
+            <AdminImageUploader label="Amenities primary image" folder="settings" multiple={false} value={form.amenitiesPageSettings?.primaryImageUrl ? [form.amenitiesPageSettings.primaryImageUrl] : []} onChange={(images) => updateNestedField('amenitiesPageSettings', 'primaryImageUrl', images[0] ?? '')} helperText="The large main visual highlighting a premium amenity (e.g. Wellness)." />
+            <AdminImageUploader label="Amenities secondary image" folder="settings" multiple={false} value={form.amenitiesPageSettings?.secondaryImageUrl ? [form.amenitiesPageSettings.secondaryImageUrl] : []} onChange={(images) => updateNestedField('amenitiesPageSettings', 'secondaryImageUrl', images[0] ?? '')} helperText="The smaller overlapping visual (e.g. Events or Service detail)." />
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            {[1, 2, 3].map((num) => {
+              const highlightKey = `highlight${num}`;
+              return (
+                <div key={highlightKey} className="space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface-secondary)]/30 p-5">
+                  <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent)] border-b border-[var(--border)] pb-3">0{num}. Highlight</h4>
+                  <label className={adminLabelClassName}>
+                    <span className={adminLabelTextClassName}>Title</span>
+                    <input className={adminInputClassName} value={form.amenitiesPageSettings?.[highlightKey]?.title ?? ''} onChange={(event) => updateNestedField('amenitiesPageSettings', highlightKey, { ...form.amenitiesPageSettings?.[highlightKey], title: event.target.value })} />
+                  </label>
+                  <label className={adminLabelClassName}>
+                    <span className={adminLabelTextClassName}>Description</span>
+                    <textarea className={adminTextAreaClassName} rows={4} value={form.amenitiesPageSettings?.[highlightKey]?.description ?? ''} onChange={(event) => updateNestedField('amenitiesPageSettings', highlightKey, { ...form.amenitiesPageSettings?.[highlightKey], description: event.target.value })} />
+                  </label>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+
         <Card className="space-y-5">
           <SectionHeading title="Website imagery" description="Upload hero and signature section visuals so the public website can feel closer to a real destination-hotel brand without further code edits." />
           <div className="grid gap-4 md:grid-cols-2">
-            <AdminImageUploader label="Homepage hero gallery" folder="settings" multiple value={form.websiteSettings?.heroGalleryUrls ?? []} onChange={(images) => updateNestedField('websiteSettings', 'heroGalleryUrls', images)} helperText="These images lead the main homepage carousel before guests move into rooms and booking." />
-            <AdminImageUploader label="About hero image" folder="settings" multiple={false} value={form.websiteSettings?.aboutHeroImageUrl ? [form.websiteSettings.aboutHeroImageUrl] : []} onChange={(images) => updateNestedField('websiteSettings', 'aboutHeroImageUrl', images[0] ?? '')} helperText="Use a warm editorial image for the About page hero." />
-            <AdminImageUploader label="Story image" folder="settings" multiple={false} value={form.websiteSettings?.storyImageUrl ? [form.websiteSettings.storyImageUrl] : []} onChange={(images) => updateNestedField('websiteSettings', 'storyImageUrl', images[0] ?? '')} helperText="Use this in the brand-story section and editorial imagery blocks." />
-            <AdminImageUploader label="Dining image" folder="settings" multiple={false} value={form.websiteSettings?.diningImageUrl ? [form.websiteSettings.diningImageUrl] : []} onChange={(images) => updateNestedField('websiteSettings', 'diningImageUrl', images[0] ?? '')} helperText="Highlights restaurant, lounge, and late-evening dining moments." />
-            <AdminImageUploader label="Wellness image" folder="settings" multiple={false} value={form.websiteSettings?.wellnessImageUrl ? [form.websiteSettings.wellnessImageUrl] : []} onChange={(images) => updateNestedField('websiteSettings', 'wellnessImageUrl', images[0] ?? '')} helperText="Supports spa, pool, and wellness storytelling across the website." />
-            <AdminImageUploader label="Events image" folder="settings" multiple={false} value={form.websiteSettings?.eventsImageUrl ? [form.websiteSettings.eventsImageUrl] : []} onChange={(images) => updateNestedField('websiteSettings', 'eventsImageUrl', images[0] ?? '')} helperText="Use for banquets, meetings, and celebration-led sections." />
-            <AdminImageUploader label="Destination image" folder="settings" multiple={false} value={form.websiteSettings?.destinationImageUrl ? [form.websiteSettings.destinationImageUrl] : []} onChange={(images) => updateNestedField('websiteSettings', 'destinationImageUrl', images[0] ?? '')} helperText="Supports location storytelling, city arrival copy, and destination-led moments." />
             <AdminImageUploader label="Contact image" folder="settings" multiple={false} value={form.websiteSettings?.contactImageUrl ? [form.websiteSettings.contactImageUrl] : []} onChange={(images) => updateNestedField('websiteSettings', 'contactImageUrl', images[0] ?? '')} helperText="Use a refined hospitality visual for guest inquiry and contact sections." />
             <AdminImageUploader label="FAQ hero image" folder="settings" multiple={false} value={form.websiteSettings?.faqHeroImageUrl ? [form.websiteSettings.faqHeroImageUrl] : []} onChange={(images) => updateNestedField('websiteSettings', 'faqHeroImageUrl', images[0] ?? '')} helperText="A warm, reassuring visual to lead the frequently asked questions center." />
             <AdminImageUploader label="Gallery highlight image" folder="settings" multiple={false} value={form.websiteSettings?.galleryHighlightUrl ? [form.websiteSettings.galleryHighlightUrl] : []} onChange={(images) => updateNestedField('websiteSettings', 'galleryHighlightUrl', images[0] ?? '')} helperText="Use a signature image to lead the Gallery page before guests browse the full visual collection." />
             <AdminImageUploader label="Login hero image" folder="settings" multiple={false} value={form.websiteSettings?.loginHeroImageUrl ? [form.websiteSettings.loginHeroImageUrl] : []} onChange={(images) => updateNestedField('websiteSettings', 'loginHeroImageUrl', images[0] ?? '')} helperText="The cinematic full-screen image anchoring the login and guest access page." />
             <AdminImageUploader label="Register hero image" folder="settings" multiple={false} value={form.websiteSettings?.registerHeroImageUrl ? [form.websiteSettings.registerHeroImageUrl] : []} onChange={(images) => updateNestedField('websiteSettings', 'registerHeroImageUrl', images[0] ?? '')} helperText="The welcoming visual anchoring the guest account creation flow." />
+          </div>
+        </Card>
+
+        <Card className="space-y-6">
+          <SectionHeading title="About Page Configuration" description="Manage all images, texts, and signature experiences for the About page from this single unified panel." />
+          
+          <div className="grid gap-4 md:grid-cols-3 rounded-xl border border-[var(--border)] bg-[var(--surface-secondary)]/10 p-5">
+             <AdminImageUploader label="About hero image" folder="settings" multiple={false} value={form.websiteSettings?.aboutHeroImageUrl ? [form.websiteSettings.aboutHeroImageUrl] : []} onChange={(images) => updateNestedField('websiteSettings', 'aboutHeroImageUrl', images[0] ?? '')} helperText="The main cover image appearing at the very top of the About page." />
+             <AdminImageUploader label="Story image" folder="settings" multiple={false} value={form.websiteSettings?.storyImageUrl ? [form.websiteSettings.storyImageUrl] : []} onChange={(images) => updateNestedField('websiteSettings', 'storyImageUrl', images[0] ?? '')} helperText="The primary visual used in the brand-story section." />
+             <AdminImageUploader label="Dining mood image" folder="settings" multiple={false} value={form.websiteSettings?.diningImageUrl ? [form.websiteSettings.diningImageUrl] : []} onChange={(images) => updateNestedField('websiteSettings', 'diningImageUrl', images[0] ?? '')} helperText="The secondary overlapping image next to the story image." />
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Dining Experience */}
+            <div className="space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface-secondary)]/30 p-5">
+               <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent)] border-b border-[var(--border)] pb-3">01. Dining</h4>
+               <AdminImageUploader label="Experience image" folder="settings" multiple={false} value={form.aboutPageSettings?.diningExperience?.imageUrl ? [form.aboutPageSettings.diningExperience.imageUrl] : []} onChange={(images) => {
+                 updateNestedField('aboutPageSettings', 'diningExperience', { ...form.aboutPageSettings?.diningExperience, imageUrl: images[0] ?? '' });
+               }} helperText="This image is for the staggered dining experience section. (Recommended size: 1080 x 1350 pixels for perfect 4:5 aspect ratio fit)" />
+               <label className={adminLabelClassName}><span className={adminLabelTextClassName}>Title</span><input className={adminInputClassName} value={form.aboutPageSettings?.diningExperience?.title ?? ''} onChange={(event) => updateNestedField('aboutPageSettings', 'diningExperience', { ...form.aboutPageSettings?.diningExperience, title: event.target.value })} /></label>
+               <label className={adminLabelClassName}><span className={adminLabelTextClassName}>Description</span><textarea className={adminTextAreaClassName} rows={4} value={form.aboutPageSettings?.diningExperience?.description ?? ''} onChange={(event) => updateNestedField('aboutPageSettings', 'diningExperience', { ...form.aboutPageSettings?.diningExperience, description: event.target.value })} /></label>
+            </div>
+
+            {/* Wellness Experience */}
+            <div className="space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface-secondary)]/30 p-5">
+               <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent)] border-b border-[var(--border)] pb-3">02. Wellness</h4>
+               <AdminImageUploader label="Wellness image" folder="settings" multiple={false} value={form.aboutPageSettings?.wellnessExperience?.imageUrl ? [form.aboutPageSettings.wellnessExperience.imageUrl] : []} onChange={(images) => {
+                 updateNestedField('aboutPageSettings', 'wellnessExperience', { ...form.aboutPageSettings?.wellnessExperience, imageUrl: images[0] ?? '' });
+                 updateNestedField('websiteSettings', 'wellnessImageUrl', images[0] ?? '');
+               }} helperText="This image will be used for both the About page and other wellness sections. (Recommended size: 1080 x 1350 pixels for perfect 4:5 aspect ratio fit)" />
+               <label className={adminLabelClassName}><span className={adminLabelTextClassName}>Title</span><input className={adminInputClassName} value={form.aboutPageSettings?.wellnessExperience?.title ?? ''} onChange={(event) => updateNestedField('aboutPageSettings', 'wellnessExperience', { ...form.aboutPageSettings?.wellnessExperience, title: event.target.value })} /></label>
+               <label className={adminLabelClassName}><span className={adminLabelTextClassName}>Description</span><textarea className={adminTextAreaClassName} rows={4} value={form.aboutPageSettings?.wellnessExperience?.description ?? ''} onChange={(event) => updateNestedField('aboutPageSettings', 'wellnessExperience', { ...form.aboutPageSettings?.wellnessExperience, description: event.target.value })} /></label>
+            </div>
+
+            {/* Events Experience */}
+            <div className="space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface-secondary)]/30 p-5">
+               <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent)] border-b border-[var(--border)] pb-3">03. Events</h4>
+               <AdminImageUploader label="Events image" folder="settings" multiple={false} value={form.aboutPageSettings?.eventsExperience?.imageUrl ? [form.aboutPageSettings.eventsExperience.imageUrl] : []} onChange={(images) => {
+                 updateNestedField('aboutPageSettings', 'eventsExperience', { ...form.aboutPageSettings?.eventsExperience, imageUrl: images[0] ?? '' });
+                 updateNestedField('websiteSettings', 'eventsImageUrl', images[0] ?? '');
+               }} helperText="This image will be used for both the About page and other events sections. (Recommended size: 1080 x 1350 pixels for perfect 4:5 aspect ratio fit)" />
+               <label className={adminLabelClassName}><span className={adminLabelTextClassName}>Title</span><input className={adminInputClassName} value={form.aboutPageSettings?.eventsExperience?.title ?? ''} onChange={(event) => updateNestedField('aboutPageSettings', 'eventsExperience', { ...form.aboutPageSettings?.eventsExperience, title: event.target.value })} /></label>
+               <label className={adminLabelClassName}><span className={adminLabelTextClassName}>Description</span><textarea className={adminTextAreaClassName} rows={4} value={form.aboutPageSettings?.eventsExperience?.description ?? ''} onChange={(event) => updateNestedField('aboutPageSettings', 'eventsExperience', { ...form.aboutPageSettings?.eventsExperience, description: event.target.value })} /></label>
+            </div>
           </div>
         </Card>
 

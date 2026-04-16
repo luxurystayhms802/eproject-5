@@ -37,6 +37,7 @@ export const updateMeSchema = z.object({
         lastName: z.string().min(2).max(50).optional(),
         email: z.string().email().optional(),
         phone: z.union([z.string().min(5), z.literal('')]).optional(),
+        currentPassword: z.union([z.string().min(1), z.literal('')]).optional(),
         password: z.union([z.string().min(6), z.literal('')]).optional(),
         avatarUrl: z.string().url().nullable().optional(),
     })

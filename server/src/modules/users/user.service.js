@@ -18,7 +18,6 @@ const serializeUser = (user) => {
         status: user.status,
         avatarUrl: user.avatarUrl ?? null,
         emailVerified: Boolean(user.emailVerified),
-        forcePasswordReset: Boolean(user.forcePasswordReset),
         lastLoginAt: user.lastLoginAt ?? null,
         createdAt: user.createdAt ?? null,
         updatedAt: user.updatedAt ?? null,
@@ -87,7 +86,6 @@ export const userService = {
             passwordHash,
             role: payload.role,
             status: payload.status,
-            forcePasswordReset: context.actorUserId ? true : false,
             avatarUrl: payload.avatarUrl ?? null,
             createdBy: context.actorUserId ?? null,
             updatedBy: context.actorUserId ?? null,
@@ -138,12 +136,22 @@ export const userService = {
         if (payload.status !== undefined)
             updatePayload.status = payload.status;
         if (payload.password) {
-            updatePayload.passwordHash = await bcrypt.hash(payload.password, 12);
-            if (context.actorUserId !== userId) {
-                updatePayload.forcePasswordReset = true;
-            } else if (context.actorUserId === userId) {
-                updatePayload.forcePasswordReset = false;
+            const isSameAsOld = await bcrypt.compare(payload.password, existingUser.passwordHash);
+            if (isSameAsOld) {
+                throw new AppError('New password cannot be the same as the current password', 400);
             }
+
+            if (context.actorUserId === userId) {
+                if (!payload.currentPassword) {
+                    throw new AppError('Current password is required to set a new password', 400);
+                }
+                const isValid = await bcrypt.compare(payload.currentPassword, existingUser.passwordHash);
+                if (!isValid) {
+                    throw new AppError('Incorrect current password', 400);
+                }
+            }
+
+            updatePayload.passwordHash = await bcrypt.hash(payload.password, 12);
             // Invalidate all existing sessions when password is changed
             await authRepository.revokeAllSessionsForUser(userId);
         }

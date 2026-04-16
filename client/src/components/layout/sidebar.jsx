@@ -139,7 +139,6 @@ export const adminNavSections = [
 ];
 
 const NAV_ITEMS = {
-  super_admin: adminNavSections,
   admin: adminNavSections,
   manager: [
     createSection('Overview', [
@@ -233,12 +232,12 @@ const SidebarContent = ({ role, onClose, isMobile = false }) => {
   
   const isCustomRole = !NAV_ITEMS[role];
   const baseSections = NAV_ITEMS[role] || [];
-  const isSuperAdmin = user?.role === 'super_admin';
+  const isAdmin = user?.role === 'admin';
   const displayRole = getDisplayRoleLabel(role).replace('_', ' ');
 
   let sections = [];
 
-  if (isSuperAdmin) {
+  if (isAdmin) {
     sections = adminNavSections.map((section) => ({
       ...section,
       items: [...section.items],
@@ -281,21 +280,24 @@ const SidebarContent = ({ role, onClose, isMobile = false }) => {
     const existingLabels = new Set(sections.flatMap(s => s.items.map(i => i.label)));
     const extraItems = [];
     
-    const getRoleBasePath = (currentRole) => currentRole === 'receptionist' ? '/reception' : `/${currentRole}`;
+    // Do not dynamically append Extended Access to guests! Their portal is strictly static.
+    if (role !== 'guest') {
+      const getRoleBasePath = (currentRole) => currentRole === 'receptionist' ? '/reception' : `/${currentRole}`;
 
-    adminNavSections.forEach(adminSection => {
-       adminSection.items.forEach(adminItem => {
-          if (!existingLabels.has(adminItem.label) && hasPermission(adminItem.href, user?.permissions)) {
-             extraItems.push({ ...adminItem, href: adminItem.href.replace(/^\/admin/, getRoleBasePath(role)) });
-          }
-       });
-    });
-
-    if (extraItems.length > 0) {
-      sections.push({
-        label: 'Extended Access',
-        items: extraItems
+      adminNavSections.forEach(adminSection => {
+         adminSection.items.forEach(adminItem => {
+            if (!existingLabels.has(adminItem.label) && hasPermission(adminItem.href, user?.permissions)) {
+               extraItems.push({ ...adminItem, href: adminItem.href.replace(/^\/admin/, getRoleBasePath(role)) });
+            }
+         });
       });
+
+      if (extraItems.length > 0) {
+        sections.push({
+          label: 'Extended Access',
+          items: extraItems
+        });
+      }
     }
   }
 

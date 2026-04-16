@@ -22,6 +22,38 @@ const isValidUrlOrBlank = (value) => {
   }
 };
 
+export const validateIdNumberStrict = (idType, idNumber) => {
+  const type = String(idType ?? '').trim();
+  const num = String(idNumber ?? '').trim();
+  
+  if (type === 'cnic') {
+    if (!/^\d{5}-?\d{7}-?\d{1}$/.test(num)) {
+      return 'CNIC must be a valid 13-digit format (e.g. 12345-1234567-1).';
+    }
+    return null;
+  }
+  
+  if (type === 'passport') {
+    if (!/^[A-Za-z0-9]{6,15}$/.test(num)) {
+      return 'Passport number should be 6 to 15 alphanumeric characters.';
+    }
+    return null;
+  }
+  
+  if (type === 'driving_license') {
+    if (!/^[A-Za-z0-9\-_]{5,20}$/.test(num)) {
+      return 'Driving license should be 5 to 20 characters.';
+    }
+    return null;
+  }
+  
+  if (!IDENTIFIER_PATTERN.test(num)) {
+    return 'ID number should contain 5 to 30 letters, numbers, hyphens, or underscores only.';
+  }
+  
+  return null;
+};
+
 export const validateAdminRoomTypeForm = (form) => {
   if (isBlank(form.name)) return 'Room type name is required.';
   if (isBlank(form.shortDescription)) return 'Short description is required.';
@@ -59,7 +91,8 @@ export const validateAdminStaffForm = (form, isEditing = false) => {
     if (String(form.password ?? '').trim().length < 8) return 'Password must be at least 8 characters.';
   }
   if (isBlank(form.role)) return 'Select a staff role.';
-  if (isBlank(form.status)) return 'Select an account status.';
+  if (isBlank(form.status)) return 'Select an account access status.';
+  if (isBlank(form.profile?.employmentStatus)) return 'Select an employment status.';
   if (isBlank(form.profile?.department)) return 'Select a department.';
   if (isBlank(form.profile?.designation)) return 'Designation is required.';
   if (isBlank(form.profile?.joiningDate)) return 'Joining date is required.';
@@ -90,24 +123,17 @@ export const validateAdminGuestForm = (form, isEditing = false) => {
     return 'Password must be at least 8 characters.';
   }
 
-  if (isBlank(form.profile?.gender)) return 'Gender is required.';
-  if (isBlank(form.profile?.dateOfBirth)) return 'Date of birth is required.';
+  if (!isBlank(form.profile?.nationality) && !isValidName(form.profile?.nationality)) return 'Nationality should only contain letters.';
+  if (!isBlank(form.profile?.city) && !isValidName(form.profile?.city)) return 'City should only contain letters.';
+  if (!isBlank(form.profile?.country) && !isValidName(form.profile?.country)) return 'Country should only contain letters.';
   
-  if (isBlank(form.profile?.nationality)) return 'Nationality is required.';
-  if (!isValidName(form.profile?.nationality)) return 'Nationality should only contain letters.';
+  if (!isBlank(form.profile?.idType) && isBlank(form.profile?.idNumber)) return 'ID number is required if ID type is selected.';
+  if (!isBlank(form.profile?.idNumber) && isBlank(form.profile?.idType)) return 'ID type must be specified if providing an ID number.';
   
-  if (isBlank(form.profile?.city)) return 'City is required.';
-  if (!isValidName(form.profile?.city)) return 'City should only contain letters.';
-  
-  if (isBlank(form.profile?.country)) return 'Country is required.';
-  if (!isValidName(form.profile?.country)) return 'Country should only contain letters.';
-  
-  if (isBlank(form.profile?.addressLine1)) return 'Address line 1 is required.';
-  
-  if (isBlank(form.profile?.idType)) return 'ID type is required for clear records.';
-  if (isBlank(form.profile?.idNumber)) return 'ID number (NIC/Passport) is required for clear records.';
-  
-  if (!IDENTIFIER_PATTERN.test(String(form.profile?.idNumber ?? '').trim())) return 'ID number should contain 5 to 30 letters, numbers, hyphens, or underscores only.';
+  if (!isBlank(form.profile?.idType) && !isBlank(form.profile?.idNumber)) {
+    const idError = validateIdNumberStrict(form.profile?.idType, form.profile?.idNumber);
+    if (idError) return idError;
+  }
   
   return null;
 };
@@ -256,6 +282,8 @@ export const validateCheckInDraft = (draft, hasAssignedRoom) => {
   if (!hasAssignedRoom && isBlank(draft.roomId)) return 'Assign a room before check-in.';
   if (isBlank(draft.idType)) return 'ID type is required for check-in.';
   if (isBlank(draft.idNumber)) return 'ID number is required for check-in.';
-  if (!IDENTIFIER_PATTERN.test(String(draft.idNumber ?? '').trim())) return 'ID number should contain 5 to 30 letters, numbers, hyphens, or underscores only.';
+  
+  const idError = validateIdNumberStrict(draft.idType, draft.idNumber);
+  if (idError) return idError;
   return null;
 };

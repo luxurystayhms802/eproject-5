@@ -3,7 +3,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { useAuthStore } from '@/app/store/auth-store';
 import { authApi } from '@/features/auth/api';
-import { ForcePasswordResetModal } from '@/features/auth/components/force-password-reset-modal';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -71,7 +70,6 @@ export const AppProviders = ({ children }) => {
 
     return (<QueryClientProvider client={queryClient}>
       {children}
-      <ForcePasswordResetModal />
       <Toaster position="top-right" richColors/>
     </QueryClientProvider>);
 };

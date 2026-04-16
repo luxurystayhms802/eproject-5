@@ -5,6 +5,7 @@ import { AppError } from '../../shared/utils/app-error.js';
 import { buildPaginationMeta, getPagination } from '../../shared/utils/pagination.js';
 import { deriveNameParts } from '../../shared/utils/names.js';
 import { staffRepository } from './staff-profile.repository.js';
+import { StaffProfileModel } from './staff-profile.model.js';
 const generateEmployeeCode = (department) => `EMP-${department.slice(0, 3).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
 const generateUniqueEmployeeCode = async (department) => {
     const safeDepartment = department || 'management';
@@ -29,6 +30,7 @@ const buildStaffRecord = (user, profile) => {
         phone: String(user.phone),
         role: user.role,
         status: user.status,
+        employmentStatus: profile?.employmentStatus || 'active',
         avatarUrl: user.avatarUrl ?? null,
         department: profile?.department ?? null,
         designation: profile?.designation ?? '',
@@ -49,12 +51,43 @@ export const staffService = {
             role: { $ne: 'guest' },
             deletedAt: null,
         };
+
         if (query.role) {
             userFilter.role = query.role;
         }
-        if (query.status) {
-            userFilter.status = query.status;
+
+        let profileFiltersActive = false;
+        const profileQuery = { deletedAt: null };
+
+        if (query.department) {
+            profileQuery.department = query.department;
+            profileFiltersActive = true;
         }
+        
+        if (query.shift) {
+            profileQuery.shift = query.shift;
+            profileFiltersActive = true;
+        }
+
+        if (query.status) {
+            if (query.status === 'suspended') {
+                profileQuery.employmentStatus = 'suspended';
+                profileFiltersActive = true;
+            } else {
+                userFilter.status = query.status;
+            }
+        }
+
+        if (query.employmentStatus) {
+            profileQuery.employmentStatus = query.employmentStatus;
+            profileFiltersActive = true;
+        }
+
+        if (profileFiltersActive) {
+            const matchingProfiles = await StaffProfileModel.find(profileQuery).select('userId').lean();
+            userFilter._id = { $in: matchingProfiles.map((p) => p.userId) };
+        }
+
         if (query.search) {
             const expression = new RegExp(query.search, 'i');
             userFilter.$or = [
@@ -65,15 +98,17 @@ export const staffService = {
                 { phone: expression },
             ];
         }
+
         const [users, total] = await Promise.all([
             UserModel.find(userFilter).sort({ createdAt: -1 }).skip(pagination.skip).limit(pagination.limit).lean(),
             UserModel.countDocuments(userFilter),
         ]);
+
         const profiles = await staffRepository.findLeanProfilesByUserIds(users.map((user) => user._id));
         const profileMap = new Map(profiles.map((profile) => [String(profile.userId), profile]));
-        const items = users
-            .map((user) => buildStaffRecord(user, profileMap.get(String(user._id))))
-            .filter((item) => (!query.department || item.department === query.department) && (!query.shift || item.shift === query.shift));
+
+        const items = users.map((user) => buildStaffRecord(user, profileMap.get(String(user._id))));
+
         return {
             items,
             meta: buildPaginationMeta(pagination, total),
@@ -127,6 +162,7 @@ export const staffService = {
             lastName: payload.lastName,
             email: payload.email,
             phone: payload.phone,
+            currentPassword: payload.currentPassword,
             password: payload.password,
             role: payload.role,
             status: payload.status,

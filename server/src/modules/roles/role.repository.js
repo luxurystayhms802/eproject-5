@@ -1,7 +1,28 @@
 import { defaultRolePermissions } from '../../shared/constants/permissions.js';
 import { RoleModel } from './role.model.js';
 export const roleRepository = {
-    list: () => RoleModel.find({ name: { $ne: 'guest' } }).sort({ name: 1 }).lean(),
+    list: () => RoleModel.aggregate([
+        { $match: { name: { $ne: 'guest' } } },
+        { 
+            $lookup: {
+                from: 'users',
+                localField: 'name',
+                foreignField: 'role',
+                as: 'usersWithRole'
+            }
+        },
+        {
+            $addFields: {
+                userCount: { $size: '$usersWithRole' }
+            }
+        },
+        {
+            $project: {
+                usersWithRole: 0
+            }
+        },
+        { $sort: { name: 1 } }
+    ]),
     findById: (roleId) => RoleModel.findById(roleId).lean(),
     findByName: (name) => RoleModel.findOne({ name }).lean(),
     create: (payload) => RoleModel.create(payload),

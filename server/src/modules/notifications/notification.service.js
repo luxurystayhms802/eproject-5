@@ -4,7 +4,7 @@ import { AppError } from '../../shared/utils/app-error.js';
 import { auditService } from '../audit/audit.service.js';
 import { notificationRepository } from './notification.repository.js';
 
-const PRIVILEGED_NOTIFICATION_ROLES = new Set(['admin', 'super_admin']);
+const PRIVILEGED_NOTIFICATION_ROLES = new Set(['admin']);
 
 const normalizeTargetRoles = (roles = []) => [...new Set((Array.isArray(roles) ? roles : []).filter(Boolean))];
 

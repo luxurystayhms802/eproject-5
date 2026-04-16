@@ -51,6 +51,12 @@ export const AppShell = () => {
           <Panel className="min-w-0 overflow-hidden">
             <div className="flex h-full flex-col gap-4">
               <div className="shrink-0">
+                {user.employmentStatus === 'suspended' && (
+                  <div className="bg-red-500/10 border border-red-500/20 text-red-600 text-[13px] font-semibold text-center mb-4 py-2 px-4 rounded-xl flex items-center justify-center gap-2">
+                    <span className="flex h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse"></span>
+                    Your account is currently suspended. You have read-only access. Please contact administration.
+                  </div>
+                )}
                 <Topbar onOpenSidebar={() => setMobileSidebarOpen(true)} />
               </div>
               <div id="app-shell-scroller" ref={scrollRef} className="scrollbar-invisible min-h-0 flex-1 overflow-y-auto relative">

@@ -32,7 +32,7 @@ export const userController = {
             actorUserId: request.authUser?.id,
             actorRole: request.authUser?.role,
             request,
-            allowRoleChange: request.authUser?.role === 'super_admin',
+            allowRoleChange: request.authUser?.role === 'admin',
         });
         return sendSuccess(response, {
             message: 'User updated successfully',

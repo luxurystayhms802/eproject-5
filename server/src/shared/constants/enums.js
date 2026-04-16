@@ -1,5 +1,6 @@
-export const USER_ROLES = ['super_admin', 'admin', 'manager', 'receptionist', 'housekeeping', 'maintenance', 'guest'];
-export const USER_STATUSES = ['active', 'inactive', 'suspended'];
+export const USER_ROLES = ['admin', 'manager', 'receptionist', 'housekeeping', 'maintenance', 'guest'];
+export const USER_STATUSES = ['active', 'inactive'];
+export const EMPLOYMENT_STATUSES = ['active', 'suspended'];
 export const GENDERS = ['male', 'female', 'other'];
 export const ID_TYPES = ['cnic', 'passport', 'driving_license', 'other'];
 export const BED_TYPES = ['single', 'double', 'queen', 'king', 'twin'];

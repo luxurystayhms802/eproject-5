@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Maximize2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { PublicGalleryLightbox } from '@/features/public/components/public-gallery-lightbox';
 import { PublicPageHero } from '@/features/public/components/public-page-hero';
@@ -113,27 +114,27 @@ export const GalleryPage = () => {
             </div>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4 auto-rows-[300px]">
+          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6 break-inside-avoid">
             {visibleItems.map((item, index) => {
-              const isLargeSpace = visibleItems.length > 3 && index % 6 === 0;
-              const isTall = visibleItems.length > 5 && index % 7 === 1;
-              const isWide = visibleItems.length > 4 && index % 5 === 2;
-
-              let spanClasses = 'col-span-1 row-span-1';
-              if (isLargeSpace) spanClasses = 'md:col-span-2 md:row-span-2';
-              else if (isTall) spanClasses = 'md:col-span-1 md:row-span-2';
-              else if (isWide) spanClasses = 'md:col-span-2 md:row-span-1';
+              const heights = [
+                'aspect-[4/3]',
+                'aspect-[3/4]',
+                'aspect-square',
+                'aspect-[4/5]',
+                'aspect-video'
+              ];
+              const shapeClass = item.image ? 'h-[v-max]' : heights[index % heights.length];
 
               return (
                 <button
                   type="button"
                   key={item.id}
-                  style={{ animationDelay: `${Math.min(index * 75, 1000)}ms` }}
-                  className={`group relative overflow-hidden rounded-[32px] border border-white/30 text-left shadow-[var(--shadow-soft)] transition-all duration-700 hover:shadow-2xl hover:-translate-y-1 block animate-in fade-in slide-in-from-bottom-12 duration-[1.2s] ease-out fill-mode-both ${spanClasses}`}
+                  style={{ animationDelay: `${Math.min(index * 50, 700)}ms` }}
+                  className={`group relative overflow-hidden rounded-[24px] border border-white/10 w-full text-left shadow-md transition-all duration-700 hover:shadow-2xl hover:-translate-y-1 block animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out fill-mode-both break-inside-avoid ${shapeClass}`}
                   onClick={() => setSelectedItem(item)}
                 >
                   <div 
-                    className="absolute inset-0 transition-transform duration-[1.8s] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.12] bg-[#0c1c30]"
+                    className="absolute inset-0 transition-transform duration-[2s] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105 bg-[var(--surface-secondary)]/20"
                     style={
                       item.image
                         ? {
@@ -144,18 +145,28 @@ export const GalleryPage = () => {
                         : item.backdropStyle
                     }
                   />
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,24,44,0)_0%,rgba(8,24,44,0.15)_45%,rgba(5,15,30,0.95)_100%)] transition-opacity duration-700 group-hover:opacity-90" />
+                  {/* Barely-there image base if no image exists (fallback) */}
+                  {item.image && (
+                     <img src={item.image} alt={item.title} className="w-full h-auto opacity-0" />
+                  )}
 
-                  <div className="relative z-10 flex h-full flex-col justify-end p-8 text-white">
-                    <span className="w-max rounded-full border border-[var(--accent)]/40 bg-[var(--accent)]/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.34em] text-[#f7e3c3] backdrop-blur-md shadow-sm transition-all duration-500 group-hover:-translate-y-3 group-hover:border-[var(--accent)]/80">
+                  {/* Refined fading bottom edge for text legibility without muddying the photo */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-70 transition-opacity duration-700 group-hover:opacity-40 pointer-events-none" />
+
+                  {/* Center hover indicator */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-all duration-500 scale-95 group-hover:opacity-100 group-hover:scale-100 z-10 pointer-events-none">
+                    <div className="bg-black/30 p-4 rounded-full backdrop-blur-md border border-white/30 shadow-2xl">
+                      <Maximize2 className="text-white w-5 h-5" />
+                    </div>
+                  </div>
+
+                  <div className="absolute bottom-0 left-0 right-0 z-20 flex flex-col p-6 text-white pointer-events-none">
+                    <span className="w-max rounded-full border border-white/20 bg-white/15 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.25em] text-white backdrop-blur-sm shadow-sm transition-all duration-500 mb-4 group-hover:-translate-y-1 group-hover:border-white/40">
                       {item.category}
                     </span>
-                    <h3 className="mt-5 font-[var(--font-display)] text-3xl leading-[1.1] md:text-4xl lg:text-[2.6rem] text-white drop-shadow-md transition-transform duration-500 delay-[50ms] group-hover:-translate-y-3">
+                    <h3 className="font-[var(--font-display)] text-2xl leading-[1.1] md:text-3xl text-white drop-shadow-md transition-transform duration-500 group-hover:-translate-y-1">
                       {item.title}
                     </h3>
-                    <p className="mt-3 max-w-sm text-[0.95rem] leading-relaxed text-white/85 transition-all duration-500 delay-[120ms] group-hover:-translate-y-3 opacity-0 group-hover:opacity-100 translate-y-6">
-                      {item.description}
-                    </p>
                   </div>
                 </button>
               );

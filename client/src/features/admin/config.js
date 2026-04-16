@@ -1,6 +1,7 @@
 export const ADMIN_ROLE_OPTIONS = ['admin', 'manager', 'receptionist', 'housekeeping', 'maintenance'];
 export const USER_ROLE_OPTIONS = [...ADMIN_ROLE_OPTIONS, 'guest'];
-export const USER_STATUS_OPTIONS = ['active', 'inactive', 'suspended'];
+export const USER_STATUS_OPTIONS = ['active', 'inactive'];
+export const EMPLOYMENT_STATUS_OPTIONS = ['active', 'suspended'];
 export const STAFF_SHIFT_OPTIONS = ['morning', 'evening', 'night', 'rotational'];
 export const ROOM_STATUS_OPTIONS = ['available', 'reserved', 'occupied', 'cleaning', 'maintenance', 'out_of_service'];
 export const HOUSEKEEPING_STATUS_OPTIONS = ['clean', 'dirty', 'inspected', 'in_progress'];
@@ -105,7 +106,7 @@ export const formatAdminCurrency = (value) => `Rs ${Number(value ?? 0).toFixed(2
 export const formatAdminDate = (value) => (value ? new Date(value).toLocaleDateString() : 'n/a');
 export const formatAdminDateTime = (value) => (value ? new Date(value).toLocaleString() : 'n/a');
 export const titleCase = (value) => String(value ?? '').replaceAll('_', ' ');
-export const getDisplayRoleLabel = (value) => (value === 'super_admin' ? 'admin' : value);
+export const getDisplayRoleLabel = (value) => value;
 
 export const formatPermission = (permission) => {
   const [_, action] = permission.split('.');

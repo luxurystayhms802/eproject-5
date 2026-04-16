@@ -53,10 +53,10 @@ export const AdminRolesPage = () => {
 
   const user = useAuthStore((state) => state.user);
   const permissions = user?.permissions ?? [];
-  const isSuperAdmin = user?.role === 'super_admin';
-  const canCreate = isSuperAdmin || permissions.includes('roles.create');
-  const canUpdate = isSuperAdmin || permissions.includes('roles.update');
-  const canDelete = isSuperAdmin || permissions.includes('roles.delete');
+  const isAdmin = user?.role === 'admin';
+  const canCreate = isAdmin || permissions.includes('roles.create');
+  const canUpdate = isAdmin || permissions.includes('roles.update');
+  const canDelete = isAdmin || permissions.includes('roles.delete');
 
   const rolesQuery = useAdminRoles();
   const createRole = useCreateRole();
@@ -164,6 +164,8 @@ export const AdminRolesPage = () => {
     }
   };
 
+  const isAdminRole = editingRole?.name === 'admin';
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -233,8 +235,16 @@ export const AdminRolesPage = () => {
                     >
                       <div className="flex flex-wrap gap-2">
                         <StatusBadge value={role.isSystemRole ? 'system_role' : 'custom_role'} />
-                        <span className="inline-flex rounded-full border border-[rgba(16,36,63,0.08)] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
+                        {role.name === 'admin' && (
+                          <span className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] text-rose-700">
+                            Locked
+                          </span>
+                        )}
+                        <span className="inline-flex items-center rounded-full border border-[rgba(16,36,63,0.08)] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
                           {role.permissions?.length ?? 0} permissions
+                        </span>
+                        <span className="inline-flex rounded-full border border-[rgba(16,36,63,0.08)] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
+                          {role.userCount ?? 0} {role.userCount === 1 ? 'user' : 'users'}
                         </span>
                       </div>
                       <h3 className="mt-3 text-xl text-[var(--primary)] [font-family:var(--font-display)]">{titleCase(role.name)}</h3>
@@ -338,7 +348,7 @@ export const AdminRolesPage = () => {
               />
             </label>
 
-            {isSuperAdmin && (
+            {isAdmin && (
               <label className={`${adminLabelClassName} justify-end`}>
                 <label className="inline-flex items-center gap-3 rounded-[18px] border border-[var(--border)] bg-white/85 px-4 py-3 text-sm text-[var(--foreground)] mt-6">
                   <input
@@ -367,8 +377,19 @@ export const AdminRolesPage = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h3 className="text-lg font-semibold text-[var(--primary)]">Permissions</h3>
-                <p className="text-sm text-[var(--muted-foreground)]">Choose the exact capabilities this role should have across the platform.</p>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-semibold text-[var(--primary)]">Permissions</h3>
+                  {isAdminRole && (
+                    <span className="rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] text-rose-700">
+                      Locked
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-[var(--muted-foreground)]">
+                  {isAdminRole 
+                    ? 'Super Administrator permissions are permanently locked by the system.'
+                    : 'Choose the exact capabilities this role should have across the platform.'}
+                </p>
               </div>
               <span className="rounded-full border border-[rgba(16,36,63,0.08)] bg-white px-3 py-1 text-xs font-semibold text-[var(--primary)]">
                 Selected {form.permissions.length}
@@ -380,7 +401,7 @@ export const AdminRolesPage = () => {
                 <div key={group} className="rounded-[20px] border border-[var(--border)] bg-white/78 p-4">
                   <div className="flex items-center justify-between gap-3">
                     <h4 className="font-semibold text-[var(--primary)]">{titleCase(group)}</h4>
-                    {canUpdate && (
+                    {canUpdate && !isAdminRole && (
                       <button
                         type="button"
                         className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)]"
@@ -408,9 +429,10 @@ export const AdminRolesPage = () => {
                             active
                               ? 'border-[rgba(184,140,74,0.28)] bg-[var(--accent-soft)] text-[var(--primary)]'
                               : 'border-[var(--border)] bg-white text-[var(--muted-foreground)] hover:bg-[var(--surface-secondary)]',
+                            isAdminRole ? 'opacity-70 cursor-not-allowed' : ''
                           ].join(' ')}
-                          onClick={() => canUpdate && togglePermission(permission)}
-                          disabled={!canUpdate && !active}
+                          onClick={() => canUpdate && !isAdminRole && togglePermission(permission)}
+                          disabled={(!canUpdate && !active) || isAdminRole}
                         >
                           {formatPermission(permission)}
                         </button>

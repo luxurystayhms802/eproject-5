@@ -68,13 +68,13 @@ export const NotificationsPage = () => {
   const staffDirectoryQuery = useQuery({
     queryKey: ['notification-staff-directory'],
     queryFn: () => adminApi.listStaff({ limit: 100, status: 'active' }),
-    enabled: ['admin', 'super_admin'].includes(user?.role),
+    enabled: ['admin'].includes(user?.role),
   });
 
   const guestDirectoryQuery = useQuery({
     queryKey: ['notification-guest-directory'],
     queryFn: () => adminApi.listGuests({ limit: 100, status: 'active' }),
-    enabled: ['admin', 'super_admin'].includes(user?.role),
+    enabled: ['admin'].includes(user?.role),
   });
 
   const staffDirectory = staffDirectoryQuery.data ?? [];
@@ -89,8 +89,8 @@ export const NotificationsPage = () => {
   }, [filters.search, notificationsQuery.data]);
   const unreadCount = notifications.filter((item) => !item.isRead).length;
   const permissions = user?.permissions ?? [];
-  const isSuperAdmin = user?.role === 'super_admin';
-  const canCompose = isSuperAdmin || permissions.includes('notifications.create');
+  const isAdmin = user?.role === 'admin';
+  const canCompose = isAdmin || permissions.includes('notifications.create');
   const emptyDescription = canCompose
     ? 'There are no alerts for the current filter set. Clear filters or compose a new operational alert from the admin side.'
     : 'There are no alerts relevant to your account for the current filter set. Clear filters or check back when a new operational update is issued to your role.';

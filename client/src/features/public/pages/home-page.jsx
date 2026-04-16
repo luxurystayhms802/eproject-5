@@ -335,15 +335,15 @@ export const HomePage = () => {
       }))
     : fallbackTestimonials;
 
+  const homePageSettings = branding.homePageSettings || {};
+
   const heroImage = heroImages[activeHeroIndex] || getPrimaryImage(featuredRooms[0]) || null;
   const aboutImage =
-    websiteMedia.aboutHeroImageUrl ||
-    websiteMedia.storyImageUrl ||
-    getPrimaryImage(featuredRooms[0]);
-  const aboutSecondaryImage =
-    websiteMedia.diningImageUrl ||
-    websiteMedia.contactImageUrl ||
+    homePageSettings.aboutPrimaryImageUrl ||
     getPrimaryImage(featuredRooms[1] || featuredRooms[0]);
+  const aboutSecondaryImage =
+    homePageSettings.aboutSecondaryImageUrl ||
+    getPrimaryImage(featuredRooms[0]);
 
   const metrics = [
     {
@@ -600,7 +600,7 @@ export const HomePage = () => {
                  <span className="h-px w-4 bg-[#ecd3a8]" />
                  Arrival Awaits
                </span>
-               <h2 className="font-[var(--font-display)] text-xl sm:text-2xl lg:text-3xl leading-[1.1] text-white mb-2 tracking-tight">Reserve Your Escape.</h2>
+               <h2 className="font-[var(--font-display)] text-xl sm:text-2xl lg:text-3xl leading-[1.1] !text-white mb-2 tracking-tight">Reserve Your Escape.</h2>
                <p className="text-[0.9rem] md:text-[0.95rem] text-white/70 max-w-[40ch] mx-auto md:mx-0">Confirm your suite and let the stay begin with confidence.</p>
             </div>
             

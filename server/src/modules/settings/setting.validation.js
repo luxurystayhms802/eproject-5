@@ -81,5 +81,47 @@ export const updateSettingsSchema = z.object({
             darkModeEnabled: z.boolean().optional(),
         })
             .optional(),
+        aboutPageSettings: z
+            .object({
+            diningExperience: z.object({
+                title: z.string().optional(),
+                description: z.string().optional(),
+                imageUrl: optionalUrl,
+            }).optional(),
+            wellnessExperience: z.object({
+                title: z.string().optional(),
+                description: z.string().optional(),
+                imageUrl: optionalUrl,
+            }).optional(),
+            eventsExperience: z.object({
+                title: z.string().optional(),
+                description: z.string().optional(),
+                imageUrl: optionalUrl,
+            }).optional(),
+        }).optional(),
+        homePageSettings: z
+            .object({
+            aboutPrimaryImageUrl: optionalUrl,
+            aboutSecondaryImageUrl: optionalUrl,
+        })
+            .optional(),
+        amenitiesPageSettings: z
+            .object({
+            primaryImageUrl: optionalUrl,
+            secondaryImageUrl: optionalUrl,
+            highlight1: z.object({
+                title: z.string().optional(),
+                description: z.string().optional(),
+            }).optional(),
+            highlight2: z.object({
+                title: z.string().optional(),
+                description: z.string().optional(),
+            }).optional(),
+            highlight3: z.object({
+                title: z.string().optional(),
+                description: z.string().optional(),
+            }).optional(),
+        })
+            .optional(),
     }),
 });

@@ -5,17 +5,52 @@ const IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9\-_/]{4,29}$/;
 
 const isBlank = (value) => String(value ?? '').trim() === '';
 
+const validateIdNumberStrict = (idType, idNumber) => {
+  const type = String(idType ?? '').trim();
+  const num = String(idNumber ?? '').trim();
+  
+  if (type === 'cnic') {
+    if (!/^\d{5}-?\d{7}-?\d{1}$/.test(num)) {
+      return 'CNIC must be a valid 13-digit format (e.g. 12345-1234567-1).';
+    }
+    return null;
+  }
+  
+  if (type === 'passport') {
+    if (!/^[A-Za-z0-9]{6,15}$/.test(num)) {
+      return 'Passport number should be 6 to 15 alphanumeric characters.';
+    }
+    return null;
+  }
+  
+  if (type === 'driving_license') {
+    if (!/^[A-Za-z0-9\-_]{5,20}$/.test(num)) {
+      return 'Driving license should be 5 to 20 characters.';
+    }
+    return null;
+  }
+  
+  if (!IDENTIFIER_PATTERN.test(num)) {
+    return 'ID number should contain 5 to 30 letters, numbers, hyphens, or underscores only.';
+  }
+  
+  return null;
+};
+
 export const validateGuestProfileForm = (form) => {
   if (!NAME_PATTERN.test(String(form.firstName ?? '').trim())) return 'Enter a valid first name.';
   if (!NAME_PATTERN.test(String(form.lastName ?? '').trim())) return 'Enter a valid last name.';
   if (!EMAIL_PATTERN.test(String(form.email ?? '').trim())) return 'Enter a valid email address.';
   if (!PHONE_PATTERN.test(String(form.phone ?? '').trim())) return 'Enter a valid phone number.';
-  if (!isBlank(form.profile?.idNumber) && !IDENTIFIER_PATTERN.test(String(form.profile?.idNumber ?? '').trim())) {
-    return 'ID number should contain 5 to 30 letters, numbers, hyphens, or underscores only.';
+  if (!isBlank(form.profile?.idNumber)) {
+    if (isBlank(form.profile?.idType)) return 'ID Type must be selected to validate ID Number.';
+    const idError = validateIdNumberStrict(form.profile?.idType, form.profile?.idNumber);
+    if (idError) return idError;
   }
   if (!isBlank(form.profile?.emergencyContact?.phone) && !PHONE_PATTERN.test(String(form.profile?.emergencyContact?.phone ?? '').trim())) {
     return 'Enter a valid emergency contact phone number.';
   }
+
   return null;
 };
 

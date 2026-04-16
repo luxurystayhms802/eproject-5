@@ -67,7 +67,7 @@ const runSeed = async () => {
     await roleService.ensureSystemRoles();
     await seedFaqs();
     const [superAdmin, admin, manager, receptionist, housekeeping, maintenance, guestOne, guestTwo] = await Promise.all([
-        upsertUser({ firstName: 'Super', lastName: 'Admin', email: 'superadmin@luxurystay.com', phone: '03000000001', role: 'super_admin' }),
+        upsertUser({ firstName: 'Super', lastName: 'Admin', email: 'superadmin@luxurystay.com', phone: '03000000001', role: 'admin' }),
         upsertUser({ firstName: 'System', lastName: 'Admin', email: 'admin@luxurystay.com', phone: '03000000002', role: 'admin', password: 'password123' }),
         upsertUser({ firstName: 'General', lastName: 'Manager', email: 'manager@luxurystay.com', phone: '03000000003', role: 'manager', password: 'Password123' }),
         upsertUser({ firstName: 'Front', lastName: 'Desk', email: 'reception@luxurystay.com', phone: '03000000004', role: 'receptionist' }),

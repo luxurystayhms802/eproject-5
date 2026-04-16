@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  Image as ImageIcon,
+  ChevronLeft,
+  ChevronRight,
+  X,
   ArrowRight,
   Bath,
   BedDouble,
@@ -120,6 +124,18 @@ export const RoomDetailsPage = () => {
   const roomImages = roomType ? getRoomGalleryForType(roomType, liveRooms) : [];
   const galleryImages = roomImages.length ? roomImages : [getPrimaryImage(roomType)].filter(Boolean);
   const [activeImage, setActiveImage] = useState(galleryImages[0] ?? null);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const openLightbox = (index) => {
+    setLightboxIndex(index);
+    setIsLightboxOpen(true);
+  };
+
+  const closeLightbox = () => setIsLightboxOpen(false);
+  const nextLightboxImage = () => setLightboxIndex((i) => (i + 1) % galleryImages.length);
+  const prevLightboxImage = () => setLightboxIndex((i) => (i - 1 + galleryImages.length) % galleryImages.length);
+
   const publishedReviews = publishedFeedbackQuery.data ?? [];
   const guestVoices = publishedReviews.map((review) => ({
     id: review.id,
@@ -272,6 +288,11 @@ export const RoomDetailsPage = () => {
                 <span className="inline-flex rounded-full bg-white/20 backdrop-blur-md border border-white/30 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-sm">
                   {galleryImages.length} Views
                 </span>
+                {galleryImages.length > 1 && (
+                  <button type="button" onClick={() => openLightbox(0)} className="inline-flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur-md hover:bg-black/60 transition-colors border border-white/20 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-sm cursor-pointer">
+                     <ImageIcon className="h-3 w-3" /> View Gallery
+                  </button>
+                )}
               </div>
 
               <div className="max-w-3xl max-h-min mt-auto pt-24">
@@ -330,28 +351,34 @@ export const RoomDetailsPage = () => {
               </div>
             </div>
 
-            {/* Gallery Grid */}
+            {/* VIP Gallery Grid (Bento Style) */}
             {galleryImages.length > 1 && (
               <div>
                 <h2 className="text-[11px] font-black uppercase tracking-[0.3em] text-[#0c1622] mb-8">Visual Exploration</h2>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {galleryImages.slice(0, 6).map((image, index) => (
+                <div className={`grid gap-4 ${galleryImages.length === 2 ? 'grid-cols-2' : 'grid-cols-2 lg:grid-cols-4'}`}>
+                  {galleryImages.slice(0, 5).map((image, index) => (
                     <button
                       type="button"
                       key={`${roomType.id}-thumb-${index}`}
-                      className={`relative aspect-[4/3.2] overflow-hidden rounded-[20px] transition-all duration-700 bg-[#fbf9f6] group ${
-                        activeImage === image ? 'ring-2 ring-offset-4 ring-[#0c1622]' : 'hover:scale-[1.02]'
+                      className={`relative overflow-hidden rounded-[24px] cursor-pointer transition-all duration-700 bg-[#fbf9f6] group w-full ${
+                        index === 0 && galleryImages.length > 2
+                          ? 'col-span-2 row-span-2 aspect-[4/3] lg:aspect-square' 
+                          : 'aspect-[4/3] lg:aspect-[4/3.5]'
                       }`}
-                      onClick={() => {
-                        setActiveImage(image);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}
+                      onClick={() => openLightbox(index)}
                     >
                        <img 
                          src={image} 
                          alt="Room View" 
-                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
+                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-[1.03]" 
                        />
+                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
+                       {index === 4 && galleryImages.length > 5 && (
+                         <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center backdrop-blur bg-opacity-40 transition-colors group-hover:bg-black/60">
+                           <ImageIcon className="h-6 w-6 text-white mb-2 opacity-80" />
+                           <span className="text-white font-bold tracking-[0.2em] uppercase text-xs">+ {galleryImages.length - 5} Views</span>
+                         </div>
+                       )}
                     </button>
                   ))}
                 </div>
@@ -494,35 +521,101 @@ export const RoomDetailsPage = () => {
 
       {/* Related Rooms - Keeping minimalist */}
       {relatedRooms.length > 0 && (
-        <section className="px-4 md:px-8 mt-20 pt-20 pb-10 border-t border-[#0c1622]/10 bg-[#fbf9f6]/50">
-          <div className="mx-auto max-w-[1400px] mb-8 text-center">
-            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#c5a059] mb-4">More Options</p>
-            <h2 className="text-4xl lg:text-5xl font-[var(--font-display)] text-[#0c1622]">Continue Exploring</h2>
-          </div>
-          <div className="mx-auto max-w-[1400px]">
-            <div className="grid gap-12 lg:gap-8 lg:grid-cols-2">
-              {relatedRooms.map((room) => (
-                <PublicRoomCard
-                  key={room.id}
-                  room={room}
-                  currency={branding.currency}
-                  checkInDate={checkInDate}
-                  checkOutDate={checkOutDate}
-                  adults={adults}
-                  children={children}
-                  align="vertical"
-                />
-              ))}
+        <section className="px-4 md:px-8 mt-32 mb-20">
+          <div className="bg-white rounded-[48px] shadow-[0_20px_80px_rgba(8,24,44,0.03)] border border-[#0c1622]/5 p-10 md:p-16 lg:p-20 max-w-[1500px] mx-auto">
+            <div className="mx-auto max-w-[1400px] mb-16 text-center">
+              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#c5a059] mb-5">Further Options</p>
+              <h2 className="text-4xl lg:text-5xl font-[var(--font-display)] text-[#0c1622] leading-tight">Continue Exploring.</h2>
             </div>
-            <div className="flex justify-center mt-12">
-               <Link to="/rooms">
-                 <Button variant="ghost" className="rounded-full px-8 text-[#0c1622] hover:bg-[#fbf9f6] text-[11px] font-bold tracking-[0.15em] uppercase transition-all">
-                   View Curated Collection
-                 </Button>
-               </Link>
+            <div className="mx-auto max-w-[1400px]">
+              <div className="grid gap-x-12 gap-y-16 lg:gap-16 lg:grid-cols-2">
+                {relatedRooms.map((room) => (
+                  <PublicRoomCard
+                    key={room.id}
+                    room={room}
+                    currency={branding.currency}
+                    checkInDate={checkInDate}
+                    checkOutDate={checkOutDate}
+                    adults={adults}
+                    children={children}
+                    align="vertical"
+                  />
+                ))}
+              </div>
+              <div className="flex justify-center mt-16 pt-10 border-t border-black/5">
+                 <Link to="/rooms">
+                   <Button variant="ghost" className="rounded-full px-10 h-12 bg-black/[0.03] text-[#0c1622] hover:bg-black/10 text-[11px] font-black tracking-[0.2em] uppercase transition-all">
+                     View Complete Collection
+                   </Button>
+                 </Link>
+              </div>
             </div>
           </div>
         </section>
+      )}
+
+      {/* VIP LUXURY LIGHTBOX MODAL */}
+      {isLightboxOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0c1622]/95 backdrop-blur-xl">
+          {/* Close Header */}
+          <div className="absolute top-0 left-0 right-0 flex justify-between items-center px-6 py-5 z-50">
+            <p className="text-white/60 text-[11px] uppercase tracking-[0.3em] font-bold">
+              {lightboxIndex + 1} / {galleryImages.length}
+            </p>
+            <button 
+              type="button"
+              className="text-white/70 hover:text-white transition-colors bg-white/5 hover:bg-white/20 rounded-full p-2 backdrop-blur-md"
+              onClick={closeLightbox}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          
+          {/* Main Image View */}
+          <div className="relative w-full h-full flex items-center justify-center p-4">
+             <img 
+               src={galleryImages[lightboxIndex]} 
+               alt="Gallery Full View" 
+               className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl drop-shadow-[0_0_40px_rgba(0,0,0,0.5)] transition-opacity duration-300"
+             />
+          </div>
+
+          {/* Navigation Controls */}
+          {galleryImages.length > 1 && (
+            <>
+              <button 
+                type="button"
+                className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white bg-black/20 hover:bg-black/50 p-3 md:p-4 rounded-full backdrop-blur transition-all"
+                onClick={prevLightboxImage}
+              >
+                <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
+              </button>
+              <button 
+                type="button"
+                className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white bg-black/20 hover:bg-black/50 p-3 md:p-4 rounded-full backdrop-blur transition-all"
+                onClick={nextLightboxImage}
+              >
+                <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
+              </button>
+            </>
+          )}
+
+          {/* Filmstrip Thumbnails */}
+          <div className="absolute bottom-6 left-0 right-0 flex justify-center px-4">
+             <div className="flex gap-2 p-3 bg-black/40 backdrop-blur-md rounded-2xl max-w-full overflow-x-auto scrollbar-invisible">
+               {galleryImages.map((img, idx) => (
+                 <button
+                   key={idx}
+                   type="button"
+                   onClick={() => setLightboxIndex(idx)}
+                   className={`relative h-14 w-20 md:h-16 md:w-24 shrink-0 overflow-hidden rounded-xl transition-all duration-300 ${lightboxIndex === idx ? 'ring-2 ring-white scale-105 opacity-100' : 'opacity-40 hover:opacity-100'}`}
+                 >
+                   <img src={img} alt="Thumb" className="w-full h-full object-cover" />
+                 </button>
+               ))}
+             </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -1,5 +1,4 @@
 const roleMap = {
-    super_admin: '/admin/dashboard',
     admin: '/admin/dashboard',
     manager: '/manager/dashboard',
     receptionist: '/reception/dashboard',

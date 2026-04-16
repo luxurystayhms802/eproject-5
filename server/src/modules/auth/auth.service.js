@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { randomUUID } from 'node:crypto';
 import { GuestProfileModel } from '../guests/guest-profile.model.js';
+import { StaffProfileModel } from '../staff/staff-profile.model.js';
 import { REFRESH_COOKIE_NAME } from '../../shared/constants/auth.js';
 import { env } from '../../config/env.js';
 import { AppError } from '../../shared/utils/app-error.js';
@@ -24,7 +25,7 @@ const deriveNameParts = (userRecord) => {
     };
 };
 
-const serializeUser = (userRecord) => {
+const serializeUser = (userRecord, employmentStatus = 'active') => {
     const names = deriveNameParts(userRecord);
     return {
         id: userRecord._id.toString(),
@@ -34,7 +35,7 @@ const serializeUser = (userRecord) => {
         email: userRecord.email,
         role: userRecord.role,
         avatarUrl: userRecord.avatarUrl ?? null,
-        forcePasswordReset: Boolean(userRecord.forcePasswordReset),
+        employmentStatus,
     };
 };
 
@@ -48,6 +49,12 @@ const setRefreshCookie = (response, refreshToken) => {
         maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 };
+
+const getEmploymentStatus = async (userId) => {
+    const profile = await StaffProfileModel.findOne({ userId }).lean();
+    return profile?.employmentStatus || 'active';
+};
+
 export const authService = {
     async registerGuest(payload) {
         const existingEmail = await authRepository.findUserByEmail(payload.email);
@@ -69,7 +76,7 @@ export const authService = {
             userId: user._id,
         });
         const permissions = await roleService.getPermissionsForRole('guest');
-        const accessToken = signAccessToken({ sub: user._id.toString(), role: 'guest', permissions, forcePasswordReset: Boolean(user.forcePasswordReset) });
+        const accessToken = signAccessToken({ sub: user._id.toString(), role: 'guest', permissions });
         return {
             ...serializeUser(user),
             permissions,
@@ -95,8 +102,9 @@ export const authService = {
             throw new AppError('Account is not active', 403);
         }
         const permissions = await roleService.getPermissionsForRole(activeUser.role);
+        const employmentStatus = await getEmploymentStatus(activeUser._id);
         const sessionId = randomUUID();
-        const accessToken = signAccessToken({ sub: activeUser._id.toString(), role: activeUser.role, permissions, forcePasswordReset: Boolean(activeUser.forcePasswordReset) });
+        const accessToken = signAccessToken({ sub: activeUser._id.toString(), role: activeUser.role, permissions, employmentStatus });
         const refreshToken = signRefreshToken({ sub: activeUser._id.toString(), sessionId });
         await authRepository.createSession({
             _id: sessionId,
@@ -111,7 +119,7 @@ export const authService = {
         });
         return {
             user: {
-                ...serializeUser(activeUser),
+                ...serializeUser(activeUser, employmentStatus),
                 permissions,
                 accessToken,
             },
@@ -126,9 +134,10 @@ export const authService = {
             throw new AppError('User not found', 404);
         }
         const permissions = await roleService.getPermissionsForRole(activeUser.role);
-        const accessToken = signAccessToken({ sub: activeUser._id.toString(), role: activeUser.role, permissions, forcePasswordReset: Boolean(activeUser.forcePasswordReset) });
+        const employmentStatus = await getEmploymentStatus(activeUser._id);
+        const accessToken = signAccessToken({ sub: activeUser._id.toString(), role: activeUser.role, permissions, employmentStatus });
         return {
-            ...serializeUser(activeUser),
+            ...serializeUser(activeUser, employmentStatus),
             permissions,
             accessToken,
         };
@@ -141,9 +150,11 @@ export const authService = {
             allowRoleChange: false,
         });
         const permissions = await roleService.getPermissionsForRole(updatedUser.role);
-        const accessToken = signAccessToken({ sub: updatedUser.id, role: updatedUser.role, permissions, forcePasswordReset: Boolean(updatedUser.forcePasswordReset) });
+        const employmentStatus = await getEmploymentStatus(updatedUser.id);
+        const accessToken = signAccessToken({ sub: updatedUser.id, role: updatedUser.role, permissions, employmentStatus });
         return {
             ...updatedUser,
+            employmentStatus,
             permissions,
             accessToken,
         };
@@ -164,8 +175,9 @@ export const authService = {
             throw new AppError('User not found', 404);
         }
         const permissions = await roleService.getPermissionsForRole(activeUser.role);
+        const employmentStatus = await getEmploymentStatus(activeUser._id);
         const nextSessionId = randomUUID();
-        const nextAccessToken = signAccessToken({ sub: activeUser._id.toString(), role: activeUser.role, permissions, forcePasswordReset: Boolean(activeUser.forcePasswordReset) });
+        const nextAccessToken = signAccessToken({ sub: activeUser._id.toString(), role: activeUser.role, permissions, employmentStatus });
         const nextRefreshToken = signRefreshToken({ sub: activeUser._id.toString(), sessionId: nextSessionId });
         await authRepository.revokeSession(session._id.toString());
         await authRepository.createSession({
@@ -178,7 +190,7 @@ export const authService = {
         });
         return {
             user: {
-                ...serializeUser(activeUser),
+                ...serializeUser(activeUser, employmentStatus),
                 permissions,
                 accessToken: nextAccessToken,
             },
@@ -213,9 +225,10 @@ export const authService = {
         const passwordHash = await bcrypt.hash(payload.newPassword, 12);
         const updatedUser = await authRepository.updateUserById(user._id.toString(), { passwordHash });
         const permissions = await roleService.getPermissionsForRole(updatedUser.role);
-        const accessToken = signAccessToken({ sub: updatedUser._id.toString(), role: updatedUser.role, permissions, forcePasswordReset: Boolean(updatedUser.forcePasswordReset) });
+        const employmentStatus = await getEmploymentStatus(updatedUser._id);
+        const accessToken = signAccessToken({ sub: updatedUser._id.toString(), role: updatedUser.role, permissions, employmentStatus });
         return {
-            ...serializeUser(updatedUser),
+            ...serializeUser(updatedUser, employmentStatus),
             permissions,
             accessToken,
         };

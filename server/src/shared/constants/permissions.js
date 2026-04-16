@@ -66,7 +66,7 @@ export const allPermissions = [
     'faqs.delete',
 ];
 export const defaultRolePermissions = {
-    super_admin: [...allPermissions],
+    admin: [...allPermissions],
     admin: [...allPermissions],
     manager: [
         'users.read',
@@ -163,6 +163,7 @@ export const defaultRolePermissions = {
         'serviceRequests.read',
         'serviceRequests.create',
         'serviceRequests.update',
+        'folioCharges.read',
         'feedback.read',
         'feedback.create',
         'notifications.read',

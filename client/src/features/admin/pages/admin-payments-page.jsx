@@ -47,8 +47,8 @@ export const AdminPaymentsPage = () => {
 
   const user = useAuthStore((state) => state.user);
   const permissions = user?.permissions ?? [];
-  const isSuperAdmin = user?.role === 'super_admin';
-  const canCreate = isSuperAdmin || permissions.includes('payments.create');
+  const isAdmin = user?.role === 'admin';
+  const canCreate = isAdmin || permissions.includes('payments.create');
 
   const invoicesQuery = useAdminInvoices({ limit: 100 });
   const paymentsQuery = useAdminPayments({

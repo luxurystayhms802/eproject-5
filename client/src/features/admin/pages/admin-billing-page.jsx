@@ -86,11 +86,11 @@ export const AdminBillingPage = () => {
 
   const user = useAuthStore((state) => state.user);
   const permissions = user?.permissions ?? [];
-  const isSuperAdmin = user?.role === 'super_admin';
-  const canCreateInvoice = isSuperAdmin || permissions.includes('invoices.create');
-  const canFinalizeInvoice = isSuperAdmin || permissions.includes('invoices.finalize');
-  const canCreateCharge = isSuperAdmin || permissions.includes('folioCharges.create');
-  const canDeleteCharge = isSuperAdmin || permissions.includes('folioCharges.delete');
+  const isAdmin = user?.role === 'admin';
+  const canCreateInvoice = isAdmin || permissions.includes('invoices.create');
+  const canFinalizeInvoice = isAdmin || permissions.includes('invoices.finalize');
+  const canCreateCharge = isAdmin || permissions.includes('folioCharges.create');
+  const canDeleteCharge = isAdmin || permissions.includes('folioCharges.delete');
 
   const paymentsQuery = useAdminPayments(selectedInvoice?.id ? { invoiceId: selectedInvoice.id, limit: 50 } : {}, Boolean(selectedInvoice?.id));
   const chargesQuery = useAdminFolioCharges(selectedInvoice?.reservationId ? { reservationId: selectedInvoice.reservationId, limit: 50 } : {});

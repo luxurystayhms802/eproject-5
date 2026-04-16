@@ -166,7 +166,7 @@ const router = createBrowserRouter([
     ],
   },
   {
-    element: <ProtectedRoute allowedRoles={['super_admin', 'admin']} allowDynamicRoles={true} />,
+    element: <ProtectedRoute allowedRoles={['admin']} allowDynamicRoles={true} />,
     children: [
       {
         path: '/admin',
@@ -182,6 +182,7 @@ const router = createBrowserRouter([
         element: <AppShell />,
         children: [
           { path: 'dashboard', element: renderLazy(CustomRoleDashboardPage, 'Loading your workspace') },
+          { path: 'profile', element: renderLazy(StaffProfilePage, 'Loading profile') },
           ...adminWorkspaceNodes,
           { index: true, element: <Navigate to="dashboard" replace /> },
         ],

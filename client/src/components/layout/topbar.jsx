@@ -32,7 +32,7 @@ export const Topbar = ({ onOpenSidebar = () => {} }) => {
   const segments = location.pathname.split('/').filter(Boolean);
   const baseSegment = segments[0] || '';
   const notificationsPath = baseSegment ? `/${baseSegment}/notifications` : '/';
-  const accountSettingsPath = ['manager', 'reception', 'housekeeping', 'maintenance', 'guest'].includes(baseSegment)
+  const accountSettingsPath = ['manager', 'reception', 'housekeeping', 'maintenance', 'guest', 'staff'].includes(baseSegment)
     ? `/${baseSegment}/profile`
     : `/${baseSegment}/account-settings`;
   const formattedDate = new Intl.DateTimeFormat('en-US', {

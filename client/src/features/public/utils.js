@@ -170,6 +170,8 @@ export const getPublicBranding = (settings) => ({
   bookingSettings: settings?.bookingSettings || {},
   themeSettings: settings?.themeSettings || {},
   seoSettings: settings?.seoSettings || {},
+  homePageSettings: settings?.homePageSettings || {},
+  amenitiesPageSettings: settings?.amenitiesPageSettings || {},
 });
 
 export const formatAmenityLabel = (value) =>

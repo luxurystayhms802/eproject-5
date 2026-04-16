@@ -28,7 +28,7 @@ export const GuestInvoicesPage = () => {
             });
         }
         catch {
-            toast.error('Unable to prepare this invoice for printing right now.');
+            toast.error('Unable to prepare this invoice for downloading right now.');
         }
         finally {
             setPrintingInvoiceId('');
@@ -61,7 +61,7 @@ export const GuestInvoicesPage = () => {
                     <p className="font-semibold text-[var(--primary)]">{formatCurrency(invoice.totalAmount)}</p>
                     <p className="text-sm text-[var(--muted-foreground)]">Balance {formatCurrency(invoice.balanceAmount)}</p>
                     <Button className="mt-2" variant="outline" onClick={() => handlePrintInvoice(invoice)} disabled={printingInvoiceId === invoice.id}>
-                      {printingInvoiceId === invoice.id ? 'Preparing...' : 'Print invoice'}
+                      {printingInvoiceId === invoice.id ? 'Preparing...' : 'Download invoice'}
                     </Button>
                   </div>
                 </div>
@@ -82,7 +82,7 @@ export const GuestInvoicesPage = () => {
                     <p className="font-semibold text-[var(--primary)]">{formatCurrency(payment.amount)}</p>
                     <p className="text-sm capitalize text-[var(--muted-foreground)]">{payment.status}</p>
                     <Button className="mt-2" variant="outline" onClick={() => handlePrintReceipt(payment)}>
-                      Print receipt
+                      Download receipt
                     </Button>
                   </div>
                 </div>

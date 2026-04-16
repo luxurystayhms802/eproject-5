@@ -11,7 +11,17 @@ export const roleService = {
         return role.permissions ?? [];
     },
     createRole: (payload) => roleRepository.create(payload),
-    updateRole: (roleId, payload) => roleRepository.updateById(roleId, payload),
+    updateRole: async (roleId, payload) => {
+        const role = await roleRepository.findById(roleId);
+        if (!role) throw new Error('Role not found');
+        
+        // Security Lock: Immutable Admin
+        if (role.name === 'admin' && payload.permissions) {
+            payload.permissions = defaultRolePermissions['admin'];
+        }
+        
+        return roleRepository.updateById(roleId, payload);
+    },
     deleteRole: async (roleId) => {
         const role = await roleRepository.findById(roleId);
         if (!role) throw new Error('Role not found');

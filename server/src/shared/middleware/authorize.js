@@ -8,7 +8,7 @@ export const requireRoles = (...roles) => (request, response, next) => {
     return next();
 };
 export const requirePermissions = (...permissions) => (request, response, next) => {
-    if (request.authUser?.role === 'super_admin') {
+    if (request.authUser?.role === 'admin') {
         return next();
     }
     const userPermissions = request.authUser?.permissions ?? [];

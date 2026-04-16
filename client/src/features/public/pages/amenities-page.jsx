@@ -26,7 +26,7 @@ export const AmenitiesPage = () => {
   const settingsQuery = useHotelSettings();
   const roomTypesQuery = useRoomTypes({ isActive: true, limit: 12 });
   const branding = getPublicBranding(settingsQuery.data);
-  const websiteMedia = branding.websiteMedia || {};
+  const amenitiesPageSettings = branding.amenitiesPageSettings || {};
   const roomTypes = roomTypesQuery.data?.data ?? [];
   const uniqueAmenities = getUniqueAmenities(roomTypes).slice(0, 12);
   const serviceStandards = [
@@ -84,7 +84,7 @@ export const AmenitiesPage = () => {
                <div className="absolute right-0 top-0 w-[85%] h-[85%] rounded-[32px] overflow-hidden shadow-[0_30px_90px_rgba(10,20,30,0.15)] z-10">
                  <div
                    className="h-full w-full bg-cover bg-center transition-transform duration-[1.5s] hover:scale-105"
-                   style={{ backgroundImage: `url(${websiteMedia.wellnessImageUrl || websiteMedia.diningImageUrl || getPrimaryImage(roomTypes[1] || roomTypes[0])})` }}
+                   style={{ backgroundImage: `url(${amenitiesPageSettings.primaryImageUrl || getPrimaryImage(roomTypes[1] || roomTypes[0])})` }}
                  />
                  <div className="absolute inset-0 bg-black/5" />
                </div>
@@ -92,7 +92,7 @@ export const AmenitiesPage = () => {
                <div className="absolute left-0 bottom-0 w-[60%] h-[60%] rounded-[24px] overflow-hidden shadow-[0_40px_80px_rgba(10,20,30,0.25)] z-20 border-8 border-white bg-white">
                  <div
                    className="h-full w-full bg-cover bg-center"
-                   style={{ backgroundImage: `url(${websiteMedia.eventsImageUrl || websiteMedia.aboutHeroImageUrl || getPrimaryImage(roomTypes[0])})` }}
+                   style={{ backgroundImage: `url(${amenitiesPageSettings.secondaryImageUrl || getPrimaryImage(roomTypes[0])})` }}
                  />
                  <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent,rgba(10,25,45,0.7))] pointer-events-none" />
                  <div className="absolute bottom-6 left-6 right-6">
@@ -154,68 +154,43 @@ export const AmenitiesPage = () => {
         </div>
       </section>
 
-      <section className="px-4 md:px-6 pb-6 pt-8">
-        <div className="mx-auto grid max-w-[1380px] gap-6 lg:grid-cols-[1.1fr,0.9fr]">
-          <div className="group rounded-[24px] border border-[var(--border)] bg-white p-6 sm:p-8 shadow-[0_12px_40px_rgba(16,36,63,0.03)] relative overflow-hidden flex flex-col justify-between transition-all duration-500 hover:shadow-[0_20px_50px_rgba(16,36,63,0.06)]">
-            <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-[radial-gradient(circle_at_top_right,rgba(16,36,63,0.03),transparent_70%)]" />
-            <div className="relative z-10 mb-8 mt-2">
-               <span className="inline-flex rounded-full border border-[var(--border)] bg-white px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.25em] text-[var(--primary)] shadow-sm mb-4">
-                 Room-level Comfort
-               </span>
-               <h2 className="font-[var(--font-display)] text-[1.8rem] leading-[1.15] text-[var(--primary)] md:text-[2.2rem] max-w-sm tracking-tight">
-                 Details that make every suite feel composed and complete.
-               </h2>
-               <p className="mt-4 text-[0.95rem] leading-[1.7] text-[var(--muted-foreground)] max-w-md font-light">
-                 In-room comforts shape the tone of the stay, acting as the quiet foundation from first arrival through the final night.
-               </p>
-            </div>
-            
-            <div className="relative z-10 flex flex-wrap gap-2.5">
-              {uniqueAmenities.map((amenity) => (
-                <span key={amenity} className="rounded-full border border-[var(--border)] bg-white px-4 py-2 text-[0.8rem] font-medium text-[var(--primary)] shadow-sm hover:border-[var(--accent)] transition-colors cursor-default">
-                  {amenity}
-                </span>
-              ))}
-            </div>
+      <section className="bg-[linear-gradient(to_bottom,transparent,rgba(184,140,74,0.03),transparent)] py-24 mt-12 mb-8 relative">
+        <div className="mx-auto max-w-[1380px] px-4 md:px-8 relative z-10">
+          <div className="mb-16 flex flex-col items-center text-center">
+            <span className="inline-flex rounded-full border border-[var(--accent)]/20 bg-[var(--accent)]/5 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.34em] text-[var(--accent)] shadow-sm mb-6">
+              Signature Principles
+            </span>
+            <h2 className="font-[var(--font-display)] text-[2.2rem] leading-[1.15] text-[var(--primary)] md:text-[3rem] tracking-tight max-w-2xl">
+              Hospitality driven by detail.
+            </h2>
+            <p className="mt-5 text-[0.95rem] leading-[1.7] text-[var(--muted-foreground)] max-w-xl font-light">
+              We believe a premium stay is defined not just by what you see, but by the quiet efficiency of what happens in the background.
+            </p>
           </div>
 
-          <div className="rounded-[24px] bg-[linear-gradient(150deg,#0a1626,#122845)] p-6 sm:p-8 text-white shadow-[0_20px_50px_rgba(10,20,35,0.15)] relative overflow-hidden flex flex-col">
-            <div className="absolute -right-10 -top-10 w-60 h-60 rounded-full border border-white/5 bg-white/5 blur-3xl mix-blend-overlay" />
-            
-            <div className="relative z-10 mt-2">
-              <span className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.3em] text-[#ecd3a8] mb-4">
-                <span className="h-px w-5 bg-[#ecd3a8]" />
-                Service Standards
-              </span>
-              <h2 className="font-[var(--font-display)] text-[1.8rem] leading-[1.1] md:text-[2.2rem] tracking-tight text-white mb-8 max-w-sm">
-                Discreet, polished, and beautifully timed.
-              </h2>
-            </div>
-            
-            <div className="relative z-10 flex-1 grid gap-3 grid-cols-1 sm:grid-cols-2">
-              {supportingAmenities.map((item) => (
-                <div key={item.title} className="flex items-center gap-3 rounded-[16px] bg-white/5 border border-white/10 p-4 hover:bg-white/10 transition-colors backdrop-blur-md">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-[#ecd3a8]">
-                    <item.icon className="h-3.5 w-3.5" />
+          <div className="grid gap-6 md:grid-cols-3">
+            {[1, 2, 3].map((num) => {
+              const highlight = amenitiesPageSettings[`highlight${num}`] || { title: '', description: '' };
+              if (!highlight.title && !highlight.description) return null;
+              
+              return (
+                <div key={`highlight-${num}`} className="group relative overflow-hidden rounded-[32px] bg-white border border-[var(--border)] p-10 shadow-[0_12px_40px_rgba(16,36,63,0.03)] transition-all duration-700 hover:shadow-[0_20px_50px_rgba(184,140,74,0.08)] hover:border-[var(--accent)]/30 hover:-translate-y-1 flex flex-col items-center text-center">
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-[radial-gradient(ellipse_at_top_right,rgba(184,140,74,0.15),transparent_70%)] transition-opacity duration-700 opacity-0 group-hover:opacity-100" />
+                  
+                  <div className="mb-8 inline-flex h-12 w-12 items-center justify-center rounded-full border border-[var(--accent)]/20 bg-[var(--accent)]/5 text-[11px] font-[var(--font-display)] font-semibold text-[var(--accent)] transition-all duration-700 group-hover:scale-110 group-hover:bg-[var(--accent)] group-hover:text-white shadow-sm">
+                    0{num}
                   </div>
-                  <p className="text-[0.85rem] font-medium tracking-wide text-white">{item.title}</p>
+                  
+                  <h3 className="font-[var(--font-display)] text-[1.5rem] xl:text-[1.8rem] leading-[1.2] text-[var(--primary)] mb-4 tracking-tight transition-transform duration-500">
+                    {highlight.title}
+                  </h3>
+                  
+                  <p className="text-[0.95rem] leading-[1.8] text-[var(--muted-foreground)] font-light max-w-sm">
+                    {highlight.description}
+                  </p>
                 </div>
-              ))}
-            </div>
-            
-            <div className="relative z-10 mt-8 grid gap-4 border-t border-white/10 pt-6">
-              {serviceStandards.map((item) => (
-                <div key={item.title} className="flex items-start gap-4">
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 text-[#ecd3a8]">
-                    <item.icon className="h-3.5 w-3.5" />
-                  </div>
-                  <div>
-                    <p className="text-[0.95rem] font-semibold tracking-wide text-white">{item.title}</p>
-                    <p className="mt-1 text-[0.85rem] leading-[1.5] text-white/60 font-light max-w-[30ch]">{item.detail}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>

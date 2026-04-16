@@ -58,10 +58,7 @@ const userSchema = new Schema({
         type: Boolean,
         default: false,
     },
-    forcePasswordReset: {
-        type: Boolean,
-        default: false,
-    },
+
     lastLoginAt: {
         type: Date,
         default: null,

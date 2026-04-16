@@ -77,6 +77,43 @@ const settingSchema = new Schema({
         accentColor: { type: String, default: '#b88c4a' },
         darkModeEnabled: { type: Boolean, default: false },
     },
+    aboutPageSettings: {
+        diningExperience: {
+            title: { type: String, default: '' },
+            description: { type: String, default: '' },
+            imageUrl: { type: String, default: '' },
+        },
+        wellnessExperience: {
+            title: { type: String, default: '' },
+            description: { type: String, default: '' },
+            imageUrl: { type: String, default: '' },
+        },
+        eventsExperience: {
+            title: { type: String, default: '' },
+            description: { type: String, default: '' },
+            imageUrl: { type: String, default: '' },
+        }
+    },
+    homePageSettings: {
+        aboutPrimaryImageUrl: { type: String, default: '' },
+        aboutSecondaryImageUrl: { type: String, default: '' },
+    },
+    amenitiesPageSettings: {
+        primaryImageUrl: { type: String, default: '' },
+        secondaryImageUrl: { type: String, default: '' },
+        highlight1: {
+            title: { type: String, default: '' },
+            description: { type: String, default: '' },
+        },
+        highlight2: {
+            title: { type: String, default: '' },
+            description: { type: String, default: '' },
+        },
+        highlight3: {
+            title: { type: String, default: '' },
+            description: { type: String, default: '' },
+        },
+    },
     updatedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
 }, { timestamps: true });
 export const SettingModel = model('Setting', settingSchema);

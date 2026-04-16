@@ -99,10 +99,10 @@ export const AdminRoomsPage = () => {
 
   const user = useAuthStore((state) => state.user);
   const permissions = user?.permissions ?? [];
-  const isSuperAdmin = user?.role === 'super_admin';
-  const canUpdate = isSuperAdmin || permissions.includes('rooms.update');
-  const canCreate = isSuperAdmin || permissions.includes('rooms.create');
-  const canDelete = isSuperAdmin || permissions.includes('rooms.delete');
+  const isAdmin = user?.role === 'admin';
+  const canUpdate = isAdmin || permissions.includes('rooms.update');
+  const canCreate = isAdmin || permissions.includes('rooms.create');
+  const canDelete = isAdmin || permissions.includes('rooms.delete');
 
   const roomTypesQuery = useAdminRoomTypes();
   const roomsQuery = useAdminRooms({

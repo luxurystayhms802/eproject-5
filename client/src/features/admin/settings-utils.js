@@ -43,6 +43,22 @@ export const createDefaultSettingsForm = () => ({
     metaDescription: 'Discover a premium hotel website experience with refined suites, signature dining, seamless reservations, and five-star hospitality.',
     metaKeywords: 'luxury hotel, hotel suites, five star hotel, hotel booking, premium hospitality, boutique hotel',
   },
+  aboutPageSettings: {
+    diningExperience: { title: 'Late-evening dining with a city-facing table', description: 'Seasonal menus, private dining corners, and service paced for long conversations rather than rushed tables.', imageUrl: '' },
+    wellnessExperience: { title: 'A slower rhythm for mornings, recovery, and reset', description: 'Wellness rituals, in-room comfort, and restorative amenities that make every stay feel intentionally paced.', imageUrl: '' },
+    eventsExperience: { title: 'Gatherings that feel polished before the first guest arrives', description: 'Boardroom precision, celebration-ready styling, and hosting support carried with calm confidence.', imageUrl: '' },
+  },
+  homePageSettings: {
+    aboutPrimaryImageUrl: '',
+    aboutSecondaryImageUrl: '',
+  },
+  amenitiesPageSettings: {
+    primaryImageUrl: '',
+    secondaryImageUrl: '',
+    highlight1: { title: 'Quiet foundation', description: 'Every detail in our suites serves a purpose, creating an effortless surrounding without visual noise.' },
+    highlight2: { title: 'Considered arrival', description: 'Check-in is handled personally, designed to lower heart rates and set a composed tone from the first minute.' },
+    highlight3: { title: 'Unseen care', description: 'Housekeeping and service touchpoints are almost invisible, leaving room for absolute calm during your stay.' },
+  },
   socialLinks: {
     facebook: '',
     instagram: '',
@@ -84,6 +100,34 @@ export const mergeSettingsForm = (data) => ({
   seoSettings: {
     ...createDefaultSettingsForm().seoSettings,
     ...(data?.seoSettings ?? {}),
+  },
+  aboutPageSettings: {
+    diningExperience: {
+        ...createDefaultSettingsForm().aboutPageSettings.diningExperience,
+        ...(data?.aboutPageSettings?.diningExperience ?? {}),
+        imageUrl: data?.aboutPageSettings?.diningExperience?.imageUrl || data?.websiteSettings?.diningImageUrl || '',
+    },
+    wellnessExperience: {
+        ...createDefaultSettingsForm().aboutPageSettings.wellnessExperience,
+        ...(data?.aboutPageSettings?.wellnessExperience ?? {}),
+        imageUrl: data?.aboutPageSettings?.wellnessExperience?.imageUrl || data?.websiteSettings?.wellnessImageUrl || '',
+    },
+    eventsExperience: {
+        ...createDefaultSettingsForm().aboutPageSettings.eventsExperience,
+        ...(data?.aboutPageSettings?.eventsExperience ?? {}),
+        imageUrl: data?.aboutPageSettings?.eventsExperience?.imageUrl || data?.websiteSettings?.eventsImageUrl || '',
+    },
+  },
+  homePageSettings: {
+    ...createDefaultSettingsForm().homePageSettings,
+    ...(data?.homePageSettings ?? {}),
+  },
+  amenitiesPageSettings: {
+    ...createDefaultSettingsForm().amenitiesPageSettings,
+    ...(data?.amenitiesPageSettings ?? {}),
+    highlight1: { ...createDefaultSettingsForm().amenitiesPageSettings.highlight1, ...(data?.amenitiesPageSettings?.highlight1 ?? {}) },
+    highlight2: { ...createDefaultSettingsForm().amenitiesPageSettings.highlight2, ...(data?.amenitiesPageSettings?.highlight2 ?? {}) },
+    highlight3: { ...createDefaultSettingsForm().amenitiesPageSettings.highlight3, ...(data?.amenitiesPageSettings?.highlight3 ?? {}) },
   },
   socialLinks: {
     ...createDefaultSettingsForm().socialLinks,
@@ -146,6 +190,43 @@ export const buildSettingsPayload = (form) => ({
     metaTitle: form.seoSettings?.metaTitle?.trim() || '',
     metaDescription: form.seoSettings?.metaDescription?.trim() || '',
     metaKeywords: form.seoSettings?.metaKeywords?.trim() || '',
+  },
+  aboutPageSettings: {
+    diningExperience: {
+        title: form.aboutPageSettings?.diningExperience?.title?.trim() || '',
+        description: form.aboutPageSettings?.diningExperience?.description?.trim() || '',
+        imageUrl: form.aboutPageSettings?.diningExperience?.imageUrl?.trim() || '',
+    },
+    wellnessExperience: {
+        title: form.aboutPageSettings?.wellnessExperience?.title?.trim() || '',
+        description: form.aboutPageSettings?.wellnessExperience?.description?.trim() || '',
+        imageUrl: form.aboutPageSettings?.wellnessExperience?.imageUrl?.trim() || '',
+    },
+    eventsExperience: {
+        title: form.aboutPageSettings?.eventsExperience?.title?.trim() || '',
+        description: form.aboutPageSettings?.eventsExperience?.description?.trim() || '',
+        imageUrl: form.aboutPageSettings?.eventsExperience?.imageUrl?.trim() || '',
+    },
+  },
+  homePageSettings: {
+    aboutPrimaryImageUrl: form.homePageSettings?.aboutPrimaryImageUrl?.trim() || '',
+    aboutSecondaryImageUrl: form.homePageSettings?.aboutSecondaryImageUrl?.trim() || '',
+  },
+  amenitiesPageSettings: {
+    primaryImageUrl: form.amenitiesPageSettings?.primaryImageUrl?.trim() || '',
+    secondaryImageUrl: form.amenitiesPageSettings?.secondaryImageUrl?.trim() || '',
+    highlight1: {
+        title: form.amenitiesPageSettings?.highlight1?.title?.trim() || '',
+        description: form.amenitiesPageSettings?.highlight1?.description?.trim() || '',
+    },
+    highlight2: {
+        title: form.amenitiesPageSettings?.highlight2?.title?.trim() || '',
+        description: form.amenitiesPageSettings?.highlight2?.description?.trim() || '',
+    },
+    highlight3: {
+        title: form.amenitiesPageSettings?.highlight3?.title?.trim() || '',
+        description: form.amenitiesPageSettings?.highlight3?.description?.trim() || '',
+    },
   },
   socialLinks: {
     facebook: form.socialLinks?.facebook?.trim() || '',

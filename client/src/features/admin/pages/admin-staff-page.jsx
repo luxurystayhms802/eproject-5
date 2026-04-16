@@ -25,11 +25,21 @@ import {
   ADMIN_ROLE_OPTIONS,
   STAFF_SHIFT_OPTIONS,
   USER_STATUS_OPTIONS,
+  EMPLOYMENT_STATUS_OPTIONS,
   getDisplayRoleLabel,
+  titleCase,
 } from '@/features/admin/config';
 import { getDisplayName } from '@/features/admin/display-utils';
+
+const SYSTEM_ROLE_DEPARTMENTS = {
+  admin: 'management',
+  manager: 'management',
+  receptionist: 'reception',
+  housekeeping: 'housekeeping',
+  maintenance: 'maintenance',
+};
 import { validateAdminStaffForm } from '@/features/admin/form-utils';
-import { useAdminStaff, useCreateStaff, useDeleteAdminUser, useUpdateStaff, useAdminRoles, useAdminDepartments } from '@/features/admin/hooks';
+import { useAdminStaff, useCreateStaff, useUpdateStaff, useAdminRoles, useAdminDepartments } from '@/features/admin/hooks';
 
 const createInitialForm = () => ({
   firstName: '',
@@ -40,6 +50,7 @@ const createInitialForm = () => ({
   role: '',
   status: 'active',
   profile: {
+    employmentStatus: 'active',
     department: '',
     designation: '',
     joiningDate: '',
@@ -58,6 +69,7 @@ const mapStaffToForm = (member) => ({
   role: getDisplayRoleLabel(member.role ?? 'manager'),
   status: member.status ?? 'active',
   profile: {
+    employmentStatus: member.employmentStatus ?? 'active',
     department: member.department ?? 'management',
     designation: member.designation ?? '',
     joiningDate: member.joiningDate ? new Date(member.joiningDate).toISOString().slice(0, 10) : '',
@@ -76,6 +88,7 @@ const buildStaffPayload = (form, isEditing) => {
     role: form.role,
     status: form.status,
     profile: {
+      employmentStatus: form.profile.employmentStatus,
       department: form.profile.department,
       designation: form.profile.designation.trim(),
       joiningDate: form.profile.joiningDate,
@@ -113,10 +126,10 @@ export const AdminStaffPage = () => {
 
   const user = useAuthStore((state) => state.user);
   const permissions = user?.permissions ?? [];
-  const isSuperAdmin = user?.role === 'super_admin';
-  const canUpdate = isSuperAdmin || permissions.includes('staff.update');
-  const canCreate = isSuperAdmin || permissions.includes('staff.create');
-  const canDelete = isSuperAdmin || permissions.includes('users.delete');
+  const isAdmin = user?.role === 'admin';
+  const canUpdate = isAdmin || permissions.includes('staff.update');
+  const canCreate = isAdmin || permissions.includes('staff.create');
+  const isCurrentUserAdmin = user?.role === 'admin';
 
   const staffQuery = useAdminStaff({
     search: filters.search.trim() || undefined,
@@ -126,7 +139,6 @@ export const AdminStaffPage = () => {
   });
   const createStaff = useCreateStaff();
   const updateStaff = useUpdateStaff();
-  const deleteUser = useDeleteAdminUser();
   const rolesQuery = useAdminRoles();
   const departmentsQuery = useAdminDepartments();
   const staff = staffQuery.data ?? [];
@@ -162,6 +174,20 @@ export const AdminStaffPage = () => {
     setModalOpen(true);
   };
 
+  const isDepartmentLocked = Boolean(SYSTEM_ROLE_DEPARTMENTS[form.role]);
+
+  const handleRoleChange = (event) => {
+    const newRole = event.target.value;
+    setForm((current) => {
+      const nextForm = { ...current, role: newRole };
+      const strictDept = SYSTEM_ROLE_DEPARTMENTS[newRole];
+      if (strictDept) {
+        nextForm.profile = { ...current.profile, department: strictDept };
+      }
+      return nextForm;
+    });
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const validationMessage = validateAdminStaffForm(form, Boolean(editingStaff));
@@ -194,19 +220,6 @@ export const AdminStaffPage = () => {
         staffId: member.id,
         payload: { status },
       });
-    } catch {
-      // Mutation hook already shows a toast.
-    }
-  };
-
-  const handleDeleteStaff = async (member) => {
-    if (!window.confirm(`Delete ${getDisplayName(member, 'this staff member')}? This will permanently delete the account and their profile from the system.`)) {
-      return;
-    }
-
-    try {
-      await deleteUser.mutateAsync(member.id);
-      setSelectedStaff(null);
     } catch {
       // Mutation hook already shows a toast.
     }
@@ -267,7 +280,7 @@ export const AdminStaffPage = () => {
           </select>
           <select className={adminSelectClassName} value={filters.status} onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}>
             <option value="">All statuses</option>
-            {USER_STATUS_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+            {['active', 'inactive', 'suspended'].map((option) => <option key={option} value={option}>{option}</option>)}
           </select>
         </div>
       </AdminToolbar>
@@ -292,7 +305,8 @@ export const AdminStaffPage = () => {
               <div key={member.id} className="grid gap-4 rounded-[24px] border border-[var(--border)] bg-white/76 p-5 shadow-[0_16px_34px_rgba(16,36,63,0.05)] xl:grid-cols-[minmax(0,1.6fr)_minmax(260px,0.85fr)_auto] xl:items-start">
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <StatusBadge value={member.status} />
+                    <StatusBadge value={member.employmentStatus} />
+                    <StatusBadge value={member.status} className={member.status === 'active' ? 'bg-indigo-100 text-indigo-700' : 'bg-red-100 text-red-700'} />
                     <StatusBadge value={getDisplayRoleLabel(member.role)} />
                     {member.department ? <StatusBadge value={member.department} className="bg-slate-100 text-slate-700" /> : null}
                   </div>
@@ -312,11 +326,11 @@ export const AdminStaffPage = () => {
                   <div className="rounded-[22px] border border-[var(--border)] bg-white/84 px-4 py-3">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--muted-foreground)]">Access posture</p>
                     <p className="mt-2 text-lg font-semibold capitalize text-[var(--primary)]">{member.role}</p>
-                    <p className="mt-1 text-sm text-[var(--muted-foreground)]">{member.status === 'active' ? 'Ready for live operations' : 'Restricted from live access'}</p>
+                    <p className="mt-1 text-sm text-[var(--muted-foreground)] capitalize">{member.status === 'active' ? 'Account Active' : 'Account Inactive'}</p>
                   </div>
                   <div className="rounded-[22px] border border-[var(--border)] bg-white/84 px-4 py-3">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--muted-foreground)]">Employment profile</p>
-                    <p className="mt-2 text-lg font-semibold text-[var(--primary)]">{member.designation || 'Designation pending'}</p>
+                    <p className="mt-2 text-lg font-semibold capitalize text-[var(--primary)]">{member.employmentStatus} - {member.designation || 'Pending'}</p>
                     <p className="mt-1 text-sm text-[var(--muted-foreground)]">{member.joiningDate ? `Joined ${new Date(member.joiningDate).toLocaleDateString()}` : 'Joining date pending'}</p>
                   </div>
                 </div>
@@ -327,24 +341,19 @@ export const AdminStaffPage = () => {
                     View details
                   </Button>
                   {canUpdate && (
-                    <Button variant="outline" onClick={() => openEditModal(member)}>
+                  <Button variant="outline" disabled={member.role === 'admin' && !isCurrentUserAdmin} onClick={() => openEditModal(member)}>
                       Edit profile
                     </Button>
                   )}
                   {canUpdate && member.status !== 'inactive' ? (
-                    <Button variant="outline" className="border-amber-200 text-amber-700 hover:bg-amber-50" onClick={() => handleQuickStatus(member, 'inactive')}>
+                    <Button variant="outline" className="border-amber-200 text-amber-700 hover:bg-amber-50" disabled={member.role === 'admin' && !isCurrentUserAdmin} onClick={() => handleQuickStatus(member, 'inactive')}>
                       Deactivate
                     </Button>
                   ) : canUpdate ? (
-                    <Button variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50" onClick={() => handleQuickStatus(member, 'active')}>
+                    <Button variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50" disabled={member.role === 'admin' && !isCurrentUserAdmin} onClick={() => handleQuickStatus(member, 'active')}>
                       Reactivate
                     </Button>
                   ) : null}
-                  {canDelete && (
-                    <Button variant="outline" className="border-rose-200 text-rose-700 hover:bg-rose-50" onClick={() => handleDeleteStaff(member)}>
-                      Delete
-                    </Button>
-                  )}
                 </div>
               </div>
             ))}
@@ -415,15 +424,21 @@ export const AdminStaffPage = () => {
           </label>
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Role</span>
-            <select className={adminSelectClassName} value={form.role} onChange={(event) => setForm((current) => ({ ...current, role: event.target.value }))}>
+            <select className={adminSelectClassName} value={form.role} onChange={handleRoleChange}>
               <option value="">Select role</option>
               {rolesQuery.data?.map((r) => <option key={r.id || r.name} value={r.name} className="capitalize">{r.name}</option>)}
             </select>
           </label>
           <label className={adminLabelClassName}>
-            <span className={adminLabelTextClassName}>Status</span>
+            <span className={adminLabelTextClassName}>Account access</span>
             <select className={adminSelectClassName} value={form.status} onChange={(event) => setForm((current) => ({ ...current, status: event.target.value }))}>
               {USER_STATUS_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+          </label>
+          <label className={adminLabelClassName}>
+            <span className={adminLabelTextClassName}>Employment status</span>
+            <select className={adminSelectClassName} value={form.profile.employmentStatus} onChange={(event) => setForm((current) => ({ ...current, profile: { ...current.profile, employmentStatus: event.target.value } }))}>
+              {EMPLOYMENT_STATUS_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
             </select>
           </label>
           <label className={adminLabelClassName}>
@@ -438,9 +453,17 @@ export const AdminStaffPage = () => {
                 Manage
               </button>
             </span>
-            <select className={adminSelectClassName} value={form.profile.department} onChange={(event) => setForm((current) => ({ ...current, profile: { ...current.profile, department: event.target.value } }))}>
+            <select 
+              className={adminSelectClassName} 
+              value={form.profile.department} 
+              onChange={(event) => setForm((current) => ({ ...current, profile: { ...current.profile, department: event.target.value } }))}
+              disabled={isDepartmentLocked}
+            >
               <option value="">Select department</option>
               {departments.map((dept) => <option key={dept.name} value={dept.name}>{dept.label}</option>)}
+              {isDepartmentLocked && form.profile.department && !departments.find(d => d.name === form.profile.department) && (
+                <option value={form.profile.department}>{titleCase(form.profile.department)}</option>
+              )}
             </select>
           </label>
           <label className={adminLabelClassName}>
@@ -498,7 +521,7 @@ export const AdminStaffPage = () => {
         actions={selectedStaff ? (
           <>
             {canUpdate && (
-              <Button variant="outline" onClick={() => openEditModal(selectedStaff)}>
+              <Button variant="outline" disabled={selectedStaff.role === 'admin' && !isCurrentUserAdmin} onClick={() => openEditModal(selectedStaff)}>
                 Edit profile
               </Button>
             )}
@@ -506,18 +529,10 @@ export const AdminStaffPage = () => {
               <Button
                 variant="outline"
                 className={selectedStaff.status !== 'inactive' ? 'border-amber-200 text-amber-700 hover:bg-amber-50' : 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'}
+                disabled={selectedStaff.role === 'admin' && !isCurrentUserAdmin}
                 onClick={() => handleQuickStatus(selectedStaff, selectedStaff.status !== 'inactive' ? 'inactive' : 'active')}
               >
                 {selectedStaff.status !== 'inactive' ? 'Deactivate' : 'Reactivate'}
-              </Button>
-            )}
-            {canDelete && (
-              <Button
-                variant="outline"
-                className="border-red-200 text-red-700 hover:bg-red-50"
-                onClick={() => handleDeleteStaff(selectedStaff)}
-              >
-                Delete
               </Button>
             )}
           </>
@@ -528,7 +543,7 @@ export const AdminStaffPage = () => {
             <AdminDetailSection title="Account overview" description="Primary identity, access role, and live account readiness.">
               <AdminDetailGrid>
                 <AdminDetailItem label="Role" value={getDisplayRoleLabel(selectedStaff.role)} emphasis />
-                <AdminDetailItem label="Status" value={selectedStaff.status} emphasis />
+                <AdminDetailItem label="Account access" value={selectedStaff.status} emphasis />
                 <AdminDetailItem label="Email" value={selectedStaff.email} />
                 <AdminDetailItem label="Phone" value={selectedStaff.phone} />
               </AdminDetailGrid>
@@ -536,6 +551,7 @@ export const AdminStaffPage = () => {
 
             <AdminDetailSection title="Employment profile" description="Operational employment details used across scheduling and reporting.">
               <AdminDetailGrid>
+                <AdminDetailItem label="Employment status" value={selectedStaff.employmentStatus} emphasis />
                 <AdminDetailItem label="Department" value={selectedStaff.department} emphasis />
                 <AdminDetailItem label="Designation" value={selectedStaff.designation} />
                 <AdminDetailItem label="Shift" value={selectedStaff.shift} />

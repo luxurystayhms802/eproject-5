@@ -19,8 +19,8 @@ export const AdminPoliciesPage = () => {
 
   const user = useAuthStore((state) => state.user);
   const permissions = user?.permissions ?? [];
-  const isSuperAdmin = user?.role === 'super_admin';
-  const canUpdate = isSuperAdmin || permissions.includes('settings.update');
+  const isAdmin = user?.role === 'admin';
+  const canUpdate = isAdmin || permissions.includes('settings.update');
 
   useEffect(() => {
     if (settingsQuery.data) {

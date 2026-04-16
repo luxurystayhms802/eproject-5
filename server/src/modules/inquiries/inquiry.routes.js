@@ -17,7 +17,7 @@ inquiriesRouter.post(
 
 // Authenticated endpoints for staff
 inquiriesRouter.use(authenticate);
-inquiriesRouter.use(requireRoles('super_admin', 'admin', 'manager', 'receptionist'));
+inquiriesRouter.use(requireRoles('admin', 'manager', 'receptionist'));
 
 inquiriesRouter.get(
   '/',

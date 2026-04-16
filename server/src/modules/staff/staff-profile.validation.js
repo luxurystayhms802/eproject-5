@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { STAFF_SHIFTS, USER_ROLES, USER_STATUSES } from '../../shared/constants/enums.js';
+import { STAFF_SHIFTS, USER_ROLES, USER_STATUSES, EMPLOYMENT_STATUSES } from '../../shared/constants/enums.js';
 const staffProfileFields = z.object({
     employeeCode: z.string().trim().min(3).optional(),
     department: z.string().trim().min(2).optional(),
@@ -9,6 +9,7 @@ const staffProfileFields = z.object({
     salary: z.number().min(0).nullable().optional(),
     permissionsOverride: z.array(z.string()).optional(),
     address: z.string().trim().nullable().optional(),
+    employmentStatus: z.enum(EMPLOYMENT_STATUSES).optional(),
 });
 export const staffIdParamsSchema = z.object({
     params: z.object({
@@ -23,7 +24,8 @@ export const listStaffSchema = z.object({
         role: z.string().trim().min(2).optional(),
         department: z.string().trim().min(2).optional(),
         shift: z.enum(STAFF_SHIFTS).optional(),
-        status: z.enum(USER_STATUSES).optional(),
+        status: z.enum([...USER_STATUSES, 'suspended']).optional(),
+        employmentStatus: z.enum(EMPLOYMENT_STATUSES).optional(),
     }),
 });
 export const createStaffSchema = z.object({
@@ -43,6 +45,7 @@ export const createStaffSchema = z.object({
             designation: z.string().trim().min(2),
             joiningDate: z.coerce.date(),
             shift: z.enum(STAFF_SHIFTS),
+            employmentStatus: z.enum(EMPLOYMENT_STATUSES).default('active'),
         }),
     }),
 });
@@ -53,6 +56,7 @@ export const updateStaffSchema = z.object({
         lastName: z.string().min(2).max(50).optional(),
         email: z.string().email().optional(),
         phone: z.string().min(10).optional(),
+        currentPassword: z.union([z.string().min(1), z.literal('')]).optional(),
         password: z.string().min(8).optional(),
         role: z.string().trim().min(2).optional(),
         status: z.enum(USER_STATUSES).optional(),

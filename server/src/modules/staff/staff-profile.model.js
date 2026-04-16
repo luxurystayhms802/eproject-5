@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { STAFF_SHIFTS } from '../../shared/constants/enums.js';
+import { STAFF_SHIFTS, EMPLOYMENT_STATUSES } from '../../shared/constants/enums.js';
 const staffProfileSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
@@ -36,6 +36,11 @@ const staffProfileSchema = new Schema({
     salary: {
         type: Number,
         default: null,
+    },
+    employmentStatus: {
+        type: String,
+        enum: EMPLOYMENT_STATUSES,
+        default: 'active',
     },
     permissionsOverride: {
         type: [String],

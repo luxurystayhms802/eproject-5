@@ -30,17 +30,17 @@ const pieColors = ['#10243f', '#b88c4a', '#d4a862', '#4f7bb6', '#6b7280'];
 export const AdminDashboardPage = () => {
   const user = useAuthStore((state) => state.user);
   const permissions = user?.permissions ?? [];
-  const isSuperAdmin = user?.role === 'super_admin';
-  const prefix = isSuperAdmin ? '/admin' : `/${user?.role}`;
+  const isAdmin = user?.role === 'admin';
+  const prefix = isAdmin ? '/admin' : `/${user?.role}`;
 
   const dashboardQuery = useAdminDashboard();
-  const reservationsQuery = useAdminReservations({}, { enabled: isSuperAdmin || permissions.includes('reservations.read') });
-  const staffQuery = useAdminStaff({ status: 'active' }, { enabled: isSuperAdmin || permissions.includes('staff.read') });
-  const maintenanceQuery = useAdminMaintenanceRequests({ status: 'open,assigned,in_progress' }, { enabled: isSuperAdmin || permissions.includes('maintenance.read') });
-  const housekeepingQuery = useAdminHousekeepingTasks({ status: 'pending' }, { enabled: isSuperAdmin || permissions.includes('housekeeping.read') });
-  const serviceRequestsQuery = useAdminServiceRequests({ status: 'pending' }, { enabled: isSuperAdmin || permissions.includes('serviceRequests.read') });
-  const notificationsQuery = useNotifications({ readStatus: 'unread' }, { enabled: isSuperAdmin || permissions.includes('notifications.read') });
-  const auditQuery = useAuditLogs({ enabled: isSuperAdmin || permissions.includes('audit.read') });
+  const reservationsQuery = useAdminReservations({}, { enabled: isAdmin || permissions.includes('reservations.read') });
+  const staffQuery = useAdminStaff({ status: 'active' }, { enabled: isAdmin || permissions.includes('staff.read') });
+  const maintenanceQuery = useAdminMaintenanceRequests({ status: 'open,assigned,in_progress' }, { enabled: isAdmin || permissions.includes('maintenance.read') });
+  const housekeepingQuery = useAdminHousekeepingTasks({ status: 'pending' }, { enabled: isAdmin || permissions.includes('housekeeping.read') });
+  const serviceRequestsQuery = useAdminServiceRequests({ status: 'pending' }, { enabled: isAdmin || permissions.includes('serviceRequests.read') });
+  const notificationsQuery = useNotifications({ readStatus: 'unread' }, { enabled: isAdmin || permissions.includes('notifications.read') });
+  const auditQuery = useAuditLogs({ enabled: isAdmin || permissions.includes('audit.read') });
   const rolesQuery = useAdminRoles();
   
   const data = dashboardQuery.data;
@@ -103,31 +103,31 @@ export const AdminDashboardPage = () => {
       icon: AlertTriangle,
       permission: 'notifications.read',
     },
-  ].filter((row) => isSuperAdmin || permissions.includes(row.permission));
+  ].filter((row) => isAdmin || permissions.includes(row.permission));
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title={isSuperAdmin ? "Admin Dashboard" : `${titleCase(user?.role)} Dashboard`}
+        title={isAdmin ? "Admin Dashboard" : `${titleCase(user?.role)} Dashboard`}
         description="Coordinate rooms, reservations, finances, alerts, and multiple role-based teams from one clean operations command surface."
       >
         <div className="flex flex-wrap gap-3">
-          {(isSuperAdmin || permissions.includes('reservations.read')) && (
+          {(isAdmin || permissions.includes('reservations.read')) && (
             <Link to={`${prefix}/reservations`}>
               <Button variant="outline">Reservations desk</Button>
             </Link>
           )}
-          {(isSuperAdmin || permissions.includes('staff.read')) && (
+          {(isAdmin || permissions.includes('staff.read')) && (
             <Link to={`${prefix}/staff`}>
               <Button variant="outline">Staff management</Button>
             </Link>
           )}
-          {(isSuperAdmin || permissions.includes('notifications.create')) && (
+          {(isAdmin || permissions.includes('notifications.create')) && (
             <Link to={`${prefix}/notifications`}>
               <Button variant="outline">Broadcast alerts</Button>
             </Link>
           )}
-          {(isSuperAdmin || permissions.includes('settings.read')) && (
+          {(isAdmin || permissions.includes('settings.read')) && (
             <Link to={`${prefix}/settings`}>
               <Button variant="outline">System settings</Button>
             </Link>
@@ -139,7 +139,7 @@ export const AdminDashboardPage = () => {
         <StatsCard title="Rooms" value={String(cards?.totalRooms ?? 0)} description="Active room inventory" icon={BedDouble} />
         <StatsCard title="Occupied" value={String(cards?.occupiedRooms ?? 0)} description="Checked-in rooms now" icon={BedDouble} />
         <StatsCard title="Arrivals" value={String(cards?.todayArrivals ?? 0)} description="Expected today" icon={ClipboardList} />
-        {(isSuperAdmin || permissions.includes('reports.read') || permissions.includes('payments.read')) && (
+        {(isAdmin || permissions.includes('reports.read') || permissions.includes('payments.read')) && (
            <StatsCard title="Revenue 30d" value={formatAdminCurrency(cards?.revenueThisMonth ?? 0)} description="Captured payments" icon={CreditCard} />
         )}
       </div>
@@ -151,7 +151,7 @@ export const AdminDashboardPage = () => {
               <h2 className="text-xl font-semibold text-[var(--primary)]">Team coverage</h2>
               <p className="text-sm text-[var(--muted-foreground)]">Multiple staff members can operate under the same role while keeping separate credentials and portals.</p>
             </div>
-            {(isSuperAdmin || permissions.includes('staff.read')) && (
+            {(isAdmin || permissions.includes('staff.read')) && (
               <Link to={`${prefix}/staff`}>
                 <Button variant="outline">Manage staff</Button>
               </Link>
@@ -232,7 +232,7 @@ export const AdminDashboardPage = () => {
           </div>
         </Card>
 
-        {(isSuperAdmin || permissions.includes('reports.read')) && (
+        {(isAdmin || permissions.includes('reports.read')) && (
           <Card className="space-y-5">
             <div>
               <h2 className="text-xl font-semibold text-[var(--primary)]">Room status distribution</h2>
@@ -263,7 +263,7 @@ export const AdminDashboardPage = () => {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[0.95fr,1.05fr]">
-        {(isSuperAdmin || permissions.includes('reports.read') || permissions.includes('payments.read')) && (
+        {(isAdmin || permissions.includes('reports.read') || permissions.includes('payments.read')) && (
           <Card className="space-y-4">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -303,7 +303,7 @@ export const AdminDashboardPage = () => {
               <h2 className="text-xl font-semibold text-[var(--primary)]">Recent reservations</h2>
               <p className="text-sm text-[var(--muted-foreground)]">Newest bookings entering the system for room assignment and arrival handling.</p>
             </div>
-            {(isSuperAdmin || permissions.includes('reservations.read')) && (
+            {(isAdmin || permissions.includes('reservations.read')) && (
               <Link to={`${prefix}/reservations`}>
                 <Button variant="outline">View all</Button>
               </Link>
@@ -350,7 +350,7 @@ export const AdminDashboardPage = () => {
               <h2 className="text-xl font-semibold text-[var(--primary)]">Alert broadcasts</h2>
               <p className="text-sm text-[var(--muted-foreground)]">Unread notifications delivered through role-wide or direct staff targeting.</p>
             </div>
-            {(isSuperAdmin || permissions.includes('notifications.read')) && (
+            {(isAdmin || permissions.includes('notifications.read')) && (
               <Link to={`${prefix}/notifications`}>
                 <Button variant="outline">Manage alerts</Button>
               </Link>
@@ -399,7 +399,7 @@ export const AdminDashboardPage = () => {
               <h2 className="text-xl font-semibold text-[var(--primary)]">Recent activity</h2>
               <p className="text-sm text-[var(--muted-foreground)]">Critical actions from the audit trail across users, modules, and system updates.</p>
             </div>
-            {(isSuperAdmin || permissions.includes('audit.read')) && (
+            {(isAdmin || permissions.includes('audit.read')) && (
               <Link to={`${prefix}/audit-logs`}>
                 <Button variant="outline">Open audit trail</Button>
               </Link>

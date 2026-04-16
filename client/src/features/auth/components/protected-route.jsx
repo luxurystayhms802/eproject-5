@@ -19,7 +19,7 @@ export const ProtectedRoute = ({ allowedRoles, allowDynamicRoles = false }) => {
     const requiredPermission = ROUTE_PERMISSIONS[location.pathname] || ROUTE_PERMISSIONS[normalizedPath];
     const hasExplicitPermission = requiredPermission && user.permissions?.includes(requiredPermission);
 
-    if (hasExplicitPermission || location.pathname === '/staff/dashboard') {
+    if (hasExplicitPermission || location.pathname === '/staff/dashboard' || location.pathname === '/staff/profile') {
         return <Outlet />;
     }
 

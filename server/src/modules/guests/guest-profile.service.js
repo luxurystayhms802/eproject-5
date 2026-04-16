@@ -137,6 +137,7 @@ export const guestService = {
             lastName: payload.lastName,
             email: payload.email,
             phone: payload.phone,
+            currentPassword: payload.currentPassword,
             password: payload.password,
             avatarUrl: payload.avatarUrl,
             status: payload.status ?? existingUser.status ?? 'active',
