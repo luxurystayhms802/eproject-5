@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { CalendarClock, ClipboardList, Pencil, Plus, Search, XCircle, Hotel } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { CalendarClock, ClipboardList, Hotel, Pencil, Plus, Search, UserMinus, XCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/shared/page-header';
@@ -27,6 +27,7 @@ import {
   useCancelReceptionReservation,
   useConfirmReceptionReservation,
   useCreateReceptionReservation,
+  useMarkReservationNoShow,
   useReceptionGuests,
   useReceptionReservations,
   useReceptionRoomTypes,
@@ -121,6 +122,7 @@ export const ReservationDeskPage = () => {
   const assignReservationRoom = useAssignRoom();
   const confirmReservation = useConfirmReceptionReservation();
   const cancelReservation = useCancelReceptionReservation();
+  const markNoShowMutation = useMarkReservationNoShow();
 
   const reservations = reservationsQuery.data ?? [];
   const guests = guestsQuery.data ?? [];
@@ -567,6 +569,21 @@ export const ReservationDeskPage = () => {
                       Cancel
                     </Button>
                   ) : null}
+                  {canUpdate && ['pending', 'confirmed'].includes(reservation.status) && new Date(reservation.checkInDate).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0) ? (
+                    <Button
+                      variant="outline"
+                      className="border-rose-200 text-rose-700 hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={markNoShowMutation.isPending}
+                      onClick={() => {
+                        if (window.confirm(`Mark ${reservation.reservationCode} as No-Show and release any assigned room?`)) {
+                          markNoShowMutation.mutate(reservation.id);
+                        }
+                      }}
+                    >
+                      <UserMinus className="mr-2 h-4 w-4" />
+                      No-Show
+                    </Button>
+                  ) : null}
                 </div>
               </div>
             ))}
@@ -739,6 +756,7 @@ export const ReservationDeskPage = () => {
               name="adults"
               type="number"
               min="1"
+              max="20"
               className={receptionFieldClassName}
               value={form.adults}
               onChange={(event) => setForm((current) => ({ ...current, adults: event.target.value }))}
@@ -751,6 +769,7 @@ export const ReservationDeskPage = () => {
               name="children"
               type="number"
               min="0"
+              max="20"
               className={receptionFieldClassName}
               value={form.children}
               onChange={(event) => setForm((current) => ({ ...current, children: event.target.value }))}
@@ -824,6 +843,7 @@ export const ReservationDeskPage = () => {
               name="discountAmount"
               type="number"
               min="0"
+              max="100000"
               className={receptionFieldClassName}
               value={form.discountAmount}
               onChange={(event) => setForm((current) => ({ ...current, discountAmount: event.target.value }))}

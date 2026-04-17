@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { CalendarClock, ClipboardList, Eye, Plus, Search, Sparkles } from 'lucide-react';
+import { CalendarClock, ClipboardList, Eye, Plus, Search, Sparkles, UserMinus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/app/store/auth-store';
 import { PageHeader } from '@/components/shared/page-header';
@@ -42,6 +42,7 @@ import {
   useConfirmReservation,
   useCreateReservation,
   useUpdateReservation,
+  useAdminMarkReservationNoShow,
 } from '@/features/admin/hooks';
 
 const getTodayString = () => {
@@ -253,6 +254,7 @@ export const AdminReservationsPage = () => {
   const updateReservation = useUpdateReservation();
   const confirmReservation = useConfirmReservation();
   const cancelReservation = useCancelReservation();
+  const markNoShowMutation = useAdminMarkReservationNoShow();
 
   const reservations = useMemo(() => dedupeCollectionById(reservationsQuery.data ?? [], 'reservation'), [reservationsQuery.data]);
   const guests = useMemo(() => dedupeCollectionById(guestsQuery.data ?? [], 'guest'), [guestsQuery.data]);
@@ -889,6 +891,21 @@ export const AdminReservationsPage = () => {
                       Cancel
                     </Button>
                   ) : null}
+                  {canCancel && reservation.status === 'confirmed' && new Date(reservation.checkInDate).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0) ? (
+                    <Button 
+                      variant="outline" 
+                      className="border-rose-200 text-rose-700 hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed" 
+                      disabled={markNoShowMutation.isPending}
+                      onClick={() => {
+                        if (window.confirm(`Mark ${reservation.reservationCode} as No-Show and release any assigned room?`)) {
+                          markNoShowMutation.mutate(reservation.id);
+                        }
+                      }}
+                    >
+                      <UserMinus className="mr-2 h-4 w-4" />
+                      No-Show
+                    </Button>
+                  ) : null}
                 </div>
 
                 <div className="xl:col-span-3 rounded-[20px] border border-[rgba(16,36,63,0.08)] bg-white/58 px-4 py-3 text-sm leading-6 text-[var(--muted-foreground)]">
@@ -999,11 +1016,11 @@ export const AdminReservationsPage = () => {
           </label>
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Adults</span>
-            <input name="adults" type="number" min="1" className={adminInputClassName} value={form.adults} onChange={(event) => setForm((current) => ({ ...current, adults: event.target.value }))} />
+            <input name="adults" type="number" min="1" max="20" className={adminInputClassName} value={form.adults} onChange={(event) => setForm((current) => ({ ...current, adults: event.target.value }))} />
           </label>
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Children</span>
-            <input name="children" type="number" min="0" className={adminInputClassName} value={form.children} onChange={(event) => setForm((current) => ({ ...current, children: event.target.value }))} />
+            <input name="children" type="number" min="0" max="20" className={adminInputClassName} value={form.children} onChange={(event) => setForm((current) => ({ ...current, children: event.target.value }))} />
           </label>
           <div className="rounded-[20px] border border-[var(--border)] bg-white/72 px-4 py-4 md:col-span-2">
             <div className="grid gap-3 md:grid-cols-4">
@@ -1068,7 +1085,7 @@ export const AdminReservationsPage = () => {
           </label>
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Discount amount</span>
-            <input name="discountAmount" type="number" min="0" className={adminInputClassName} value={form.discountAmount} onChange={(event) => setForm((current) => ({ ...current, discountAmount: event.target.value }))} />
+            <input name="discountAmount" type="number" min="0" max="100000" className={adminInputClassName} value={form.discountAmount} onChange={(event) => setForm((current) => ({ ...current, discountAmount: event.target.value }))} />
           </label>
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Arrival time</span>

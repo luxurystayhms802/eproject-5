@@ -59,9 +59,17 @@ export const validateAdminRoomTypeForm = (form) => {
   if (isBlank(form.shortDescription)) return 'Short description is required.';
   if (isBlank(form.description)) return 'Long description is required.';
   if (Number.isNaN(toNumber(form.basePrice)) || toNumber(form.basePrice) < 0) return 'Base price must be 0 or greater.';
+  if (toNumber(form.basePrice) > 100000) return 'Base price cannot exceed 100,000.';
   if (Number.isNaN(toNumber(form.maxAdults)) || toNumber(form.maxAdults) < 1) return 'Max adults must be at least 1.';
+  if (toNumber(form.maxAdults) > 20) return 'Max adults cannot exceed 20.';
   if (Number.isNaN(toNumber(form.maxChildren)) || toNumber(form.maxChildren) < 0) return 'Max children cannot be negative.';
+  if (toNumber(form.maxChildren) > 20) return 'Max children cannot exceed 20.';
   if (Number.isNaN(toNumber(form.bedCount)) || toNumber(form.bedCount) < 1) return 'Bed count must be at least 1.';
+  if (toNumber(form.bedCount) > 10) return 'Bed count cannot exceed 10.';
+  if (!isBlank(form.roomSizeSqFt)) {
+    if (Number.isNaN(toNumber(form.roomSizeSqFt)) || toNumber(form.roomSizeSqFt) < 0) return 'Room size must be 0 or greater.';
+    if (toNumber(form.roomSizeSqFt) > 10000) return 'Room size cannot exceed 10,000 sq ft.';
+  }
   if (!String(form.amenities ?? '').split(',').map((item) => item.trim()).filter(Boolean).length) return 'Add at least one amenity.';
   if (!hasImages(form.images)) return 'Upload at least one room type image for website and reservation views.';
   return null;
@@ -72,9 +80,13 @@ export const validateAdminRoomForm = (form) => {
   if (!ROOM_NUMBER_PATTERN.test(String(form.roomNumber ?? '').trim())) return 'Room number may only contain letters, numbers, spaces, hyphens, slashes, and #.';
   if (isBlank(form.roomTypeId)) return 'Select a room type for this room.';
   if (Number.isNaN(toNumber(form.floor)) || toNumber(form.floor) < 0) return 'Floor must be 0 or greater.';
+  if (toNumber(form.floor) > 1) return 'Floor cannot be greater than 1.';
   if (form.customPrice !== '' && (Number.isNaN(toNumber(form.customPrice)) || toNumber(form.customPrice) < 0)) return 'Custom price must be 0 or greater.';
+  if (form.customPrice !== '' && toNumber(form.customPrice) > 100000) return 'Custom price cannot exceed 100,000.';
   if (Number.isNaN(toNumber(form.capacityAdults)) || toNumber(form.capacityAdults) < 1) return 'Adults capacity must be at least 1.';
+  if (toNumber(form.capacityAdults) > 20) return 'Adults capacity cannot exceed 20.';
   if (Number.isNaN(toNumber(form.capacityChildren)) || toNumber(form.capacityChildren) < 0) return 'Children capacity cannot be negative.';
+  if (toNumber(form.capacityChildren) > 20) return 'Children capacity cannot exceed 20.';
   if (!hasImages(form.images)) return 'Upload at least one room image for the live website and admin inventory.';
   return null;
 };
@@ -148,8 +160,11 @@ export const validateAdminReservationForm = (form) => {
   if (isBlank(form.checkOutDate)) return 'Check-out date is required.';
   if (new Date(form.checkOutDate) <= new Date(form.checkInDate)) return 'Check-out date must be after check-in date.';
   if (Number.isNaN(toNumber(form.adults)) || toNumber(form.adults) < 1) return 'At least one adult is required.';
+  if (toNumber(form.adults) > 20) return 'Adults cannot exceed 20.';
   if (Number.isNaN(toNumber(form.children)) || toNumber(form.children) < 0) return 'Children count cannot be negative.';
+  if (toNumber(form.children) > 20) return 'Children count cannot exceed 20.';
   if (Number.isNaN(toNumber(form.discountAmount || 0)) || toNumber(form.discountAmount || 0) < 0) return 'Discount amount cannot be negative.';
+  if (toNumber(form.discountAmount || 0) > 100000) return 'Discount amount cannot exceed 100,000.';
   if (!isBlank(form.arrivalTime) && !TIME_PATTERN.test(String(form.arrivalTime ?? '').trim())) return 'Arrival time should look like 2:00 PM or 14:00.';
   return null;
 };

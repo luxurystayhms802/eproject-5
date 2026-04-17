@@ -1,4 +1,4 @@
-import { http } from '@/services/http';
+ import { http } from '@/services/http';
 export const adminApi = {
     getDashboard: async () => {
         const response = await http.get('/reports/dashboard');
@@ -114,6 +114,10 @@ export const adminApi = {
     },
     cancelReservation: async ({ reservationId, cancellationReason }) => {
         const response = await http.post(`/reservations/${reservationId}/cancel`, { cancellationReason });
+        return response.data.data;
+    },
+    markReservationNoShow: async (reservationId) => {
+        const response = await http.post(`/reservations/${reservationId}/no-show`);
         return response.data.data;
     },
     listFolioCharges: async (params = {}) => {

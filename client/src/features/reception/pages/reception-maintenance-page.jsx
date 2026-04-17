@@ -68,10 +68,10 @@ export const ReceptionMaintenancePage = () => {
 
   const summary = useMemo(
     () => ({
-      total: requests.length,
-      urgent: requests.filter((item) => item.priority === 'urgent').length,
+      total: requests.filter((item) => !['closed', 'resolved'].includes(item.status)).length,
+      urgent: requests.filter((item) => item.priority === 'urgent' && !['closed', 'resolved'].includes(item.status)).length,
       open: requests.filter((item) => item.status === 'open').length,
-      assigned: requests.filter((item) => Boolean(item.assignedTo)).length,
+      assigned: requests.filter((item) => Boolean(item.assignedTo) && !['closed', 'resolved'].includes(item.status)).length,
     }),
     [requests],
   );

@@ -39,11 +39,11 @@ const normalizeEnumValue = (value, fallback) => {
 
 const createInitialForm = () => ({
   roomNumber: '',
-  floor: '1',
+  floor: '',
   roomTypeId: '',
   customPrice: '',
-  capacityAdults: '2',
-  capacityChildren: '0',
+  capacityAdults: '',
+  capacityChildren: '',
   status: 'available',
   housekeepingStatus: 'clean',
   notes: '',
@@ -415,7 +415,7 @@ export const AdminRoomsPage = () => {
           </label>
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Floor</span>
-            <input type="number" min="0" className={adminInputClassName} value={form.floor} onChange={(event) => setForm((current) => ({ ...current, floor: event.target.value }))} />
+            <input type="number" min="0" max="1" className={adminInputClassName} value={form.floor} onChange={(event) => setForm((current) => ({ ...current, floor: event.target.value }))} />
           </label>
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Room type</span>
@@ -446,6 +446,7 @@ export const AdminRoomsPage = () => {
               <input
                 type="number"
                 min="0"
+                max="100000"
                 className={adminInputClassName}
                 value={form.customPrice}
                 onChange={(event) => setForm((current) => ({ ...current, customPrice: event.target.value }))}
@@ -460,11 +461,11 @@ export const AdminRoomsPage = () => {
           </label>
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Adults capacity</span>
-            <input type="number" min="1" className={adminInputClassName} value={form.capacityAdults} onChange={(event) => setForm((current) => ({ ...current, capacityAdults: event.target.value }))} />
+            <input type="number" min="1" max="20" className={adminInputClassName} value={form.capacityAdults} onChange={(event) => setForm((current) => ({ ...current, capacityAdults: event.target.value }))} />
           </label>
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Children capacity</span>
-            <input type="number" min="0" className={adminInputClassName} value={form.capacityChildren} onChange={(event) => setForm((current) => ({ ...current, capacityChildren: event.target.value }))} />
+            <input type="number" min="0" max="20" className={adminInputClassName} value={form.capacityChildren} onChange={(event) => setForm((current) => ({ ...current, capacityChildren: event.target.value }))} />
           </label>
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Room status</span>

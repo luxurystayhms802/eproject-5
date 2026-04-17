@@ -462,11 +462,11 @@ export const WalkInBookingPage = () => {
             </label>
             <label className={receptionLabelClassName}>
               <span className={receptionLabelTextClassName}>Adults</span>
-              <input className={receptionFieldClassName} name="adults" type="number" min="1" value={stayForm.adults} onChange={(event) => handleStayChange('adults', event.target.value)} />
+              <input className={receptionFieldClassName} name="adults" type="number" min="1" max="20" value={stayForm.adults} onChange={(event) => handleStayChange('adults', event.target.value)} />
             </label>
             <label className={receptionLabelClassName}>
               <span className={receptionLabelTextClassName}>Children</span>
-              <input className={receptionFieldClassName} name="children" type="number" min="0" value={stayForm.children} onChange={(event) => handleStayChange('children', event.target.value)} />
+              <input className={receptionFieldClassName} name="children" type="number" min="0" max="20" value={stayForm.children} onChange={(event) => handleStayChange('children', event.target.value)} />
             </label>
             <label className={receptionLabelClassName}>
               <span className={receptionLabelTextClassName}>Room category</span>
@@ -502,7 +502,7 @@ export const WalkInBookingPage = () => {
             </label>
             <label className={receptionLabelClassName}>
               <span className={receptionLabelTextClassName}>Discount amount</span>
-              <input className={receptionFieldClassName} name="discountAmount" type="number" min="0" value={stayForm.discountAmount} onChange={(event) => handleStayChange('discountAmount', event.target.value)} />
+              <input className={receptionFieldClassName} name="discountAmount" type="number" min="0" max="100000" value={stayForm.discountAmount} onChange={(event) => handleStayChange('discountAmount', event.target.value)} />
             </label>
             <label className={receptionLabelClassName}>
               <span className={receptionLabelTextClassName}>Arrival time</span>

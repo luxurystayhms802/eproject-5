@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AlertCircle, BadgeCheck, DoorOpen, KeyRound, Search } from 'lucide-react';
+import { AlertCircle, BadgeCheck, DoorOpen, KeyRound, Search, UserMinus } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/shared/page-header';
 import { Card } from '@/components/ui/card';
@@ -14,7 +14,7 @@ import {
   receptionLabelClassName,
   receptionLabelTextClassName,
 } from '@/features/reception/config';
-import { useAssignRoom, useCheckInReservation, useConfirmedReservations } from '@/features/reception/hooks';
+import { useAssignRoom, useCheckInReservation, useConfirmedReservations, useMarkReservationNoShow } from '@/features/reception/hooks';
 
 const defaultDraft = {
   idType: 'cnic',
@@ -34,6 +34,7 @@ export const CheckInDeskPage = () => {
   const confirmedReservationsQuery = useConfirmedReservations();
   const checkInMutation = useCheckInReservation();
   const assignRoomMutation = useAssignRoom();
+  const markNoShowMutation = useMarkReservationNoShow();
 
   const [drafts, setDrafts] = useState({});
   const [availabilityByReservation, setAvailabilityByReservation] = useState({});
@@ -130,6 +131,7 @@ export const CheckInDeskPage = () => {
           reservations.map((reservation) => {
             const draft = drafts[reservation.id] ?? defaultDraft;
             const availableRooms = availabilityByReservation[reservation.id] ?? [];
+            const isOverdue = new Date(reservation.checkInDate).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0);
 
             return (
               <Card key={reservation.id} className="space-y-5">
@@ -246,6 +248,22 @@ export const CheckInDeskPage = () => {
                 </div>
 
                 <div className="flex flex-wrap justify-end gap-3">
+                  {isOverdue && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={markNoShowMutation.isPending}
+                      onClick={() => {
+                        if (window.confirm(`Mark ${reservation.reservationCode} as No-Show and release any assigned room?`)) {
+                          markNoShowMutation.mutate(reservation.id);
+                        }
+                      }}
+                    >
+                      <UserMinus className="mr-2 h-4 w-4" />
+                      {markNoShowMutation.isPending ? 'Marking...' : 'Mark as No-Show'}
+                    </Button>
+                  )}
                   <Button
                     onClick={() => handleCheckIn(reservation, draft)}
                     disabled={(!reservation.room && !draft.roomId) || !draft.idNumber.trim() || checkInMutation.isPending}

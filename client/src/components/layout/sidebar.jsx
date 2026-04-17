@@ -276,8 +276,10 @@ const SidebarContent = ({ role, onClose, isMobile = false }) => {
 
     // Now, cross-reference adminNavSections to see if they possess EXTRA permissions 
     // that are NOT in their base predefined sections!
-    // Since base sections use different prefixes (like /manager/), we check by item label to prevent duplicating tools they already natively have.
-    const existingLabels = new Set(sections.flatMap(s => s.items.map(i => i.label)));
+    // We check by the underlying permission resource module (e.g., 'checkIn') to strictly prevent duplicating tools
+    const existingResources = new Set(
+      sections.flatMap(s => s.items.map(i => ROUTE_PERMISSIONS[i.href]?.split('.')[0])).filter(Boolean)
+    );
     const extraItems = [];
     
     // Do not dynamically append Extended Access to guests! Their portal is strictly static.
@@ -286,7 +288,12 @@ const SidebarContent = ({ role, onClose, isMobile = false }) => {
 
       adminNavSections.forEach(adminSection => {
          adminSection.items.forEach(adminItem => {
-            if (!existingLabels.has(adminItem.label) && hasPermission(adminItem.href, user?.permissions)) {
+            if (adminItem.href === '/admin/dashboard') return;
+            
+            const adminResource = ROUTE_PERMISSIONS[adminItem.href]?.split('.')[0];
+            const isResourceAlreadyVisible = adminResource && existingResources.has(adminResource);
+
+            if (!isResourceAlreadyVisible && hasPermission(adminItem.href, user?.permissions)) {
                extraItems.push({ ...adminItem, href: adminItem.href.replace(/^\/admin/, getRoleBasePath(role)) });
             }
          });

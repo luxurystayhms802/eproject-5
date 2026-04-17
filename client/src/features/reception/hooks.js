@@ -247,6 +247,21 @@ export const useCancelReceptionReservation = () => {
         },
     });
 };
+export const useMarkReservationNoShow = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: receptionApi.markReservationNoShow,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['reception', 'reservations'] });
+            queryClient.invalidateQueries({ queryKey: receptionQueryKeys.confirmedReservations });
+            queryClient.invalidateQueries({ queryKey: receptionQueryKeys.arrivalsToday });
+            toast.success('Reservation marked as no-show successfully.');
+        },
+        onError: (error) => {
+            toast.error(getApiErrorMessage(error, 'Unable to mark reservation as no-show.'));
+        },
+    });
+};
 export const useCreateReceptionPayment = () => {
     const queryClient = useQueryClient();
     return useMutation({

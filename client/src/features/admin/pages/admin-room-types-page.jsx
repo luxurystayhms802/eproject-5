@@ -27,13 +27,13 @@ const createInitialForm = () => ({
   slug: '',
   shortDescription: '',
   description: '',
-  basePrice: '250',
-  maxAdults: '2',
-  maxChildren: '1',
-  bedCount: '1',
+  basePrice: '',
+  maxAdults: '',
+  maxChildren: '',
+  bedCount: '',
   bedType: 'queen',
   roomSizeSqFt: '',
-  amenities: 'WiFi, Breakfast, Concierge',
+  amenities: '',
   images: [],
   featured: false,
   isActive: true,
@@ -311,7 +311,7 @@ export const AdminRoomTypesPage = () => {
           </label>
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Base price</span>
-            <input className={adminInputClassName} type="number" min="0" value={form.basePrice} onChange={(event) => setForm((current) => ({ ...current, basePrice: event.target.value }))} />
+            <input className={adminInputClassName} type="number" min="0" max="100000" value={form.basePrice} onChange={(event) => setForm((current) => ({ ...current, basePrice: event.target.value }))} />
           </label>
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Bed type</span>
@@ -323,19 +323,19 @@ export const AdminRoomTypesPage = () => {
           </label>
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Max adults</span>
-            <input className={adminInputClassName} type="number" min="1" value={form.maxAdults} onChange={(event) => setForm((current) => ({ ...current, maxAdults: event.target.value }))} />
+            <input className={adminInputClassName} type="number" min="1" max="20" value={form.maxAdults} onChange={(event) => setForm((current) => ({ ...current, maxAdults: event.target.value }))} />
           </label>
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Max children</span>
-            <input className={adminInputClassName} type="number" min="0" value={form.maxChildren} onChange={(event) => setForm((current) => ({ ...current, maxChildren: event.target.value }))} />
+            <input className={adminInputClassName} type="number" min="0" max="20" value={form.maxChildren} onChange={(event) => setForm((current) => ({ ...current, maxChildren: event.target.value }))} />
           </label>
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Bed count</span>
-            <input className={adminInputClassName} type="number" min="1" value={form.bedCount} onChange={(event) => setForm((current) => ({ ...current, bedCount: event.target.value }))} />
+            <input className={adminInputClassName} type="number" min="1" max="10" value={form.bedCount} onChange={(event) => setForm((current) => ({ ...current, bedCount: event.target.value }))} />
           </label>
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Room size (sq ft)</span>
-            <input className={adminInputClassName} type="number" min="0" value={form.roomSizeSqFt} onChange={(event) => setForm((current) => ({ ...current, roomSizeSqFt: event.target.value }))} />
+            <input className={adminInputClassName} type="number" min="0" max="10000" value={form.roomSizeSqFt} onChange={(event) => setForm((current) => ({ ...current, roomSizeSqFt: event.target.value }))} />
           </label>
           <label className={`${adminLabelClassName} md:col-span-2`}>
             <span className={adminLabelTextClassName}>Amenities</span>

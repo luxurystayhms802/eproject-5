@@ -1,5 +1,7 @@
 import { sendSuccess } from '../../shared/utils/api-response.js';
 import { settingService } from './setting.service.js';
+import { cronService } from '../system/cron.service.js';
+
 export const settingController = {
     getCurrent: async (_request, response) => {
         const settings = await settingService.getSettings();
@@ -13,6 +15,11 @@ export const settingController = {
             ...request.body,
             updatedBy: request.authUser?.id ?? null,
         });
+
+        if (request.body.nightAuditTime) {
+            cronService.scheduleNightAudit(request.body.nightAuditTime);
+        }
+
         return sendSuccess(response, {
             message: 'Hotel settings updated successfully',
             data: settings,

@@ -362,6 +362,7 @@ export const reservationService = {
             link: '/reception/dashboard',
             priority: status === 'pending' ? 'medium' : 'low',
         });
+        runReservationSideEffect(billingService.generateInvoice(createdReservation._id.toString(), context), 'Initial invoice generation', createdReservation._id.toString());
         return serializeReservation(createdReservation.toObject());
     },
     async updateReservation(reservationId, payload, context) {
@@ -485,6 +486,7 @@ export const reservationService = {
             link: statusChangedToConfirmed ? '/reception/check-in' : '/admin/reservations',
             priority: statusChangedToConfirmed ? 'medium' : 'low',
         });
+        runReservationSideEffect(billingService.generateInvoice(reservationId, context), 'Invoice generation on update', reservationId);
         return serializeReservation(updatedReservation.toObject());
     },
     async amendStayDates(reservationId, payload, context) {
@@ -552,6 +554,7 @@ export const reservationService = {
             priority: 'medium',
         });
 
+        runReservationSideEffect(billingService.generateInvoice(reservationId, context), 'Invoice generation on amend', reservationId);
         return serializeReservation(updatedReservation.toObject());
     },
     async confirmReservation(reservationId, context) {
@@ -589,6 +592,7 @@ export const reservationService = {
             link: '/reception/check-in',
             priority: 'medium',
         });
+        runReservationSideEffect(billingService.generateInvoice(reservationId, context), 'Invoice generation on confirm', reservationId);
         return serializeReservation(updatedReservation.toObject());
     },
     async assignRoom(reservationId, roomId, context) {
@@ -691,6 +695,56 @@ export const reservationService = {
             link: '/admin/reservations',
             priority: 'low',
         });
+        return serializeReservation(updatedReservation.toObject());
+    },
+    async markAsNoShow(reservationId, context) {
+        const existingReservation = await reservationRepository.findById(reservationId);
+        if (!existingReservation) {
+            throw new AppError('Reservation not found', 404);
+        }
+
+        if (!['pending', 'confirmed'].includes(String(existingReservation.status))) {
+            throw new AppError('Only pending or confirmed reservations can be marked as No-Show', 409);
+        }
+
+        const updatedReservation = await reservationRepository.updateById(reservationId, {
+            status: 'no_show',
+            notes: existingReservation.notes ? `${existingReservation.notes}\nMarked as No-Show.` : 'Marked as No-Show.'
+        });
+
+        if (!updatedReservation) {
+            throw new AppError('Failed to mark reservation as No-Show', 500);
+        }
+
+        if (existingReservation.roomId) {
+            await releaseReservedRoomIfPossible(getEntityId(existingReservation.roomId), reservationId);
+        }
+
+        const actionUserId = context.actorRole === 'system' ? undefined : context.actorUserId;
+
+        await auditService.createLog({
+            userId: actionUserId,
+            action: 'reservation.noshow',
+            entityType: 'reservation',
+            entityId: reservationId,
+            before: serializeReservation(existingReservation.toObject()),
+            after: serializeReservation(updatedReservation.toObject()),
+            ip: context.request?.ip,
+            userAgent: context.request?.headers['user-agent'] ?? null,
+        });
+
+        if (context.actorRole !== 'system') {
+            await notificationsService.createNotification({
+                type: 'reservation',
+                title: 'Reservation marked as No-Show',
+                message: 'A guest failed to arrive and their reservation was manually marked as a No-Show. The assigned room was released.',
+                targetRoles: ['admin', 'manager'],
+                targetUserIds: [],
+                link: '/admin/reservations',
+                priority: 'low',
+            });
+        }
+
         return serializeReservation(updatedReservation.toObject());
     },
     async checkInReservation(reservationId, payload, context) {

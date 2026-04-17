@@ -86,6 +86,17 @@ export const reservationController = {
             data: reservation,
         });
     },
+    markAsNoShow: async (request, response) => {
+        const reservation = await reservationService.markAsNoShow(String(request.params.reservationId), {
+            actorUserId: request.authUser.id,
+            actorRole: request.authUser.role,
+            request,
+        });
+        return sendSuccess(response, {
+            message: 'Reservation marked as no-show successfully',
+            data: reservation,
+        });
+    },
     checkIn: async (request, response) => {
         const reservation = await reservationService.checkInReservation(String(request.params.reservationId), request.body, {
             actorUserId: request.authUser.id,

@@ -55,8 +55,8 @@ export const AdminMaintenanceOverviewPage = () => {
   const summary = useMemo(
     () => ({
       open: requests.filter((request) => ['open', 'assigned', 'in_progress'].includes(request.status)).length,
-      urgent: requests.filter((request) => request.priority === 'urgent').length,
-      assigned: requests.filter((request) => Boolean(request.assignedTo)).length,
+      urgent: requests.filter((request) => request.priority === 'urgent' && !['closed', 'resolved'].includes(request.status)).length,
+      assigned: requests.filter((request) => Boolean(request.assignedTo) && !['closed', 'resolved'].includes(request.status)).length,
       resolved: requests.filter((request) => ['resolved', 'closed'].includes(request.status)).length,
     }),
     [requests],

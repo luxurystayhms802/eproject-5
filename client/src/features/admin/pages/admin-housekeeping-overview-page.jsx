@@ -55,11 +55,14 @@ export const AdminHousekeepingOverviewPage = () => {
   const filteredTasks = useMemo(() => {
     const searchTerm = filters.search.trim().toLowerCase();
 
+    // Keep completed items out of the default queue unless explicitly requested
+    const baseTasks = filters.status ? tasks : tasks.filter((task) => !['completed', 'cancelled'].includes(task.status));
+
     if (!searchTerm) {
-      return tasks;
+      return baseTasks;
     }
 
-    return tasks.filter((task) => {
+    return baseTasks.filter((task) => {
       const haystack = [
         task.room?.roomNumber,
         task.taskType,
@@ -74,17 +77,26 @@ export const AdminHousekeepingOverviewPage = () => {
 
       return haystack.includes(searchTerm);
     });
-  }, [filters.search, tasks]);
+  }, [filters.search, filters.status, tasks]);
 
-  const summary = useMemo(
-    () => ({
+  const summary = useMemo(() => {
+    const searchTerm = filters.search.trim().toLowerCase();
+    
+    // Create a list that respects search, but ignores the default "hide completed" rule for stats
+    const searchFilteredTasks = searchTerm 
+      ? tasks.filter((task) => {
+          const haystack = [task.room?.roomNumber, task.taskType, task.status, task.priority, task.notes, getDisplayName(task.assignedTo)].filter(Boolean).join(' ').toLowerCase();
+          return haystack.includes(searchTerm);
+        })
+      : tasks;
+
+    return {
       total: filteredTasks.length,
-      pending: filteredTasks.filter((task) => ['pending', 'assigned'].includes(task.status)).length,
-      inProgress: filteredTasks.filter((task) => task.status === 'in_progress').length,
-      completed: filteredTasks.filter((task) => task.status === 'completed').length,
-    }),
-    [filteredTasks],
-  );
+      pending: searchFilteredTasks.filter((task) => ['pending', 'assigned'].includes(task.status)).length,
+      inProgress: searchFilteredTasks.filter((task) => task.status === 'in_progress').length,
+      completed: searchFilteredTasks.filter((task) => task.status === 'completed').length,
+    };
+  }, [filteredTasks.length, tasks, filters.search]);
 
   return (
     <div className="space-y-6">

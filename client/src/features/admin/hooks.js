@@ -299,6 +299,11 @@ export const useCancelReservation = () => {
     return buildMutation(queryClient, adminApi.cancelReservation, 'Reservation cancelled successfully', 'Unable to cancel reservation');
 };
 
+export const useAdminMarkReservationNoShow = () => {
+    const queryClient = useQueryClient();
+    return buildMutation(queryClient, adminApi.markReservationNoShow, 'Reservation marked as no-show successfully', 'Unable to mark reservation as no-show');
+};
+
 export const useCreateFolioCharge = () => {
     const queryClient = useQueryClient();
     return buildMutation(queryClient, adminApi.createFolioCharge, 'Charge added successfully', 'Unable to add folio charge');

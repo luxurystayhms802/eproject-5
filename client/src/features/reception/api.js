@@ -78,6 +78,10 @@ export const receptionApi = {
     const response = await http.post(`/reservations/${reservationId}/cancel`, payload);
     return response.data.data;
   },
+  markReservationNoShow: async (reservationId) => {
+    const response = await http.post(`/reservations/${reservationId}/no-show`);
+    return response.data.data;
+  },
   listGuests: async (params = {}) => {
     const response = await http.get('/guests', withParams({ limit: 100, ...params }));
     return response.data.data;

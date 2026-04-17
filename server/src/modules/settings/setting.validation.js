@@ -20,6 +20,7 @@ export const updateSettingsSchema = z.object({
         timezone: z.string().min(2).optional(),
         checkInTime: z.string().min(1).optional(),
         checkOutTime: z.string().min(1).optional(),
+        nightAuditTime: z.string().min(1).optional(),
         cancellationPolicy: z.string().min(10).optional(),
         invoiceTerms: z.string().min(10).optional(),
         logoUrl: optionalUrl,

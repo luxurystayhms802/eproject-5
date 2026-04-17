@@ -17,6 +17,7 @@ const buildDefaultSettings = () => ({
   taxRules: [{ name: 'Hotel Tax', percentage: 13, appliesTo: 'room_nights' }],
   checkInTime: '14:00',
   checkOutTime: '12:00',
+  nightAuditTime: '02:00',
   cancellationPolicy: 'Free cancellation up to 24 hours before arrival.',
   invoiceTerms: 'Payments are due upon checkout unless corporate billing is approved.',
   logoUrl: null,
