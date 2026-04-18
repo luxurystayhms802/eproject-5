@@ -43,7 +43,7 @@ export const roomTypeController = {
             request,
         });
         return sendSuccess(response, {
-            message: 'Room type archived successfully',
+            message: 'Room type deleted successfully',
             data: result,
         });
     },

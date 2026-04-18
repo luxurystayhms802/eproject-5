@@ -147,7 +147,7 @@ export const AdminRoomTypesPage = () => {
   };
 
   const handleDelete = async (roomTypeId) => {
-    const confirmed = window.confirm('Archive this room type from active inventory?');
+    const confirmed = window.confirm('Delete this room type from the database?');
     if (!confirmed) {
       return;
     }
@@ -272,7 +272,7 @@ export const AdminRoomTypesPage = () => {
                   {canDelete && (
                     <Button variant="outline" className="border-rose-200 text-rose-700 hover:bg-rose-50" onClick={() => handleDelete(roomType.id)}>
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Archive
+                      Delete
                     </Button>
                   )}
                 </div>

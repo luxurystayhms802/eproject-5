@@ -154,7 +154,7 @@ export const AdminBillingPage = () => {
   }, [invoices]);
 
   const eligibleReservations = useMemo(
-    () => reservations.filter((reservation) => !['draft', 'cancelled', 'no_show'].includes(reservation.status)),
+    () => reservations.filter((reservation) => !['draft', 'cancelled', 'missed_arrival'].includes(reservation.status)),
     [reservations],
   );
 

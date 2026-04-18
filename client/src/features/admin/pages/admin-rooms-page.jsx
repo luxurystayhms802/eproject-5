@@ -202,8 +202,8 @@ export const AdminRoomsPage = () => {
     }
   };
 
-  const handleArchive = async (roomId) => {
-    const confirmed = window.confirm('Archive this room from active inventory?');
+  const handleDelete = async (roomId) => {
+    const confirmed = window.confirm('Delete this room from the database?');
     if (!confirmed) {
       return;
     }
@@ -347,7 +347,7 @@ export const AdminRoomsPage = () => {
                   <div className="rounded-[22px] border border-[var(--border)] bg-white/84 px-4 py-3">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--muted-foreground)]">Readiness</p>
                     <p className="mt-2 text-lg font-semibold capitalize text-[var(--primary)]">{room.housekeepingStatus}</p>
-                    <p className="mt-1 text-sm text-[var(--muted-foreground)]">{room.isActive ? 'Visible in live inventory' : 'Archived from active stock'}</p>
+                    <p className="mt-1 text-sm text-[var(--muted-foreground)]">{room.isActive ? 'Visible in live inventory' : 'Removed from active stock'}</p>
                   </div>
                 </div>
 
@@ -362,8 +362,8 @@ export const AdminRoomsPage = () => {
                     </Button>
                   )}
                   {canDelete && (
-                    <Button variant="outline" className="border-rose-200 text-rose-700 hover:bg-rose-50" onClick={() => handleArchive(room.id)}>
-                      Archive
+                    <Button variant="outline" className="border-rose-200 text-rose-700 hover:bg-rose-50" onClick={() => handleDelete(room.id)}>
+                      Delete
                     </Button>
                   )}
                 </div>
@@ -526,8 +526,8 @@ export const AdminRoomsPage = () => {
               </Button>
             )}
             {canDelete && (
-              <Button variant="outline" className="border-rose-200 text-rose-700 hover:bg-rose-50" onClick={() => handleArchive(selectedRoom.id)}>
-                Archive
+              <Button variant="outline" className="border-rose-200 text-rose-700 hover:bg-rose-50" onClick={() => handleDelete(selectedRoom.id)}>
+                Delete
               </Button>
             )}
           </>

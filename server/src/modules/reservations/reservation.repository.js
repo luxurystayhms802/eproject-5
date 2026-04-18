@@ -30,7 +30,7 @@ export const reservationRepository = {
     findConflictingByRoomId: (params) => ReservationModel.findOne({
         roomId: params.roomId,
         deletedAt: null,
-        status: { $nin: ['cancelled', 'no_show', 'checked_out'] },
+        status: { $nin: ['cancelled', 'missed_arrival', 'checked_out'] },
         ...(params.excludeReservationId ? { _id: { $ne: params.excludeReservationId } } : {}),
         checkInDate: { $lt: params.checkOutDate },
         checkOutDate: { $gt: params.checkInDate },
@@ -38,7 +38,7 @@ export const reservationRepository = {
     countActiveByRoomId: (roomId, excludeReservationId) => ReservationModel.countDocuments({
         roomId,
         deletedAt: null,
-        status: { $nin: ['cancelled', 'no_show', 'checked_out'] },
+        status: { $nin: ['cancelled', 'missed_arrival', 'checked_out'] },
         ...(excludeReservationId ? { _id: { $ne: excludeReservationId } } : {}),
     }),
 };

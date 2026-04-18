@@ -116,8 +116,8 @@ export const adminApi = {
         const response = await http.post(`/reservations/${reservationId}/cancel`, { cancellationReason });
         return response.data.data;
     },
-    markReservationNoShow: async (reservationId) => {
-        const response = await http.post(`/reservations/${reservationId}/no-show`);
+    markReservationMissedArrival: async (reservationId) => {
+        const response = await http.post(`/reservations/${reservationId}/missed-arrival`);
         return response.data.data;
     },
     listFolioCharges: async (params = {}) => {

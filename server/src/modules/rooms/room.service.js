@@ -7,7 +7,7 @@ import { buildPaginationMeta, getPagination } from '../../shared/utils/paginatio
 import { calculateNights, getEndOfDay, getStartOfDay } from '../../shared/utils/reservations.js';
 import { HOUSEKEEPING_ROOM_STATUSES, ROOM_STATUSES } from '../../shared/constants/enums.js';
 import { roomRepository } from './room.repository.js';
-const inactiveReservationStatuses = ['cancelled', 'no_show', 'checked_out'];
+const inactiveReservationStatuses = ['cancelled', 'missed_arrival', 'checked_out'];
 const normalizeEnumValue = (value) => {
     if (typeof value !== 'string') {
         return value;
@@ -189,13 +189,9 @@ export const roomService = {
             status: { $nin: inactiveReservationStatuses },
         });
         if (activeReservationCount > 0) {
-            throw new AppError('Cannot archive a room with active reservations', 409);
+            throw new AppError('Cannot delete a room with active reservations', 409);
         }
-        const deletedRoom = await roomRepository.updateById(roomId, {
-            deletedAt: new Date(),
-            isActive: false,
-            status: 'out_of_service',
-        });
+        const deletedRoom = await roomRepository.deleteById(roomId);
         await auditService.createLog({
             userId: context.actorUserId,
             action: 'room.delete',

@@ -11,4 +11,5 @@ export const roomTypeRepository = {
     count: (filter) => RoomTypeModel.countDocuments(filter),
     create: (payload) => RoomTypeModel.create(payload),
     updateById: (roomTypeId, payload) => RoomTypeModel.findOneAndUpdate({ _id: roomTypeId, deletedAt: null }, payload, { new: true }),
+    deleteById: (roomTypeId) => RoomTypeModel.findByIdAndDelete(roomTypeId),
 };

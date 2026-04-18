@@ -42,7 +42,7 @@ import {
   useConfirmReservation,
   useCreateReservation,
   useUpdateReservation,
-  useAdminMarkReservationNoShow,
+  useAdminMarkReservationMissedArrival,
 } from '@/features/admin/hooks';
 
 const getTodayString = () => {
@@ -254,7 +254,7 @@ export const AdminReservationsPage = () => {
   const updateReservation = useUpdateReservation();
   const confirmReservation = useConfirmReservation();
   const cancelReservation = useCancelReservation();
-  const markNoShowMutation = useAdminMarkReservationNoShow();
+  const markMissedArrivalMutation = useAdminMarkReservationMissedArrival();
 
   const reservations = useMemo(() => dedupeCollectionById(reservationsQuery.data ?? [], 'reservation'), [reservationsQuery.data]);
   const guests = useMemo(() => dedupeCollectionById(guestsQuery.data ?? [], 'guest'), [guestsQuery.data]);
@@ -374,7 +374,7 @@ export const AdminReservationsPage = () => {
       total: reservations.length,
       pending: reservations.filter((reservation) => ['draft', 'pending'].includes(reservation.status)).length,
       arrivalsToday: reservations.filter((reservation) => isSameDay(new Date(reservation.checkInDate), today)).length,
-      unassigned: reservations.filter((reservation) => !reservation.roomId && !['cancelled', 'checked_out', 'no_show'].includes(reservation.status)).length,
+      unassigned: reservations.filter((reservation) => !reservation.roomId && !['cancelled', 'checked_out', 'missed_arrival'].includes(reservation.status)).length,
     };
   }, [reservations]);
 
@@ -880,7 +880,7 @@ export const AdminReservationsPage = () => {
                       Confirm
                     </Button>
                   ) : null}
-                  {canCancel && !['cancelled', 'checked_out', 'no_show'].includes(reservation.status) ? (
+                  {canCancel && !['cancelled', 'checked_out', 'missed_arrival'].includes(reservation.status) ? (
                     <Button 
                       variant="outline" 
                       className="border-rose-200 text-rose-700 hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed" 
@@ -895,15 +895,15 @@ export const AdminReservationsPage = () => {
                     <Button 
                       variant="outline" 
                       className="border-rose-200 text-rose-700 hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed" 
-                      disabled={markNoShowMutation.isPending}
+                      disabled={markMissedArrivalMutation.isPending}
                       onClick={() => {
-                        if (window.confirm(`Mark ${reservation.reservationCode} as No-Show and release any assigned room?`)) {
-                          markNoShowMutation.mutate(reservation.id);
+                        if (window.confirm(`Mark ${reservation.reservationCode} as Missed Arrival and release any assigned room?`)) {
+                          markMissedArrivalMutation.mutate(reservation.id);
                         }
                       }}
                     >
                       <UserMinus className="mr-2 h-4 w-4" />
-                      No-Show
+                      Missed Arrival
                     </Button>
                   ) : null}
                 </div>
@@ -1248,7 +1248,7 @@ export const AdminReservationsPage = () => {
                 Confirm
               </Button>
             ) : null}
-            {canCancel && !['cancelled', 'checked_out', 'no_show'].includes(selectedReservation.status) ? (
+            {canCancel && !['cancelled', 'checked_out', 'missed_arrival'].includes(selectedReservation.status) ? (
               <Button 
                 variant="outline" 
                 className="border-rose-200 text-rose-700 hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed" 

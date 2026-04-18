@@ -86,14 +86,14 @@ export const reservationController = {
             data: reservation,
         });
     },
-    markAsNoShow: async (request, response) => {
-        const reservation = await reservationService.markAsNoShow(String(request.params.reservationId), {
+    markAsMissedArrival: async (request, response) => {
+        const reservation = await reservationService.markAsMissedArrival(String(request.params.reservationId), {
             actorUserId: request.authUser.id,
             actorRole: request.authUser.role,
             request,
         });
         return sendSuccess(response, {
-            message: 'Reservation marked as no-show successfully',
+            message: 'Reservation marked as missed arrival successfully',
             data: reservation,
         });
     },

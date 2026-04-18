@@ -17,7 +17,7 @@ export const cronService = {
         }
 
         activeNightAuditTask = cron.schedule(cronExpression, async () => {
-            logger.info(`Starting nightly audit job for no-shows (Scheduled for ${timeStr})...`);
+            logger.info(`Starting nightly audit job for missed arrivals (Scheduled for ${timeStr})...`);
             
             try {
                 const todayMidnight = getStartOfDay(new Date());
@@ -44,14 +44,14 @@ export const cronService = {
                 let processedCount = 0;
                 for (const reservation of overdueReservations) {
                     try {
-                        await reservationService.markAsNoShow(reservation._id.toString(), systemContext);
+                        await reservationService.markAsMissedArrival(reservation._id.toString(), systemContext);
                         processedCount++;
                     } catch (error) {
-                        logger.error({ err: error, reservationId: reservation._id }, 'Failed to mark reservation as no-show during night audit');
+                        logger.error({ err: error, reservationId: reservation._id }, 'Failed to mark reservation as missed arrival during night audit');
                     }
                 }
 
-                logger.info(`Night audit complete: Successfully marked ${processedCount}/${overdueReservations.length} reservations as no-show.`);
+                logger.info(`Night audit complete: Successfully marked ${processedCount}/${overdueReservations.length} reservations as missed arrival.`);
             } catch (error) {
                 logger.error({ err: error }, 'Night audit job failed');
             }

@@ -15,6 +15,6 @@ reservationsRouter.patch('/:reservationId/amend-stay', requirePermissions('reser
 reservationsRouter.post('/:reservationId/confirm', requirePermissions('reservations.confirm'), validate(reservationIdParamsSchema), asyncHandler(reservationController.confirm));
 reservationsRouter.post('/:reservationId/assign-room', requirePermissions('reservations.assignRoom'), validate(reservationIdParamsSchema), validate(assignRoomSchema), asyncHandler(reservationController.assignRoom));
 reservationsRouter.post('/:reservationId/cancel', requirePermissions('reservations.cancel'), validate(reservationIdParamsSchema), validate(cancelReservationSchema), asyncHandler(reservationController.cancel));
-reservationsRouter.post('/:reservationId/no-show', requirePermissions('reservations.update'), validate(reservationIdParamsSchema), asyncHandler(reservationController.markAsNoShow));
+reservationsRouter.post('/:reservationId/missed-arrival', requirePermissions('reservations.update'), validate(reservationIdParamsSchema), asyncHandler(reservationController.markAsMissedArrival));
 reservationsRouter.post('/:reservationId/check-in', requirePermissions('checkIn.update'), validate(reservationIdParamsSchema), validate(checkInReservationSchema), asyncHandler(reservationController.checkIn));
 reservationsRouter.post('/:reservationId/check-out', requirePermissions('checkOut.update'), validate(reservationIdParamsSchema), validate(checkOutReservationSchema), asyncHandler(reservationController.checkOut));

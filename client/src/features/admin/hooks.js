@@ -231,7 +231,7 @@ export const useUpdateRoomType = () => {
 
 export const useDeleteRoomType = () => {
     const queryClient = useQueryClient();
-    return buildMutation(queryClient, adminApi.deleteRoomType, 'Room type archived successfully', 'Unable to archive room type');
+    return buildMutation(queryClient, adminApi.deleteRoomType, 'Room type deleted successfully', 'Unable to delete room type');
 };
 
 export const useCreateRoom = () => {
@@ -251,7 +251,7 @@ export const useUpdateRoomStatus = () => {
 
 export const useDeleteRoom = () => {
     const queryClient = useQueryClient();
-    return buildMutation(queryClient, adminApi.deleteRoom, 'Room archived successfully', 'Unable to archive room');
+    return buildMutation(queryClient, adminApi.deleteRoom, 'Room deleted successfully', 'Unable to delete room');
 };
 
 export const useCreateReservation = () => {
@@ -299,9 +299,9 @@ export const useCancelReservation = () => {
     return buildMutation(queryClient, adminApi.cancelReservation, 'Reservation cancelled successfully', 'Unable to cancel reservation');
 };
 
-export const useAdminMarkReservationNoShow = () => {
+export const useAdminMarkReservationMissedArrival = () => {
     const queryClient = useQueryClient();
-    return buildMutation(queryClient, adminApi.markReservationNoShow, 'Reservation marked as no-show successfully', 'Unable to mark reservation as no-show');
+    return buildMutation(queryClient, adminApi.markReservationMissedArrival, 'Reservation marked as missed-arrival successfully', 'Unable to mark reservation as missed-arrival');
 };
 
 export const useCreateFolioCharge = () => {

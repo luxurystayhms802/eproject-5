@@ -27,7 +27,7 @@ import {
   useCancelReceptionReservation,
   useConfirmReceptionReservation,
   useCreateReceptionReservation,
-  useMarkReservationNoShow,
+  useMarkReservationMissedArrival,
   useReceptionGuests,
   useReceptionReservations,
   useReceptionRoomTypes,
@@ -122,7 +122,7 @@ export const ReservationDeskPage = () => {
   const assignReservationRoom = useAssignRoom();
   const confirmReservation = useConfirmReceptionReservation();
   const cancelReservation = useCancelReceptionReservation();
-  const markNoShowMutation = useMarkReservationNoShow();
+  const markMissedArrivalMutation = useMarkReservationMissedArrival();
 
   const reservations = reservationsQuery.data ?? [];
   const guests = guestsQuery.data ?? [];
@@ -530,7 +530,7 @@ export const ReservationDeskPage = () => {
                 </div>
 
                 <div className="flex flex-wrap items-start justify-end gap-3 xl:flex-col xl:items-stretch">
-                  {canUpdate && !['checked_in', 'checked_out', 'cancelled', 'no_show'].includes(reservation.status) ? (
+                  {canUpdate && !['checked_in', 'checked_out', 'cancelled', 'missed_arrival'].includes(reservation.status) ? (
                     <Button variant="outline" onClick={() => openEditModal(reservation)}>
                       <Pencil className="mr-2 h-4 w-4" />
                       Edit
@@ -553,7 +553,7 @@ export const ReservationDeskPage = () => {
                       Confirm
                     </Button>
                   ) : null}
-                  {canCancel && !['checked_out', 'cancelled', 'no_show'].includes(reservation.status) ? (
+                  {canCancel && !['checked_out', 'cancelled', 'missed_arrival'].includes(reservation.status) ? (
                     <Button
                       variant="outline"
                       className="border-rose-200 text-rose-700 hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -573,15 +573,15 @@ export const ReservationDeskPage = () => {
                     <Button
                       variant="outline"
                       className="border-rose-200 text-rose-700 hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={markNoShowMutation.isPending}
+                      disabled={markMissedArrivalMutation.isPending}
                       onClick={() => {
-                        if (window.confirm(`Mark ${reservation.reservationCode} as No-Show and release any assigned room?`)) {
-                          markNoShowMutation.mutate(reservation.id);
+                        if (window.confirm(`Mark ${reservation.reservationCode} as Missed Arrival and release any assigned room?`)) {
+                          markMissedArrivalMutation.mutate(reservation.id);
                         }
                       }}
                     >
                       <UserMinus className="mr-2 h-4 w-4" />
-                      No-Show
+                      Missed Arrival
                     </Button>
                   ) : null}
                 </div>

@@ -114,10 +114,7 @@ export const roomTypeService = {
         if (!existingRoomType) {
             throw new AppError('Room type not found', 404);
         }
-        const deletedRoomType = await roomTypeRepository.updateById(roomTypeId, {
-            deletedAt: new Date(),
-            isActive: false,
-        });
+        const deletedRoomType = await roomTypeRepository.deleteById(roomTypeId);
         await auditService.createLog({
             userId: context.actorUserId,
             action: 'roomType.delete',

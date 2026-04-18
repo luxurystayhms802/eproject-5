@@ -53,7 +53,7 @@ export const roomController = {
             request,
         });
         return sendSuccess(response, {
-            message: 'Room archived successfully',
+            message: 'Room deleted successfully',
             data: result,
         });
     },

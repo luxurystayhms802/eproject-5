@@ -247,18 +247,18 @@ export const useCancelReceptionReservation = () => {
         },
     });
 };
-export const useMarkReservationNoShow = () => {
+export const useMarkReservationMissedArrival = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: receptionApi.markReservationNoShow,
+        mutationFn: receptionApi.markReservationMissedArrival,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['reception', 'reservations'] });
             queryClient.invalidateQueries({ queryKey: receptionQueryKeys.confirmedReservations });
             queryClient.invalidateQueries({ queryKey: receptionQueryKeys.arrivalsToday });
-            toast.success('Reservation marked as no-show successfully.');
+            toast.success('Reservation marked as missed-arrival successfully.');
         },
         onError: (error) => {
-            toast.error(getApiErrorMessage(error, 'Unable to mark reservation as no-show.'));
+            toast.error(getApiErrorMessage(error, 'Unable to mark reservation as missed-arrival.'));
         },
     });
 };

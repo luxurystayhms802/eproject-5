@@ -18,7 +18,7 @@ import {
 import { getDisplayName } from '@/features/admin/display-utils';
 import { validateCheckInDraft } from '@/features/admin/form-utils';
 import { adminApi } from '@/features/admin/api';
-import { useAdminCheckInReservation, useAdminReservations, useAssignReservationRoom, useAdminMarkReservationNoShow } from '@/features/admin/hooks';
+import { useAdminCheckInReservation, useAdminReservations, useAssignReservationRoom, useAdminMarkReservationMissedArrival } from '@/features/admin/hooks';
 import { getApiErrorMessage } from '@/lib/api-error';
 
 const today = new Date();
@@ -59,7 +59,7 @@ export const AdminCheckInMonitorPage = () => {
   });
   const assignRoomMutation = useAssignReservationRoom();
   const checkInMutation = useAdminCheckInReservation();
-  const markNoShowMutation = useAdminMarkReservationNoShow();
+  const markMissedArrivalMutation = useAdminMarkReservationMissedArrival();
 
   const reservations = useMemo(
     () =>
@@ -352,15 +352,15 @@ export const AdminCheckInMonitorPage = () => {
                           type="button"
                           variant="outline"
                           className="border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                          disabled={markNoShowMutation.isPending}
+                          disabled={markMissedArrivalMutation.isPending}
                           onClick={() => {
-                            if (window.confirm(`Mark ${reservation.reservationCode} as No-Show and release any assigned room?`)) {
-                              markNoShowMutation.mutate(reservation.id);
+                            if (window.confirm(`Mark ${reservation.reservationCode} as Missed Arrival and release any assigned room?`)) {
+                              markMissedArrivalMutation.mutate(reservation.id);
                             }
                           }}
                         >
                           <UserMinus className="mr-2 h-4 w-4" />
-                          {markNoShowMutation.isPending ? 'Marking...' : 'Mark as No-Show'}
+                          {markMissedArrivalMutation.isPending ? 'Marking...' : 'Mark as Missed Arrival'}
                         </Button>
                       )}
                       <Button

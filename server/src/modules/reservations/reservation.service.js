@@ -14,7 +14,7 @@ import { buildPaginationMeta, getPagination } from '../../shared/utils/paginatio
 import { calculateNights, generateReservationCode, getEndOfDay, getStartOfDay } from '../../shared/utils/reservations.js';
 import { deriveDisplayName } from '../../shared/utils/names.js';
 import { reservationRepository } from './reservation.repository.js';
-const inactiveStatuses = ['cancelled', 'no_show', 'checked_out'];
+const inactiveStatuses = ['cancelled', 'missed_arrival', 'checked_out'];
 const getEntityId = (value) => {
     if (value && typeof value === 'object' && '_id' in value) {
         const nested = value._id;
@@ -370,7 +370,7 @@ export const reservationService = {
         if (!existingReservation) {
             throw new AppError('Reservation not found', 404);
         }
-        if (['checked_in', 'checked_out', 'cancelled', 'no_show'].includes(String(existingReservation.status))) {
+        if (['checked_in', 'checked_out', 'cancelled', 'missed_arrival'].includes(String(existingReservation.status))) {
             throw new AppError('This reservation can no longer be modified', 409);
         }
         const nextGuestUserId = context.actorRole === 'guest' ? context.actorUserId : payload.guestUserId ?? getEntityId(existingReservation.guestUserId);
@@ -665,7 +665,7 @@ export const reservationService = {
             id: context.actorUserId,
             role: context.actorRole,
         });
-        if (['checked_in', 'checked_out', 'cancelled', 'no_show'].includes(String(existingReservation.status))) {
+        if (['checked_in', 'checked_out', 'cancelled', 'missed_arrival'].includes(String(existingReservation.status))) {
             throw new AppError('This reservation cannot be cancelled', 409);
         }
         const updatedReservation = await reservationRepository.updateById(reservationId, {
@@ -697,23 +697,23 @@ export const reservationService = {
         });
         return serializeReservation(updatedReservation.toObject());
     },
-    async markAsNoShow(reservationId, context) {
+    async markAsMissedArrival(reservationId, context) {
         const existingReservation = await reservationRepository.findById(reservationId);
         if (!existingReservation) {
             throw new AppError('Reservation not found', 404);
         }
 
         if (!['pending', 'confirmed'].includes(String(existingReservation.status))) {
-            throw new AppError('Only pending or confirmed reservations can be marked as No-Show', 409);
+            throw new AppError('Only pending or confirmed reservations can be marked as Missed Arrival', 409);
         }
 
         const updatedReservation = await reservationRepository.updateById(reservationId, {
-            status: 'no_show',
-            notes: existingReservation.notes ? `${existingReservation.notes}\nMarked as No-Show.` : 'Marked as No-Show.'
+            status: 'missed_arrival',
+            notes: existingReservation.notes ? `${existingReservation.notes}\nMarked as Missed Arrival.` : 'Marked as Missed Arrival.'
         });
 
         if (!updatedReservation) {
-            throw new AppError('Failed to mark reservation as No-Show', 500);
+            throw new AppError('Failed to mark reservation as Missed Arrival', 500);
         }
 
         if (existingReservation.roomId) {
@@ -724,7 +724,7 @@ export const reservationService = {
 
         await auditService.createLog({
             userId: actionUserId,
-            action: 'reservation.noshow',
+            action: 'reservation.missed_arrival',
             entityType: 'reservation',
             entityId: reservationId,
             before: serializeReservation(existingReservation.toObject()),
@@ -736,8 +736,8 @@ export const reservationService = {
         if (context.actorRole !== 'system') {
             await notificationsService.createNotification({
                 type: 'reservation',
-                title: 'Reservation marked as No-Show',
-                message: 'A guest failed to arrive and their reservation was manually marked as a No-Show. The assigned room was released.',
+                title: 'Reservation marked as Missed Arrival',
+                message: 'A guest failed to arrive and their reservation was manually marked as a Missed Arrival. The assigned room was released.',
                 targetRoles: ['admin', 'manager'],
                 targetUserIds: [],
                 link: '/admin/reservations',
