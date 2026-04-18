@@ -1,3 +1,4 @@
+import { RoomModel } from '../rooms/room.model.js';
 import { auditService } from '../audit/audit.service.js';
 import { AppError } from '../../shared/utils/app-error.js';
 import { buildPaginationMeta, getPagination } from '../../shared/utils/pagination.js';
@@ -113,6 +114,10 @@ export const roomTypeService = {
         const existingRoomType = await roomTypeRepository.findById(roomTypeId);
         if (!existingRoomType) {
             throw new AppError('Room type not found', 404);
+        }
+        const activeRoomsRef = await RoomModel.countDocuments({ roomTypeId: existingRoomType._id, deletedAt: null });
+        if (activeRoomsRef > 0) {
+            throw new AppError('Cannot delete room category because it has active rooms assigned to it', 409);
         }
         const deletedRoomType = await roomTypeRepository.deleteById(roomTypeId);
         await auditService.createLog({

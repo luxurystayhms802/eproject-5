@@ -8,9 +8,9 @@ export const StatsCard = ({ title, value, description, icon: Icon }) => (<Card c
               {title}
             </span>
           </div>
-          <div className="w-full space-y-1.5 break-words">
-            <p className="text-[34px] leading-none text-[var(--primary)] [font-family:var(--font-display)]">{value}</p>
-            <p className="w-full text-sm leading-6 text-[var(--muted-foreground)]" title={description}>{description}</p>
+          <div className="min-w-0 w-full space-y-1.5">
+            <p className="truncate text-[34px] leading-none text-[var(--primary)] [font-family:var(--font-display)]">{value}</p>
+            <p className="truncate w-full text-sm leading-6 text-[var(--muted-foreground)]" title={description}>{description}</p>
           </div>
         </div>
         {Icon ? (

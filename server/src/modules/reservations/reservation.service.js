@@ -130,9 +130,11 @@ const buildGuestSnapshot = async (guestUserId) => {
 };
 const calculateReservationAmounts = async (roomRate, nights, discountAmount) => {
     const subtotal = Number((roomRate * nights).toFixed(2));
+    const safeDiscount = Number(discountAmount ?? 0);
+    const taxableAmount = Math.max(0, subtotal - safeDiscount);
     const taxPercentage = await getTaxPercentage();
-    const taxAmount = Number(((subtotal * taxPercentage) / 100).toFixed(2));
-    const totalAmount = Number((subtotal - discountAmount + taxAmount).toFixed(2));
+    const taxAmount = Number(((taxableAmount * taxPercentage) / 100).toFixed(2));
+    const totalAmount = Number((taxableAmount + taxAmount).toFixed(2));
     return {
         subtotal,
         taxAmount,
@@ -284,6 +286,7 @@ export const reservationService = {
                 roomTypeId: roomType._id,
                 deletedAt: null,
                 isActive: true,
+                status: { $nin: ['maintenance', 'out_of_service'] },
                 capacityAdults: { $gte: payload.adults },
                 capacityChildren: { $gte: payload.children },
             });
@@ -385,26 +388,35 @@ export const reservationService = {
         if (nights < 1) {
             throw new AppError('Check-out date must be after check-in date', 400);
         }
-        const roomType = await RoomTypeModel.findOne({
+        const isSameRoomType = nextRoomTypeId === getEntityId(existingReservation.roomTypeId);
+        const roomTypeQuery = {
             _id: nextRoomTypeId,
             deletedAt: null,
-            isActive: true,
             maxAdults: { $gte: nextAdults },
             maxChildren: { $gte: nextChildren },
-        });
+        };
+        if (!isSameRoomType) {
+            roomTypeQuery.isActive = true;
+        }
+        const roomType = await RoomTypeModel.findOne(roomTypeQuery);
         if (!roomType) {
             throw new AppError('Selected room type is invalid for this reservation', 404);
         }
         let roomRate = Number(existingReservation.roomRate);
         if (nextRoomId) {
-            const room = await RoomModel.findOne({
+            const isSameRoom = nextRoomId === getEntityId(existingReservation.roomId);
+            const roomQuery = {
                 _id: nextRoomId,
                 roomTypeId: roomType._id,
                 deletedAt: null,
-                isActive: true,
                 capacityAdults: { $gte: nextAdults },
                 capacityChildren: { $gte: nextChildren },
-            });
+            };
+            if (!isSameRoom) {
+                roomQuery.isActive = true;
+                roomQuery.status = { $nin: ['maintenance', 'out_of_service'] };
+            }
+            const room = await RoomModel.findOne(roomQuery);
             if (!room) {
                 throw new AppError('Selected room is invalid for this reservation', 400);
             }
@@ -608,6 +620,7 @@ export const reservationService = {
             roomTypeId: getEntityId(existingReservation.roomTypeId),
             deletedAt: null,
             isActive: true,
+            status: { $nin: ['maintenance', 'out_of_service'] },
             capacityAdults: { $gte: Number(existingReservation.adults) },
             capacityChildren: { $gte: Number(existingReservation.children) },
         });
@@ -695,6 +708,7 @@ export const reservationService = {
             link: '/admin/reservations',
             priority: 'low',
         });
+        runReservationSideEffect(billingService.generateInvoice(reservationId, context), 'Invoice generation on cancel', reservationId);
         return serializeReservation(updatedReservation.toObject());
     },
     async markAsMissedArrival(reservationId, context) {
@@ -745,6 +759,7 @@ export const reservationService = {
             });
         }
 
+        runReservationSideEffect(billingService.generateInvoice(reservationId, context), 'Invoice voiding on missed arrival', reservationId);
         return serializeReservation(updatedReservation.toObject());
     },
     async checkInReservation(reservationId, payload, context) {
@@ -772,6 +787,11 @@ export const reservationService = {
         }
         if (!reservation || !reservation.roomId) {
             throw new AppError('Room assignment could not be completed for check-in', 500);
+        }
+        
+        const roomState = await RoomModel.findById(roomId).lean();
+        if (roomState && ['maintenance', 'out_of_service'].includes(roomState.status)) {
+             throw new AppError(`Cannot check-in. The assigned room is currently marked as ${roomState.status}.`, 409);
         }
         await RoomModel.findByIdAndUpdate(roomId, {
             status: 'occupied',

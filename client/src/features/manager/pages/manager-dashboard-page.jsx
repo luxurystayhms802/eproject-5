@@ -123,7 +123,7 @@ export const ManagerDashboardPage = () => {
         <div className="flex flex-wrap gap-3">
           {hasPermission('/manager/occupancy', permissions) && (
             <Link to="/manager/occupancy">
-              <Button variant="secondary">Occupancy overview</Button>
+              <Button variant="outline">Occupancy overview</Button>
             </Link>
           )}
           {hasPermission('/manager/executive-summary', permissions) && (

@@ -86,13 +86,13 @@ export const ReceptionDashboardPage = () => {
         <div className="flex flex-wrap gap-3">
           {quickLinks.slice(0, 4).map((link) => (
             <Link key={link.href} to={link.href}>
-              <Button variant={link.label === 'Arrivals' ? 'secondary' : 'outline'}>{link.label}</Button>
+              <Button variant="outline">{link.label}</Button>
             </Link>
           ))}
         </div>
       </PageHeader>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatsCard title="Arrivals" value={String(arrivals.length)} description="Due today" icon={Users} />
         <StatsCard title="Departures" value={String(departures.length)} description="Expected today" icon={DoorClosed} />
         <StatsCard title="Pending room" value={String(pendingRoomCount)} description="Awaiting allocation" icon={Hotel} />

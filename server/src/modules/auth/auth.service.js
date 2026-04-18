@@ -224,6 +224,7 @@ export const authService = {
         }
         const passwordHash = await bcrypt.hash(payload.newPassword, 12);
         const updatedUser = await authRepository.updateUserById(user._id.toString(), { passwordHash });
+        await authRepository.revokeAllSessionsForUser(user._id.toString());
         const permissions = await roleService.getPermissionsForRole(updatedUser.role);
         const employmentStatus = await getEmploymentStatus(updatedUser._id);
         const accessToken = signAccessToken({ sub: updatedUser._id.toString(), role: updatedUser.role, permissions, employmentStatus });

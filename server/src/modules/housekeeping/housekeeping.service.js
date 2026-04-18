@@ -164,7 +164,15 @@ export const housekeepingService = {
             startedAt: new Date(),
         });
         if (existingTask.roomId) {
-            await RoomModel.findByIdAndUpdate(existingTask.roomId, { housekeepingStatus: 'in_progress' });
+            const roomIdStr = getEntityId(existingTask.roomId);
+            const room = await RoomModel.findById(roomIdStr).lean();
+            if (room) {
+                const isAvailable = room.status === 'available';
+                await RoomModel.findByIdAndUpdate(roomIdStr, {
+                    housekeepingStatus: 'in_progress',
+                    ...(isAvailable ? { status: 'cleaning' } : {}),
+                });
+            }
         }
         await auditService.createLog({
             userId: context.actorUserId,
@@ -193,16 +201,24 @@ export const housekeepingService = {
         });
         if (existingTask.roomId) {
             const roomId = getEntityId(existingTask.roomId);
-            const blockingMaintenance = await MaintenanceRequestModel.countDocuments({
-                roomId,
-                deletedAt: null,
-                status: { $in: ['open', 'assigned', 'in_progress'] },
-            });
-            await RoomModel.findByIdAndUpdate(existingTask.roomId, {
-                status: blockingMaintenance > 0 ? 'maintenance' : 'available',
-                housekeepingStatus: 'clean',
-                lastCleanedAt: new Date(),
-            });
+            const room = await RoomModel.findById(roomId).lean();
+            if (room) {
+                const blockingMaintenance = await MaintenanceRequestModel.countDocuments({
+                    roomId,
+                    deletedAt: null,
+                    priority: { $ne: 'low' },
+                    status: { $in: ['open', 'assigned', 'in_progress'] },
+                });
+                let nextStatus = room.status;
+                if (['cleaning', 'maintenance', 'available'].includes(room.status)) {
+                     nextStatus = blockingMaintenance > 0 ? 'maintenance' : 'available';
+                }
+                await RoomModel.findByIdAndUpdate(roomId, {
+                    status: nextStatus,
+                    housekeepingStatus: 'clean',
+                    lastCleanedAt: new Date(),
+                });
+            }
         }
         await auditService.createLog({
             userId: context.actorUserId,

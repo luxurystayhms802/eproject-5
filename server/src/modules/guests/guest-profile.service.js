@@ -1,3 +1,4 @@
+import { GuestProfileModel } from './guest-profile.model.js';
 import { ReservationModel } from '../reservations/reservation.model.js';
 import { userService } from '../users/user.service.js';
 import { UserModel } from '../users/user.model.js';
@@ -65,6 +66,16 @@ export const guestService = {
         if (query.status) {
             userFilter.status = query.status;
         }
+        if (query.nationality) {
+            const profilesWithNat = await GuestProfileModel.find({ nationality: query.nationality }).select('userId').lean();
+            const matchingIds = profilesWithNat.map((p) => String(p.userId));
+            if (userFilter._id) {
+                const currentId = String(userFilter._id);
+                userFilter._id = matchingIds.includes(currentId) ? currentId : null;
+            } else {
+                userFilter._id = { $in: matchingIds };
+            }
+        }
         const [users, total] = await Promise.all([
             UserModel.find(userFilter).sort({ createdAt: -1 }).skip(pagination.skip).limit(pagination.limit).lean(),
             UserModel.countDocuments(userFilter),
@@ -75,12 +86,10 @@ export const guestService = {
             getReservationCounts(userIds),
         ]);
         const profileMap = new Map(profiles.map((profile) => [String(profile.userId), profile]));
-        const filteredItems = users
-            .map((user) => buildGuestRecord(user, profileMap.get(String(user._id)), reservationCounts.get(String(user._id)) ?? 0))
-            .filter((item) => !query.nationality || item.nationality === query.nationality);
+        const filteredItems = users.map((user) => buildGuestRecord(user, profileMap.get(String(user._id)), reservationCounts.get(String(user._id)) ?? 0));
         return {
             items: filteredItems,
-            meta: buildPaginationMeta(pagination, actor.role === 'guest' ? filteredItems.length : total),
+            meta: buildPaginationMeta(pagination, total),
         };
     },
     async getGuestById(guestId, actor) {

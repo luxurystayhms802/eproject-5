@@ -92,16 +92,17 @@ const calculateInvoiceDraft = async (reservationId) => {
     ]);
     const chargesSubtotal = charges.reduce((sum, charge) => sum + Number(charge.amount), 0);
     const subtotal = Number((Number(reservation.subtotal) + chargesSubtotal).toFixed(2));
-    const taxPercentage = (settings?.taxRules ?? []).reduce((sum, taxRule) => sum + Number(taxRule.percentage ?? 0), 0);
-    const taxAmount = Number(((subtotal * taxPercentage) / 100).toFixed(2));
     const discountAmount = Number(reservation.discountAmount ?? 0);
-    const totalAmount = Number((subtotal - discountAmount + taxAmount).toFixed(2));
+    const taxableAmount = Math.max(0, subtotal - discountAmount);
+    const taxPercentage = (settings?.taxRules ?? []).reduce((sum, taxRule) => sum + Number(taxRule.percentage ?? 0), 0);
+    const taxAmount = Number(((taxableAmount * taxPercentage) / 100).toFixed(2));
+    const totalAmount = Number((taxableAmount + taxAmount).toFixed(2));
     const payments = existingInvoice ? await billingRepository.listAllPaymentsForInvoice(existingInvoice._id.toString()) : [];
     const paidAmount = Number(payments
         .reduce((sum, payment) => sum + getEffectivePaidAmount(Number(payment.amount), payment.status), 0)
         .toFixed(2));
     const balanceAmount = Number(Math.max(0, totalAmount - paidAmount).toFixed(2));
-    const status = getInvoiceStatusFromAmounts(balanceAmount, paidAmount, totalAmount);
+    const status = getInvoiceStatusFromAmounts(balanceAmount, paidAmount, totalAmount, String(reservation.status));
     return {
         reservation,
         charges,
@@ -177,6 +178,10 @@ export const billingService = {
         if (!['confirmed', 'checked_in'].includes(reservation.status)) {
             throw new AppError('Charges can only be added to confirmed or checked-in reservations', 409);
         }
+        const existingInvoice = await billingRepository.findInvoiceByReservationId(payload.reservationId);
+        if (existingInvoice && ['paid', 'void'].includes(existingInvoice.status)) {
+            throw new AppError(`Cannot add charges to a ${existingInvoice.status} invoice`, 409);
+        }
         const amount = Number((payload.unitPrice * payload.quantity).toFixed(2));
         const charge = await billingRepository.createCharge({
             reservationId: payload.reservationId,
@@ -206,6 +211,10 @@ export const billingService = {
         if (!existingCharge) {
             throw new AppError('Folio charge not found', 404);
         }
+        const existingInvoice = await billingRepository.findInvoiceByReservationId(getEntityId(existingCharge.reservationId));
+        if (existingInvoice && ['paid', 'void'].includes(existingInvoice.status)) {
+            throw new AppError(`Cannot modify charges on a ${existingInvoice.status} invoice`, 409);
+        }
         const nextUnitPrice = payload.unitPrice ?? Number(existingCharge.unitPrice);
         const nextQuantity = payload.quantity ?? Number(existingCharge.quantity);
         const updatedCharge = await billingRepository.updateChargeById(chargeId, {
@@ -232,6 +241,10 @@ export const billingService = {
         const existingCharge = await billingRepository.findChargeById(chargeId);
         if (!existingCharge) {
             throw new AppError('Folio charge not found', 404);
+        }
+        const existingInvoice = await billingRepository.findInvoiceByReservationId(getEntityId(existingCharge.reservationId));
+        if (existingInvoice && ['paid', 'void'].includes(existingInvoice.status)) {
+            throw new AppError(`Cannot delete charges from a ${existingInvoice.status} invoice`, 409);
         }
         const deletedCharge = await billingRepository.updateChargeById(chargeId, { deletedAt: new Date() });
         await auditService.createLog({
@@ -368,8 +381,16 @@ export const billingService = {
             throw new AppError('Invoice not found', 404);
         }
         const refreshedInvoice = await this.generateInvoice(getEntityId(invoice.reservationId), context);
-        if (payload.status === 'success' && payload.amount > Number(refreshedInvoice.balanceAmount)) {
-            throw new AppError('Payment amount cannot exceed the remaining balance', 409);
+        if (['void', 'draft'].includes(refreshedInvoice.status)) {
+            throw new AppError('Payments cannot be applied to void or draft invoices', 409);
+        }
+        if (payload.status === 'success') {
+            if (payload.amount > Number(refreshedInvoice.balanceAmount)) {
+                throw new AppError('Payment amount cannot exceed the remaining balance', 409);
+            }
+            if (payload.amount < 0 && Math.abs(payload.amount) > Number(refreshedInvoice.paidAmount)) {
+                throw new AppError('Refund amount cannot exceed the total paid amount', 409);
+            }
         }
         const payment = await billingRepository.createPayment({
             invoiceId: payload.invoiceId,

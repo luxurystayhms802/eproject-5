@@ -65,7 +65,7 @@ export const HousekeepingDashboardPage = () => {
       >
         <div className="flex flex-wrap gap-3">
           <Link to="/housekeeping/tasks">
-            <Button variant="secondary">Assigned tasks</Button>
+            <Button variant="outline">Assigned tasks</Button>
           </Link>
           <Link to="/housekeeping/board">
             <Button variant="outline">Room board</Button>
@@ -76,7 +76,7 @@ export const HousekeepingDashboardPage = () => {
         </div>
       </PageHeader>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatsCard title="Visible tasks" value={String(tasks.length)} description="Assigned or shared tasks in view" icon={ClipboardList} />
         <StatsCard title="Claimable" value={String(claimableTasks)} description="Unowned tasks ready to pick up" icon={Users2} />
         <StatsCard title="Dirty rooms" value={String(board?.counts?.dirty ?? 0)} description="Rooms waiting for cleaning" icon={Sparkles} />
@@ -118,7 +118,7 @@ export const HousekeepingDashboardPage = () => {
             </Link>
           </div>
 
-          <div className="grid gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             {readinessRows.map((row) => (
               <div key={row.key} className="rounded-[22px] border border-[var(--border)] bg-white/78 p-4">
                 <div className="flex items-start justify-between gap-3">
@@ -185,7 +185,7 @@ export const HousekeepingDashboardPage = () => {
             <h2 className="text-xl font-semibold text-[var(--primary)]">Release watch</h2>
             <p className="text-sm text-[var(--muted-foreground)]">Rooms closest to returning into saleable inventory.</p>
           </div>
-          <div className="grid gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-[22px] border border-[var(--border)] bg-white/78 p-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--muted-foreground)]">Inspected rooms</p>
               <p className="mt-3 text-3xl text-[var(--primary)] [font-family:var(--font-display)]">{board?.counts?.inspected ?? 0}</p>

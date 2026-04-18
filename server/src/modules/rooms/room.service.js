@@ -1,6 +1,8 @@
 import { ReservationModel } from '../reservations/reservation.model.js';
 import { SettingModel } from '../settings/setting.model.js';
 import { RoomTypeModel } from '../room-types/room-type.model.js';
+import { HousekeepingTaskModel } from '../housekeeping/housekeeping-task.model.js';
+import { MaintenanceRequestModel } from '../maintenance/maintenance-request.model.js';
 import { auditService } from '../audit/audit.service.js';
 import { AppError } from '../../shared/utils/app-error.js';
 import { buildPaginationMeta, getPagination } from '../../shared/utils/pagination.js';
@@ -24,9 +26,18 @@ const normalizeHousekeepingStatus = (value) => {
 };
 const normalizeRoomPayload = (payload = {}) => ({
     ...payload,
-    status: payload.status !== undefined ? normalizeRoomStatus(payload.status) : payload.status,
-    housekeepingStatus: payload.housekeepingStatus !== undefined ? normalizeHousekeepingStatus(payload.housekeepingStatus) : payload.housekeepingStatus,
+    ...(payload.status !== undefined ? { status: normalizeRoomStatus(payload.status) } : {}),
+    ...(payload.housekeepingStatus !== undefined ? { housekeepingStatus: normalizeHousekeepingStatus(payload.housekeepingStatus) } : {}),
 });
+const enforceConsistency = (currentPayload, existingRoom = {}) => {
+    const finalStatus = currentPayload.status ?? existingRoom.status ?? 'available';
+    const finalHkStatus = currentPayload.housekeepingStatus ?? existingRoom.housekeepingStatus ?? 'clean';
+    
+    if (['dirty', 'in_progress'].includes(finalHkStatus) && finalStatus === 'available') {
+         currentPayload.status = 'cleaning';
+    }
+    return currentPayload;
+};
 const resolveRoomEffectivePrice = (room, roomTypeOverride = null) => {
     const roomType = roomTypeOverride ?? room.roomTypeId;
     const customPrice = Number(room.customPrice);
@@ -129,7 +140,8 @@ export const roomService = {
         return serializeRoom(room);
     },
     async createRoom(payload, context) {
-        const normalizedPayload = normalizeRoomPayload(payload);
+        let normalizedPayload = normalizeRoomPayload(payload);
+        normalizedPayload = enforceConsistency(normalizedPayload);
         await ensureRoomNumberAvailable(String(payload.roomNumber));
         await ensureRoomTypeExists(String(payload.roomTypeId));
         const room = await roomRepository.create({
@@ -156,7 +168,8 @@ export const roomService = {
         if (!existingRoom) {
             throw new AppError('Room not found', 404);
         }
-        const normalizedPayload = normalizeRoomPayload(payload);
+        let normalizedPayload = normalizeRoomPayload(payload);
+        normalizedPayload = enforceConsistency(normalizedPayload, existingRoom);
         await ensureRoomNumberAvailable(normalizedPayload.roomNumber, roomId);
         await ensureRoomTypeExists(normalizedPayload.roomTypeId);
         const updatedRoom = await roomRepository.updateById(roomId, normalizedPayload);
@@ -191,6 +204,25 @@ export const roomService = {
         if (activeReservationCount > 0) {
             throw new AppError('Cannot delete a room with active reservations', 409);
         }
+
+        const activeHousekeepingCount = await HousekeepingTaskModel.countDocuments({
+            roomId,
+            deletedAt: null,
+            status: { $nin: ['completed', 'cancelled'] },
+        });
+        if (activeHousekeepingCount > 0) {
+            throw new AppError('Cannot delete a room that has active housekeeping tasks', 409);
+        }
+
+        const activeMaintenanceCount = await MaintenanceRequestModel.countDocuments({
+            roomId,
+            deletedAt: null,
+            status: { $nin: ['resolved', 'closed'] },
+        });
+        if (activeMaintenanceCount > 0) {
+            throw new AppError('Cannot delete a room that has open maintenance requests', 409);
+        }
+
         const deletedRoom = await roomRepository.deleteById(roomId);
         await auditService.createLog({
             userId: context.actorUserId,

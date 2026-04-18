@@ -24,7 +24,13 @@ export const HousekeepingInspectionsPage = () => {
   const board = boardQuery.data;
   const inspectedRooms = board?.groups?.inspected ?? [];
   const cleanRooms = board?.groups?.clean ?? [];
-  const releaseCandidates = [...inspectedRooms, ...cleanRooms];
+  const releaseCandidates = useMemo(() => {
+    return [...inspectedRooms, ...cleanRooms].sort((a, b) => {
+      const numA = parseInt(a.roomNumber.replace(/\\D/g, ''), 10) || 0;
+      const numB = parseInt(b.roomNumber.replace(/\\D/g, ''), 10) || 0;
+      return numA - numB;
+    });
+  }, [inspectedRooms, cleanRooms]);
 
   const reportRows = useMemo(
     () =>

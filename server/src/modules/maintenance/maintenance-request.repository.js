@@ -21,6 +21,7 @@ export const maintenanceRequestRepository = {
     countBlockingByRoomId: (roomId, excludeRequestId) => MaintenanceRequestModel.countDocuments({
         roomId,
         deletedAt: null,
+        priority: { $ne: 'low' },
         status: { $in: ['open', 'assigned', 'in_progress'] },
         ...(excludeRequestId ? { _id: { $ne: excludeRequestId } } : {}),
     }),

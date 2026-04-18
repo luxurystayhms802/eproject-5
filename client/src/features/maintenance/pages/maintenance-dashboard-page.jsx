@@ -70,7 +70,7 @@ export const MaintenanceDashboardPage = () => {
       >
         <div className="flex flex-wrap gap-3">
           <Link to="/maintenance/requests">
-            <Button variant="secondary">Open requests</Button>
+            <Button variant="outline">Open requests</Button>
           </Link>
           <Link to="/maintenance/history">
             <Button variant="outline">Resolution history</Button>
@@ -81,7 +81,7 @@ export const MaintenanceDashboardPage = () => {
         </div>
       </PageHeader>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatsCard title="Open requests" value={String(openRequests.length)} description="Issues needing active attention" icon={Wrench} />
         <StatsCard title="Urgent issues" value={String(urgentOpenRequests.length)} description="High-severity operational blockers" icon={AlertTriangle} />
         <StatsCard title="Assigned work" value={String(assignedRequests.length)} description="Requests already owned by staff" icon={TimerReset} />

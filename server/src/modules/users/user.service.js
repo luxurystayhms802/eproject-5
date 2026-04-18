@@ -133,8 +133,12 @@ export const userService = {
             updatePayload.avatarUrl = payload.avatarUrl;
         if (payload.emailVerified !== undefined)
             updatePayload.emailVerified = payload.emailVerified;
-        if (payload.status !== undefined)
+        if (payload.status !== undefined) {
+            if (payload.status === 'inactive' && userId === context.actorUserId) {
+                throw new AppError('You cannot deactivate your own account', 400);
+            }
             updatePayload.status = payload.status;
+        }
         if (payload.password) {
             const isSameAsOld = await bcrypt.compare(payload.password, existingUser.passwordHash);
             if (isSameAsOld) {
@@ -156,6 +160,9 @@ export const userService = {
             await authRepository.revokeAllSessionsForUser(userId);
         }
         if (payload.role !== undefined && context.allowRoleChange) {
+            if (userId === context.actorUserId) {
+                throw new AppError('You cannot change your own role', 400);
+            }
             updatePayload.role = payload.role;
         }
         const updatedUser = await userRepository.updateById(userId, updatePayload);
@@ -175,6 +182,9 @@ export const userService = {
         return serializeUser(updatedUser);
     },
     async deleteUser(userId, context) {
+        if (userId === context.actorUserId) {
+            throw new AppError('You cannot delete your own account', 400);
+        }
         const existingUser = await userRepository.findById(userId);
         if (!existingUser) {
             throw new AppError('User not found', 404);

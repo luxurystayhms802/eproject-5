@@ -47,14 +47,22 @@ const serializeRequest = (requestItem) => {
         updatedAt: requestItem.updatedAt ?? null,
     };
 };
+const ensureRoomMaintenanceStatus = async (roomId) => {
+    const room = await RoomModel.findById(roomId);
+    if (!room || ['occupied', 'reserved', 'out_of_service'].includes(room.status)) return;
+    await RoomModel.findByIdAndUpdate(roomId, { status: 'maintenance' });
+};
 const syncRoomAfterMaintenance = async (roomId, excludeRequestId) => {
     const room = await RoomModel.findById(roomId);
     if (!room) {
         return;
     }
+    if (['occupied', 'reserved', 'out_of_service'].includes(room.status)) {
+        return;
+    }
     const blockingCount = await maintenanceRequestRepository.countBlockingByRoomId(roomId, excludeRequestId);
     if (blockingCount > 0) {
-        await RoomModel.findByIdAndUpdate(roomId, { status: 'maintenance' });
+        await ensureRoomMaintenanceStatus(roomId);
         return;
     }
     await RoomModel.findByIdAndUpdate(roomId, {
@@ -117,8 +125,8 @@ export const maintenanceRequestService = {
             reportedAt: new Date(),
         });
         const created = await maintenanceRequestRepository.findById(requestItem._id.toString());
-        if (payload.roomId && payload.priority === 'urgent') {
-            await RoomModel.findByIdAndUpdate(payload.roomId, { status: 'maintenance' });
+        if (payload.roomId && payload.priority !== 'low') {
+            await ensureRoomMaintenanceStatus(payload.roomId);
         }
         await notificationsService.createNotification({
             type: 'maintenance',
@@ -158,10 +166,13 @@ export const maintenanceRequestService = {
         const roomRef = payload.roomId ??
             getEntityId(existing.roomId);
         if (roomRef) {
-            if ((payload.priority ?? existing.priority) === 'urgent' && ['open', 'assigned', 'in_progress'].includes(String(payload.status ?? existing.status))) {
-                await RoomModel.findByIdAndUpdate(roomRef, { status: 'maintenance' });
+            const currentPriority = payload.priority ?? existing.priority;
+            const currentStatus = String(payload.status ?? existing.status);
+
+            if (currentPriority !== 'low' && ['open', 'assigned', 'in_progress'].includes(currentStatus)) {
+                await ensureRoomMaintenanceStatus(roomRef);
             }
-            else if (['resolved', 'closed'].includes(String(payload.status ?? existing.status))) {
+            else {
                 await syncRoomAfterMaintenance(roomRef, requestId);
             }
         }
