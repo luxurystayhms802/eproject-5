@@ -405,6 +405,9 @@ export const reservationService = {
         let roomRate = Number(existingReservation.roomRate);
         if (nextRoomId) {
             const isSameRoom = nextRoomId === getEntityId(existingReservation.roomId);
+            if (!isSameRoom && String(existingReservation.status) === 'checked_in') {
+                throw new AppError('Cannot reassign room for a checked-in reservation. A proper room-move workflow is required.', 409);
+            }
             const roomQuery = {
                 _id: nextRoomId,
                 roomTypeId: roomType._id,
@@ -517,6 +520,11 @@ export const reservationService = {
         const nights = calculateNights(checkInDate, nextCheckOutDate);
         if (nights < 1) {
             throw new AppError('Amended check-out date must be after check-in date', 400);
+        }
+        
+        const todayOpen = getStartOfDay(new Date());
+        if (nextCheckOutDate < todayOpen) {
+            throw new AppError('Amended check-out date cannot be in the past', 400);
         }
 
         if (nextCheckOutDate > existingReservation.checkOutDate) {
@@ -793,9 +801,11 @@ export const reservationService = {
         if (roomState && ['maintenance', 'out_of_service'].includes(roomState.status)) {
              throw new AppError(`Cannot check-in. The assigned room is currently marked as ${roomState.status}.`, 409);
         }
+        if (roomState && ['dirty', 'in_progress'].includes(roomState.housekeepingStatus)) {
+             throw new AppError(`Cannot check-in. The assigned room is currently ${roomState.housekeepingStatus.replace('_', ' ')} and is not ready for guests.`, 409);
+        }
         await RoomModel.findByIdAndUpdate(roomId, {
             status: 'occupied',
-            housekeepingStatus: 'clean',
         });
         const updatedReservation = await reservationRepository.updateById(reservationId, {
             status: 'checked_in',
@@ -884,6 +894,9 @@ export const reservationService = {
             actorUserId: context.actorUserId,
             request: context.request,
         });
+        if (Number(finalizedInvoice.balanceAmount) > 0) {
+            throw new AppError(`Cannot complete check-out. There is an outstanding balance of ${finalizedInvoice.balanceAmount}. Please collect full payment.`, 409);
+        }
         await RoomModel.findByIdAndUpdate(roomId, {
             status: 'cleaning',
             housekeepingStatus: 'dirty',

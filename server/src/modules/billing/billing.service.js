@@ -392,6 +392,12 @@ export const billingService = {
                 throw new AppError('Refund amount cannot exceed the total paid amount', 409);
             }
         }
+        if (payload.status === 'refunded') {
+            const requestedRefund = Math.abs(payload.amount);
+            if (requestedRefund > Number(refreshedInvoice.paidAmount)) {
+                throw new AppError('Refund amount cannot exceed the total paid amount', 409);
+            }
+        }
         const payment = await billingRepository.createPayment({
             invoiceId: payload.invoiceId,
             reservationId: getEntityId(invoice.reservationId),

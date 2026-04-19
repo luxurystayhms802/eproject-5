@@ -1,7 +1,7 @@
 import { useAuthStore } from '@/app/store/auth-store';
 import { PageHeader } from '@/components/shared/page-header';
 import { getDisplayRoleLabel } from '@/features/admin/config';
-import { adminNavSections, hasPermission } from '@/components/layout/sidebar';
+import { customRoleNavSections, hasPermission } from '@/components/layout/sidebar';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
@@ -10,10 +10,10 @@ export const CustomRoleDashboardPage = () => {
   const displayRole = getDisplayRoleLabel(user?.role || 'staff').replace('_', ' ');
 
   // Flatten and filter the available modules based on the user's specific permissions
-  const authorizedModules = adminNavSections
+  const authorizedModules = customRoleNavSections
     .flatMap((section) => section.items)
     .filter((item) => item.href !== '/admin/dashboard' && hasPermission(item.href, user?.permissions))
-    .map(item => ({ ...item, href: item.href.replace(/^\/admin\//, '/staff/') }));
+    .map(item => ({ ...item, href: item.href.replace(/^\/(?:admin|reception|housekeeping|maintenance)\//, '/staff/') }));
 
   return (
     <div className="space-y-8 pb-10">

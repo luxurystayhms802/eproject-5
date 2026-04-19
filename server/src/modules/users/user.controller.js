@@ -19,6 +19,7 @@ export const userController = {
     create: async (request, response) => {
         const user = await userService.createUser(request.body, {
             actorUserId: request.authUser?.id,
+            actorRole: request.authUser?.role,
             request,
         });
         return sendSuccess(response, {
@@ -42,6 +43,7 @@ export const userController = {
     remove: async (request, response) => {
         const result = await userService.deleteUser(String(request.params.userId), {
             actorUserId: request.authUser?.id,
+            actorRole: request.authUser?.role,
             request,
         });
         return sendSuccess(response, {

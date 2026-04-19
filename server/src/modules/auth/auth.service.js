@@ -57,6 +57,9 @@ const getEmploymentStatus = async (userId) => {
 
 export const authService = {
     async registerGuest(payload) {
+        if (!payload.password || typeof payload.password !== 'string' || payload.password.trim() === '') {
+            throw new AppError('Password is required', 400);
+        }
         const existingEmail = await authRepository.findUserByEmail(payload.email);
         if (existingEmail) {
             throw new AppError('Email is already registered', 409);
@@ -132,6 +135,9 @@ export const authService = {
         const activeUser = user ?? rawUser;
         if (!activeUser || activeUser.deletedAt) {
             throw new AppError('User not found', 404);
+        }
+        if ((activeUser.status ?? 'active') !== 'active') {
+            throw new AppError('Account is not active', 403);
         }
         const permissions = await roleService.getPermissionsForRole(activeUser.role);
         const employmentStatus = await getEmploymentStatus(activeUser._id);

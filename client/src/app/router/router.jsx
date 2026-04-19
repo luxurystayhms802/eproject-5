@@ -126,6 +126,25 @@ const adminWorkspaceNodes = [
   { path: 'account-settings', element: renderLazy(AdminAccountSettingsPage, 'Loading account settings') },
 ];
 
+const customOperationalNodes = [
+  { path: 'arrivals', element: renderLazy(ArrivalsBoardPage, 'Loading arrivals board') },
+  { path: 'departures', element: renderLazy(DeparturesBoardPage, 'Loading departures board') },
+  { path: 'reception-desk', element: renderLazy(ReservationDeskPage, 'Loading reservation desk') },
+  { path: 'walk-ins', element: renderLazy(WalkInBookingPage, 'Loading walk-in booking') },
+  { path: 'check-in', element: renderLazy(CheckInDeskPage, 'Loading check-in desk') },
+  { path: 'check-out', element: renderLazy(CheckOutDeskPage, 'Loading check-out desk') },
+  { path: 'services', element: renderLazy(GuestServicesPage, 'Loading guest services') },
+  { path: 'hk-tasks', element: renderLazy(AssignedTasksPage, 'Loading assigned tasks') },
+  { path: 'hk-board', element: renderLazy(RoomCleaningBoardPage, 'Loading cleaning board') },
+  { path: 'hk-inspections', element: renderLazy(HousekeepingInspectionsPage, 'Loading inspections') },
+  { path: 'hk-shift', element: renderLazy(HousekeepingShiftReportPage, 'Loading shift report') },
+  { path: 'mt-requests', element: renderLazy(MaintenanceRequestsPage, 'Loading maintenance requests') },
+  { path: 'mt-history', element: renderLazy(MaintenanceHistoryPage, 'Loading maintenance history') },
+  { path: 'mt-impact', element: renderLazy(MaintenanceRoomImpactPage, 'Loading room impact') },
+  { path: 'mt-shift', element: renderLazy(MaintenanceShiftReportPage, 'Loading shift report') },
+];
+
+
 const router = createBrowserRouter([
   {
     element: <PublicLayout />,
@@ -184,6 +203,7 @@ const router = createBrowserRouter([
           { path: 'dashboard', element: renderLazy(CustomRoleDashboardPage, 'Loading your workspace') },
           { path: 'profile', element: renderLazy(StaffProfilePage, 'Loading profile') },
           ...adminWorkspaceNodes,
+          ...customOperationalNodes,
           { index: true, element: <Navigate to="dashboard" replace /> },
         ],
       },

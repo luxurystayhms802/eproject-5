@@ -75,6 +75,14 @@ export const userService = {
         return serializeUser(user);
     },
     async createUser(payload, context) {
+        if (!payload.password || typeof payload.password !== 'string' || payload.password.trim() === '') {
+            throw new AppError('Password is required', 400);
+        }
+        
+        if (payload.role === 'admin' && context.actorRole !== 'admin') {
+            throw new AppError('Only active administrators can provision new admin accounts.', 403);
+        }
+
         await ensureEmailAndPhoneAreAvailable(payload);
         const passwordHash = await bcrypt.hash(payload.password, 12);
         const user = await userRepository.create({
@@ -109,6 +117,12 @@ export const userService = {
         if (!existingUser) {
             throw new AppError('User not found', 404);
         }
+
+        // Hierarchical Guard: Prevent standard users from modifying super admin properties/credentials
+        if (existingUser.role === 'admin' && context.actorRole !== 'admin') {
+            throw new AppError('You lack sufficient clearance to modify an administrator account.', 403);
+        }
+
         await ensureEmailAndPhoneAreAvailable(payload, existingUser._id.toString());
         const updatePayload = {
             updatedBy: context.actorUserId ?? null,
@@ -188,6 +202,27 @@ export const userService = {
         const existingUser = await userRepository.findById(userId);
         if (!existingUser) {
             throw new AppError('User not found', 404);
+        }
+
+        // Hierarchical Guard: Prevent standard users from deleting an admin account
+        if (existingUser.role === 'admin' && context.actorRole !== 'admin') {
+            throw new AppError('Administrator accounts cannot be deleted by non-admin staff.', 403);
+        }
+
+        if (existingUser.role === 'guest') {
+            const importReservation = await import('../reservations/reservation.model.js');
+            const hasReservations = await importReservation.ReservationModel.exists({ guestUserId: userId });
+            if (hasReservations) {
+                throw new AppError('Cannot delete a guest who has reservation history. Please set their status to inactive instead.', 409);
+            }
+        } else {
+            const importHousekeeping = await import('../housekeeping/housekeeping.model.js');
+            const importMaintenance = await import('../maintenance/maintenance-request.model.js');
+            const hasTask = await importHousekeeping.HousekeepingTaskModel.exists({ assignedToUserId: userId, status: { $nin: ['completed', 'cancelled'] } });
+            const hasReq = await importMaintenance.MaintenanceRequestModel.exists({ assignedToUserId: userId, status: { $nin: ['closed', 'resolved'] } });
+            if (hasTask || hasReq) {
+                throw new AppError('Cannot delete staff member with active assigned tasks. Please reassign their work or set status to inactive.', 409);
+            }
         }
 
         // Perform hard delete for the user

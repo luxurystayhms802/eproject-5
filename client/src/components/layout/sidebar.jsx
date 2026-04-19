@@ -44,6 +44,9 @@ export const ROUTE_PERMISSIONS = {
   '/admin/notifications': 'notifications.read',
   '/admin/audit-logs': 'audit.read',
   '/admin/settings': 'settings.read',
+  '/admin/pricing-rules': 'settings.read',
+  '/admin/policies': 'settings.read',
+  '/admin/account-settings': 'settings.read',
   '/admin/faqs': 'faqs.read',
   '/reception/reservations': 'reservations.read',
   '/reception/walk-ins': 'reservations.create',
@@ -226,6 +229,56 @@ const NAV_ITEMS = {
   ],
 };
 
+export const customRoleNavSections = [
+  createSection('Core', [
+    { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+    { label: 'Staff', href: '/admin/staff', icon: ShieldCheck },
+    { label: 'Guests', href: '/admin/guests', icon: Users2 },
+    { label: 'Roles', href: '/admin/roles', icon: ShieldCheck },
+  ]),
+  createSection('Front Desk Operations', [
+    { label: 'Arrivals Board', href: '/reception/arrivals', icon: Users2 },
+    { label: 'Departures Board', href: '/reception/departures', icon: ClipboardList },
+    { label: 'Reservation Desk', href: '/reception/reservations', icon: ClipboardList },
+    { label: 'Walk-In Booking', href: '/reception/walk-ins', icon: Users2 },
+    { label: 'Check-in Desk', href: '/reception/check-in', icon: Hotel },
+    { label: 'Check-out Desk', href: '/reception/check-out', icon: ReceiptText },
+  ]),
+  createSection('Inventory', [
+    { label: 'Room Types', href: '/admin/room-types', icon: BedDouble },
+    { label: 'Rooms', href: '/admin/rooms', icon: Hotel },
+    { label: 'Reservations', href: '/admin/reservations', icon: ClipboardList },
+    { label: 'Check-In Monitor', href: '/admin/check-in-monitor', icon: Hotel },
+    { label: 'Check-Out Monitor', href: '/admin/check-out-monitor', icon: ClipboardList },
+  ]),
+  createSection('Finance', [
+    { label: 'Billing', href: '/admin/billing', icon: ReceiptText },
+    { label: 'Payments', href: '/admin/payments', icon: Wallet },
+  ]),
+  createSection('Field Operations', [
+    { label: 'Assigned Tasks', href: '/housekeeping/tasks', icon: ClipboardList },
+    { label: 'Guest Requests', href: '/housekeeping/requests', icon: Sparkles },
+    { label: 'Room Board', href: '/housekeeping/board', icon: Hotel },
+    { label: 'Inspections', href: '/housekeeping/inspections', icon: ShieldCheck },
+    { label: 'Open Requests (Maintenance)', href: '/maintenance/requests', icon: Wrench },
+    { label: 'Resolution History', href: '/maintenance/history', icon: ClipboardList },
+  ]),
+  createSection('Department Oversight', [
+    { label: 'Housekeeping', href: '/admin/housekeeping', icon: Sparkles },
+    { label: 'Maintenance', href: '/admin/maintenance', icon: Wrench },
+    { label: 'Service Requests', href: '/admin/service-requests', icon: ClipboardList },
+    { label: 'Feedback', href: '/admin/feedback', icon: Users2 },
+    { label: 'Inquiries', href: '/admin/inquiries', icon: MailQuestion },
+  ]),
+  createSection('Platform Management', [
+    { label: 'Reports', href: '/admin/reports', icon: Building2 },
+    { label: 'Notifications', href: '/admin/notifications', icon: BellRing },
+    { label: 'Audit Logs', href: '/admin/audit-logs', icon: ClipboardList },
+    { label: 'Settings', href: '/admin/settings', icon: Settings },
+    { label: 'FAQs', href: '/admin/faqs', icon: MailQuestion },
+  ]),
+];
+
 const SidebarContent = ({ role, onClose, isMobile = false }) => {
   const { data: settings } = useAdminSettings();
   const user = useAuthStore((state) => state.user);
@@ -243,16 +296,16 @@ const SidebarContent = ({ role, onClose, isMobile = false }) => {
       items: [...section.items],
     }));
   } else if (isCustomRole) {
-    // Custom roles get the admin sections filtered by their exact permissions.
+    // Custom roles get the full unified operational tree filtered by their exact permissions.
     // Replace the default admin dashboard link with their personal hub.
-    sections = adminNavSections
+    sections = customRoleNavSections
       .map((section) => {
         let items = section.items
           .filter((item) => {
             if (item.href === '/admin/dashboard') return false; // Hide Admin Dashboard
             return hasPermission(item.href, user?.permissions);
           })
-          .map((item) => ({ ...item, href: item.href.replace(/^\/admin\//, '/staff/') }));
+          .map((item) => ({ ...item, href: item.href.replace(/^\/(?:admin|reception|housekeeping|maintenance)\//, '/staff/') }));
 
         // If it's the Core section, artificially inject the Custom Role Hub at the top!
         if (section.label === 'Core') {
