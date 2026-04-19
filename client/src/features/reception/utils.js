@@ -11,6 +11,8 @@ export const createReceptionReservationForm = (guestUserId = '') => ({
   arrivalTime: '2:00 PM',
   specialRequests: '',
   notes: '',
+  advancePaymentAmount: '',
+  advancePaymentMethod: 'cash',
 });
 
 export const mapReservationToReceptionForm = (reservation) => ({
@@ -41,6 +43,8 @@ export const buildReceptionReservationPayload = (form) => ({
   arrivalTime: String(form.arrivalTime ?? '').trim() || null,
   specialRequests: String(form.specialRequests ?? '').trim() || null,
   notes: String(form.notes ?? '').trim() || null,
+  advancePaymentAmount: Number(form.advancePaymentAmount || 0),
+  advancePaymentMethod: form.advancePaymentMethod || 'cash',
 });
 
 export const calculateReceptionStayNights = (checkInDate, checkOutDate) => {

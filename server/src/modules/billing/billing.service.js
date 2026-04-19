@@ -381,8 +381,12 @@ export const billingService = {
             throw new AppError('Invoice not found', 404);
         }
         const refreshedInvoice = await this.generateInvoice(getEntityId(invoice.reservationId), context);
+        
+        // Prevent payments on draft or void invoices, EXCEPT for processing refunds on voided bookings
         if (['void', 'draft'].includes(refreshedInvoice.status)) {
-            throw new AppError('Payments cannot be applied to void or draft invoices', 409);
+            if (!(refreshedInvoice.status === 'void' && payload.status === 'refunded')) {
+                throw new AppError('Payments cannot be applied to void or draft invoices', 409);
+            }
         }
         if (payload.status === 'success') {
             if (payload.amount > Number(refreshedInvoice.balanceAmount)) {

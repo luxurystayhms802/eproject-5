@@ -365,7 +365,22 @@ export const reservationService = {
             link: '/reception/dashboard',
             priority: status === 'pending' ? 'medium' : 'low',
         });
-        runReservationSideEffect(billingService.generateInvoice(createdReservation._id.toString(), context), 'Initial invoice generation', createdReservation._id.toString());
+        const invoiceRefreshed = await billingService.generateInvoice(createdReservation._id.toString(), context);
+
+        if (payload.advancePaymentAmount && payload.advancePaymentAmount > 0 && payload.bookingSource !== 'online') {
+            await import('../../modules/billing/billing.service.js').then(m => 
+                m.billingService.createPayment({
+                    invoiceId: invoiceRefreshed.id,
+                    amount: payload.advancePaymentAmount,
+                    method: payload.advancePaymentMethod || 'cash',
+                    status: 'success',
+                    notes: 'Advance deposit collected at booking'
+                }, context)
+            ).catch(err => {
+                logger.error({ err }, 'Failed to process advance payment at front desk');
+            });
+        }
+
         return serializeReservation(createdReservation.toObject());
     },
     async updateReservation(reservationId, payload, context) {

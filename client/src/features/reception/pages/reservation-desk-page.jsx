@@ -861,7 +861,39 @@ export const ReservationDeskPage = () => {
             />
           </label>
 
-          <div />
+          {!editingReservation ? (
+            <>
+              <label className={receptionLabelClassName}>
+                <span className={receptionLabelTextClassName}>Advance deposit</span>
+                <input
+                  name="advancePaymentAmount"
+                  type="number"
+                  min="0"
+                  max="1000000"
+                  className={receptionFieldClassName}
+                  value={form.advancePaymentAmount}
+                  onChange={(event) => setForm((current) => ({ ...current, advancePaymentAmount: event.target.value }))}
+                  placeholder="0.00"
+                />
+              </label>
+              
+              <label className={receptionLabelClassName}>
+                <span className={receptionLabelTextClassName}>Payment method</span>
+                <select
+                  name="advancePaymentMethod"
+                  className={receptionFieldClassName}
+                  value={form.advancePaymentMethod}
+                  onChange={(event) => setForm((current) => ({ ...current, advancePaymentMethod: event.target.value }))}
+                >
+                  <option value="cash">Cash</option>
+                  <option value="card">Credit / Debit Card</option>
+                  <option value="bank_transfer">Bank Transfer</option>
+                </select>
+              </label>
+            </>
+          ) : (
+            <div />
+          )}
 
           <label className={`${receptionLabelClassName} md:col-span-2`}>
             <span className={receptionLabelTextClassName}>Special requests</span>

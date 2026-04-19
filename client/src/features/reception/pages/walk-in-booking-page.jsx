@@ -505,6 +505,18 @@ export const WalkInBookingPage = () => {
               <input className={receptionFieldClassName} name="discountAmount" type="number" min="0" max="100000" value={stayForm.discountAmount} onChange={(event) => handleStayChange('discountAmount', event.target.value)} />
             </label>
             <label className={receptionLabelClassName}>
+              <span className={receptionLabelTextClassName}>Advance deposit</span>
+              <input className={receptionFieldClassName} name="advancePaymentAmount" type="number" min="0" max="1000000" value={stayForm.advancePaymentAmount} onChange={(event) => handleStayChange('advancePaymentAmount', event.target.value)} placeholder="0.00" />
+            </label>
+            <label className={receptionLabelClassName}>
+              <span className={receptionLabelTextClassName}>Payment method</span>
+              <select className={receptionFieldClassName} name="advancePaymentMethod" value={stayForm.advancePaymentMethod} onChange={(event) => handleStayChange('advancePaymentMethod', event.target.value)}>
+                <option value="cash">Cash</option>
+                <option value="card">Credit / Debit Card</option>
+                <option value="bank_transfer">Bank Transfer</option>
+              </select>
+            </label>
+            <label className={receptionLabelClassName}>
               <span className={receptionLabelTextClassName}>Arrival time</span>
               <input className={receptionFieldClassName} name="arrivalTime" value={stayForm.arrivalTime} onChange={(event) => handleStayChange('arrivalTime', event.target.value)} placeholder="2:00 PM" />
             </label>

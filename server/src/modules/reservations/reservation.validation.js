@@ -14,6 +14,8 @@ const reservationBodyFields = z.object({
     arrivalTime: z.string().trim().nullable().optional(),
     notes: z.string().trim().nullable().optional(),
     status: z.enum(RESERVATION_STATUSES).optional(),
+    advancePaymentAmount: z.number().min(0).optional(),
+    advancePaymentMethod: z.enum(['cash', 'card', 'bank_transfer', 'online']).optional(),
 });
 export const reservationIdParamsSchema = z.object({
     params: z.object({
