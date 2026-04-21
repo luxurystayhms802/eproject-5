@@ -108,7 +108,7 @@ export const AdminSettingsPage = () => {
         }
       />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 grid-cols-[repeat(auto-fit,minmax(220px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
         <StatsCard title="Primary tax" value={`${summary.taxRate}%`} description="Base room-night tax applied in billing calculations" icon={Landmark} />
         <StatsCard title="Check window" value={summary.checkWindow} description="Current arrival and departure timing used across operations" icon={TimerReset} />
         <StatsCard title="Booking mode" value={summary.bookingMode} description="How online reservations move through approval and confirmation" icon={ShieldCheck} />

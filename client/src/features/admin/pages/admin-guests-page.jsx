@@ -419,6 +419,7 @@ export const AdminGuestsPage = () => {
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>Phone</span>
             <input
+              type="tel"
               className={adminInputClassName}
               value={form.phone}
               onChange={(event) => {
@@ -470,10 +471,12 @@ export const AdminGuestsPage = () => {
           <label className={adminLabelClassName}>
             <span className={adminLabelTextClassName}>ID number</span>
             <input
+              type="text"
+              inputMode="numeric"
               className={adminInputClassName}
               value={form.profile.idNumber}
               onChange={(event) => {
-                const val = event.target.value.replace(/[^0-9a-zA-Z-]/g, '');
+                const val = event.target.value.replace(/[^0-9]/g, '');
                 setForm((current) => ({ ...current, profile: { ...current.profile, idNumber: val } }));
               }}
             />

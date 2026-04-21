@@ -34,6 +34,7 @@ export const updateUserSchema = z.object({
         email: z.string().email().optional(),
         phone: z.string().min(10).optional(),
         password: z.string().min(8).optional(),
+        currentPassword: z.string().min(1).optional(),
         role: z.string().trim().min(2).optional(),
         status: z.enum(USER_STATUSES).optional(),
         avatarUrl: z.string().url().nullable().optional(),

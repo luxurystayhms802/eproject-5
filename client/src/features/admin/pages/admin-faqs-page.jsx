@@ -97,14 +97,36 @@ export const AdminFaqsPage = () => {
   };
 
   const validateForm = () => {
-    if (form.question.trim().length < 3) {
-      toast.error('Question must be at least 3 characters.');
+    const q = form.question.trim();
+    const a = form.answer.trim();
+
+    if (!q) {
+      toast.error('Question is required.');
       return false;
     }
-    if (form.answer.trim().length < 5) {
-      toast.error('Answer must be at least 5 characters.');
+    if (q.length < 10) {
+      toast.error('Question must be at least 10 characters long.');
       return false;
     }
+    if (!q.endsWith('?')) {
+      toast.error('Question must end with a question mark (?).');
+      return false;
+    }
+
+    if (!a) {
+      toast.error('Answer is required.');
+      return false;
+    }
+    if (a.length < 20) {
+      toast.error('Answer must be at least 20 characters long to provide sufficient detail.');
+      return false;
+    }
+    
+    if (form.order === null || form.order < 0) {
+      toast.error('Sort order cannot be negative.');
+      return false;
+    }
+
     return true;
   };
 
@@ -206,13 +228,7 @@ export const AdminFaqsPage = () => {
                         </div>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-center">
-                        <StatusBadge
-                          status={faq.isActive ? 'active' : 'inactive'}
-                          config={{
-                            active: { label: 'Live', variant: 'success' },
-                            inactive: { label: 'Hidden', variant: 'warning' },
-                          }}
-                        />
+                        <StatusBadge value={faq.isActive ? 'active' : 'inactive'} />
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-3">

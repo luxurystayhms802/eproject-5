@@ -9,8 +9,8 @@ export const StatsCard = ({ title, value, description, icon: Icon }) => (<Card c
             </span>
           </div>
           <div className="min-w-0 w-full space-y-1.5">
-            <p className="truncate text-[34px] leading-none text-[var(--primary)] [font-family:var(--font-display)]">{value}</p>
-            <p className="truncate w-full text-sm leading-6 text-[var(--muted-foreground)]" title={description}>{description}</p>
+            <p className="break-words text-[34px] leading-tight text-[var(--primary)] [font-family:var(--font-display)]">{value}</p>
+            <p className="w-full text-sm leading-6 text-[var(--muted-foreground)]" title={description}>{description}</p>
           </div>
         </div>
         {Icon ? (

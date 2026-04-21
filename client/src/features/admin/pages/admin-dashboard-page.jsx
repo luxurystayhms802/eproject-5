@@ -267,8 +267,8 @@ export const AdminDashboardPage = () => {
           <Card className="space-y-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-xl font-semibold text-[var(--primary)]">Revenue trend</h2>
-                <p className="text-sm text-[var(--muted-foreground)]">Monthly payment capture with operational readiness context.</p>
+                <h2 className="text-xl font-semibold text-[var(--primary)]">Overall revenue trend</h2>
+                <p className="text-sm text-[var(--muted-foreground)]">Complete monthly payment capture analysis across all time.</p>
               </div>
               <Link to={`${prefix}/reports`}>
                 <Button variant="outline">Open reports</Button>
@@ -279,7 +279,7 @@ export const AdminDashboardPage = () => {
                 <div className="h-full animate-pulse rounded-2xl bg-white/70" />
               ) : (data?.charts?.revenueByMonth ?? []).length === 0 ? (
                 <div className="absolute inset-0 flex items-center justify-center rounded-2xl border border-dashed border-[var(--border)] bg-white/50">
-                  <p className="text-sm text-[var(--muted-foreground)]">No revenue data available for the previous months.</p>
+                  <p className="text-sm text-[var(--muted-foreground)]">No revenue data available yet.</p>
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">

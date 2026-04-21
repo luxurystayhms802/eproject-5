@@ -210,17 +210,18 @@ export const userService = {
         }
 
         if (existingUser.role === 'guest') {
-            const importReservation = await import('../reservations/reservation.model.js');
-            const hasReservations = await importReservation.ReservationModel.exists({ guestUserId: userId });
-            if (hasReservations) {
+            const { ReservationModel } = await import('../reservations/reservation.model.js');
+            // Using countDocuments is more robust for checking presence with string vs ObjectId casting.
+            const reservationCount = await ReservationModel.countDocuments({ guestUserId: userId });
+            if (reservationCount > 0) {
                 throw new AppError('Cannot delete a guest who has reservation history. Please set their status to inactive instead.', 409);
             }
         } else {
-            const importHousekeeping = await import('../housekeeping/housekeeping.model.js');
-            const importMaintenance = await import('../maintenance/maintenance-request.model.js');
-            const hasTask = await importHousekeeping.HousekeepingTaskModel.exists({ assignedToUserId: userId, status: { $nin: ['completed', 'cancelled'] } });
-            const hasReq = await importMaintenance.MaintenanceRequestModel.exists({ assignedToUserId: userId, status: { $nin: ['closed', 'resolved'] } });
-            if (hasTask || hasReq) {
+            const { HousekeepingTaskModel } = await import('../housekeeping/housekeeping.model.js');
+            const { MaintenanceRequestModel } = await import('../maintenance/maintenance-request.model.js');
+            const activeTaskCount = await HousekeepingTaskModel.countDocuments({ assignedToUserId: userId, status: { $nin: ['completed', 'cancelled'] } });
+            const activeReqCount = await MaintenanceRequestModel.countDocuments({ assignedToUserId: userId, status: { $nin: ['closed', 'resolved'] } });
+            if (activeTaskCount > 0 || activeReqCount > 0) {
                 throw new AppError('Cannot delete staff member with active assigned tasks. Please reassign their work or set status to inactive.', 409);
             }
         }

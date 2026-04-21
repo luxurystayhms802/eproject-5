@@ -136,7 +136,7 @@ export const adminNavSections = [
     { label: 'Reports', href: '/admin/reports', icon: Building2 },
     { label: 'Notifications', href: '/admin/notifications', icon: BellRing },
     { label: 'Audit Logs', href: '/admin/audit-logs', icon: ClipboardList },
-    { label: 'Settings', href: '/admin/settings', icon: Settings },
+    { label: 'Hotel Settings', href: '/admin/settings', icon: Settings },
     { label: 'FAQs', href: '/admin/faqs', icon: MailQuestion },
   ]),
 ];
@@ -274,7 +274,7 @@ export const customRoleNavSections = [
     { label: 'Reports', href: '/admin/reports', icon: Building2 },
     { label: 'Notifications', href: '/admin/notifications', icon: BellRing },
     { label: 'Audit Logs', href: '/admin/audit-logs', icon: ClipboardList },
-    { label: 'Settings', href: '/admin/settings', icon: Settings },
+    { label: 'Hotel Settings', href: '/admin/settings', icon: Settings },
     { label: 'FAQs', href: '/admin/faqs', icon: MailQuestion },
   ]),
 ];

@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/shared/page-header';
 import { StatsCard } from '@/components/shared/stats-card';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { AdminModal } from '@/features/admin/components/admin-modal';
 import { AdminToolbar } from '@/features/admin/components/admin-toolbar';
 import {
   adminInputClassName,
@@ -27,6 +28,8 @@ export const AdminPricingRulesPage = () => {
   const settingsQuery = useAdminSettings();
   const updateSettings = useUpdateAdminSettings();
   const [form, setForm] = useState(createDefaultSettingsForm());
+  const [modalOpen, setModalOpen] = useState(false);
+  const [newRule, setNewRule] = useState(createTaxRule());
 
   const user = useAuthStore((state) => state.user);
   const permissions = user?.permissions ?? [];
@@ -57,11 +60,19 @@ export const AdminPricingRulesPage = () => {
     }));
   };
 
-  const addTaxRule = () => {
+  const openAddRuleModal = () => {
+    setNewRule(createTaxRule());
+    setModalOpen(true);
+  };
+
+  const confirmAddRule = (e) => {
+    e.preventDefault();
     setForm((current) => ({
       ...current,
-      taxRules: [...(current.taxRules ?? []), createTaxRule()],
+      taxRules: [...(current.taxRules ?? []), newRule],
     }));
+    setModalOpen(false);
+    setNewRule(createTaxRule());
   };
 
   const removeTaxRule = (index) => {
@@ -132,7 +143,7 @@ export const AdminPricingRulesPage = () => {
             description="Add, edit, or remove individual hotel tax rules that feed invoice and billing calculations."
             actions={
               canUpdate ? (
-                <Button type="button" variant="outline" className="rounded-2xl px-4" onClick={addTaxRule}>
+                <Button type="button" variant="outline" className="rounded-2xl px-4" onClick={openAddRuleModal}>
                   <Plus className="mr-2 h-4 w-4" />
                   Add rule
                 </Button>
@@ -202,6 +213,56 @@ export const AdminPricingRulesPage = () => {
           </div>
         </Card>
       </form>
+
+      <AdminModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Add tax rule"
+        description="Configure a new taxing percentage to apply to guest invoices."
+      >
+        <form className="grid gap-4 md:grid-cols-2" onSubmit={confirmAddRule}>
+          <label className={`${adminLabelClassName} md:col-span-2`}>
+            <span className={adminLabelTextClassName}>Rule name</span>
+            <input
+              required
+              className={adminInputClassName}
+              value={newRule.name}
+              onChange={(e) => setNewRule({ ...newRule, name: e.target.value })}
+              placeholder="e.g. GST 16%"
+            />
+          </label>
+          <label className={adminLabelClassName}>
+            <span className={adminLabelTextClassName}>Percentage (%)</span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              required
+              className={adminInputClassName}
+              value={newRule.percentage}
+              onChange={(e) => setNewRule({ ...newRule, percentage: Number(e.target.value) })}
+            />
+          </label>
+          <label className={adminLabelClassName}>
+            <span className={adminLabelTextClassName}>Applies to</span>
+            <input
+              required
+              className={adminInputClassName}
+              value={newRule.appliesTo}
+              onChange={(e) => setNewRule({ ...newRule, appliesTo: e.target.value })}
+              placeholder="room_nights"
+            />
+          </label>
+          <div className="flex justify-end gap-3 pt-4 md:col-span-2">
+            <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="secondary">
+              Add rule
+            </Button>
+          </div>
+        </form>
+      </AdminModal>
     </div>
   );
 };
