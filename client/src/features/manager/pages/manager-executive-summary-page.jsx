@@ -107,7 +107,7 @@ export const ManagerExecutiveSummaryPage = () => {
         </span>
       </PageHeader>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <StatsCard title="Occupancy" value={`${executiveMetrics.occupancy}%`} description="Live share" icon={Building2} />
         <StatsCard title="Revenue" value={formatManagerCurrency(executiveMetrics.revenue)} description="Captured" icon={Wallet} />
         <StatsCard title="Arrivals" value={String(executiveMetrics.arrivals)} description="Today" icon={ClipboardList} />

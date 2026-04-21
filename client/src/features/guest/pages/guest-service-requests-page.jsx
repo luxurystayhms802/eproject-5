@@ -11,13 +11,27 @@ import { useGuestReservations } from '@/features/public/hooks';
 const inputClassName = 'w-full rounded-2xl border border-[var(--border)] bg-white/80 px-4 py-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]';
 
 const serviceRequestTypeOptions = [
-  { value: 'room_service', label: 'Room service' },
-  { value: 'wake_up_call', label: 'Wake-up call' },
-  { value: 'laundry', label: 'Laundry' },
-  { value: 'transport', label: 'Transport' },
-  { value: 'extra_bed', label: 'Extra bed' },
+  { value: 'room_service', label: 'Room Service' },
   { value: 'housekeeping', label: 'Housekeeping' },
-  { value: 'misc', label: 'Other request' },
+  { value: 'laundry', label: 'Laundry' },
+  { value: 'maintenance', label: 'Maintenance' },
+  { value: 'amenities_request', label: 'Amenities Request' },
+  { value: 'food_beverage', label: 'Food & Beverage' },
+  { value: 'wake_up_call', label: 'Wake-up Call' },
+  { value: 'transport', label: 'Transport' },
+  { value: 'luggage_assistance', label: 'Luggage Assistance' },
+  { value: 'extra_bed', label: 'Extra Bed' },
+  { value: 'internet_wifi_support', label: 'Internet/Wi-Fi Support' },
+  { value: 'late_check_out_request', label: 'Late Check-out Request' },
+  { value: 'early_check_in_request', label: 'Early Check-in Request' },
+  { value: 'booking_reservation_help', label: 'Booking/Reservation Help' },
+  { value: 'concierge_service', label: 'Concierge Service' },
+  { value: 'lost_and_found', label: 'Lost & Found' },
+  { value: 'complaint', label: 'Complaint' },
+  { value: 'medical_assistance', label: 'Medical Assistance' },
+  { value: 'security_assistance', label: 'Security Assistance' },
+  { value: 'special_occasion_request', label: 'Special Occasion Request' },
+  { value: 'other_request', label: 'Other Request' },
 ];
 
 const formatRequestType = (value) => serviceRequestTypeOptions.find((option) => option.value === value)?.label ?? value.replaceAll('_', ' ');
@@ -184,6 +198,11 @@ export const GuestServiceRequestsPage = () => {
                       <div>
                         <h3 className="font-semibold capitalize text-[var(--primary)]">{formatRequestType(request.requestType)}</h3>
                         <p className="mt-1 text-sm text-[var(--muted-foreground)]">{request.description}</p>
+                        <p className="mt-2 text-xs uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
+                          {request.reservation?.room?.roomNumber ? `Room ${request.reservation.room.roomNumber} | ` : ''}
+                          Stay {request.reservation?.reservationCode ?? 'n/a'}
+                          {request.preferredTime ? ` | Preferred ${new Date(request.preferredTime).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}` : ''}
+                        </p>
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <StatusBadge value={request.status} />

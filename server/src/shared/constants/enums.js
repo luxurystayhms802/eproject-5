@@ -19,7 +19,29 @@ export const HOUSEKEEPING_TASK_STATUSES = ['pending', 'assigned', 'in_progress',
 export const PRIORITIES = ['low', 'medium', 'high', 'urgent'];
 export const MAINTENANCE_ISSUE_TYPES = ['ac', 'plumbing', 'electricity', 'furniture', 'lock', 'internet', 'bathroom', 'appliance', 'other'];
 export const MAINTENANCE_STATUSES = ['open', 'assigned', 'in_progress', 'resolved', 'closed'];
-export const SERVICE_REQUEST_TYPES = ['room_service', 'wake_up_call', 'laundry', 'transport', 'extra_bed', 'housekeeping', 'misc'];
+export const SERVICE_REQUEST_TYPES = [
+  'room_service',
+  'housekeeping',
+  'laundry',
+  'maintenance',
+  'amenities_request',
+  'food_beverage',
+  'wake_up_call',
+  'transport',
+  'luggage_assistance',
+  'extra_bed',
+  'internet_wifi_support',
+  'late_check_out_request',
+  'early_check_in_request',
+  'booking_reservation_help',
+  'concierge_service',
+  'lost_and_found',
+  'complaint',
+  'medical_assistance',
+  'security_assistance',
+  'special_occasion_request',
+  'other_request',
+];
 export const SERVICE_REQUEST_STATUSES = ['pending', 'assigned', 'in_progress', 'completed', 'cancelled'];
 export const NOTIFICATION_TYPES = ['reservation', 'payment', 'housekeeping', 'maintenance', 'service_request', 'system', 'feedback'];
 export const NOTIFICATION_PRIORITIES = ['low', 'medium', 'high'];

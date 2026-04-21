@@ -29,8 +29,9 @@ const toneMap = {
     inactive: 'bg-slate-200 text-slate-700',
     suspended: 'bg-rose-100 text-rose-700',
     low: 'bg-slate-200 text-slate-700',
-    medium: 'bg-emerald-100 text-emerald-700',
-    high: 'bg-rose-100 text-rose-700',
+    medium: 'bg-amber-100 text-amber-700',
+    high: 'bg-orange-100 text-orange-700',
+    urgent: 'bg-rose-100 text-rose-700',
 };
 export const StatusBadge = ({ value, className }) => {
     const label = value ? value.replaceAll('_', ' ') : 'n/a';

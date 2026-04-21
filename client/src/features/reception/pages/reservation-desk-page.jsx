@@ -11,10 +11,13 @@ import { AdminModal } from '@/features/admin/components/admin-modal';
 import { useAuthStore } from '@/app/store/auth-store';
 import { getDisplayName } from '@/features/admin/display-utils';
 import { validateAdminReservationForm } from '@/features/admin/form-utils';
+import { useHotelSettings } from '@/features/public/hooks';
+import { formatTimeFromSettings } from '@/features/public/utils';
 import {
   bookingSourceOptions,
   formatReceptionCurrency,
   formatReceptionDate,
+  formatReceptionDateTime,
   receptionFieldClassName,
   receptionLabelClassName,
   receptionLabelTextClassName,
@@ -115,6 +118,9 @@ export const ReservationDeskPage = () => {
   });
   const guestsQuery = useReceptionGuests();
   const roomTypesQuery = useReceptionRoomTypes();
+  const hotelSettingsQuery = useHotelSettings();
+
+  const defaultCheckInTime = formatTimeFromSettings(hotelSettingsQuery.data?.checkInTime);
 
   const createReservation = useCreateReceptionReservation();
   const updateReservation = useUpdateReceptionReservation();
@@ -511,7 +517,11 @@ export const ReservationDeskPage = () => {
                     <span>Guests: <strong className="font-semibold text-[var(--primary)]">{reservation.adults}A / {reservation.children}C</strong></span>
                     <span>Room: <strong className="font-semibold text-[var(--primary)]">{reservation.room?.roomNumber ? `Room ${reservation.room.roomNumber}` : 'Pending'}</strong></span>
                     <span>Nights: <strong className="font-semibold text-[var(--primary)]">{reservation.nights}</strong></span>
-                    <span>Arrival: <strong className="font-semibold text-[var(--primary)]">{reservation.arrivalTime || '2:00 PM'}</strong></span>
+                    {reservation.checkedInAt ? (
+                      <span><strong>Checked in:</strong> <strong className="font-semibold text-[var(--primary)]">{formatReceptionDateTime(reservation.checkedInAt)}</strong></span>
+                    ) : (
+                      <span>Exp. arrival: <strong className="font-semibold text-[var(--primary)]">{reservation.arrivalTime || defaultCheckInTime}</strong></span>
+                    )}
                   </div>
                 </div>
 

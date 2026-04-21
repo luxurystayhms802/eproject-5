@@ -78,6 +78,22 @@ export const AdminServiceRequestsPage = () => {
     [filteredRequests],
   );
 
+  const groupedRequests = useMemo(() => {
+    const groups = {};
+    for (const req of filteredRequests) {
+      const resId = req.reservation?.id || 'unlinked';
+      if (!groups[resId]) {
+        groups[resId] = {
+          reservation: req.reservation,
+          guest: req.guest,
+          requests: [],
+        };
+      }
+      groups[resId].requests.push(req);
+    }
+    return Object.values(groups);
+  }, [filteredRequests]);
+
   const updateDraft = (requestId, patch) => {
     setDrafts((current) => ({
       ...current,
@@ -155,95 +171,104 @@ export const AdminServiceRequestsPage = () => {
         {requestsQuery.isLoading ? (
           Array.from({ length: 4 }).map((_, index) => <Card key={index} className="h-52 animate-pulse bg-white/70" />)
         ) : filteredRequests.length ? (
-          filteredRequests.map((request) => {
-            const draft = drafts[request.id] ?? {
-              status: request.status,
-              assignedToUserId: request.assignedToUserId ?? '',
-            };
-
-            return (
-              <Card key={request.id} className="space-y-5">
-                <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+            <div className="space-y-4">
+              {groupedRequests.map((group) => (
+                <div key={group.reservation?.id || 'unlinked'} className="space-y-3 rounded-xl border border-[rgba(16,36,63,0.06)] bg-slate-50/50 p-3 shadow-sm">
+                  <div className="flex items-center gap-2 px-2 pt-1 pb-2 border-b border-[rgba(16,36,63,0.04)]">
+                    <h3 className="text-[12px] font-bold uppercase tracking-[0.16em] text-[var(--primary)]">
+                      {group.reservation ? `${group.reservation.room?.roomNumber ? `Room ${group.reservation.room.roomNumber} | ` : ''}${getDisplayName(group.guest, 'Guest')} (${group.reservation.reservationCode})` : 'Unlinked / General Requests'}
+                    </h3>
+                  </div>
                   <div className="space-y-3">
-                    <div className="flex flex-wrap gap-2">
-                      <StatusBadge value={request.status} />
-                      <span className="inline-flex rounded-full border border-[rgba(16,36,63,0.08)] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
-                        {titleCase(request.requestType)}
-                      </span>
-                    </div>
-                    <div>
-                      <h2 className="text-[28px] text-[var(--primary)] [font-family:var(--font-display)]">
-                        {getDisplayName(request.guest, request.guest?.email ?? 'Guest request')}
-                      </h2>
-                      <p className="mt-2 text-sm text-[var(--foreground)]">{request.description}</p>
-                      <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
-                        Reservation {request.reservation?.reservationCode ?? 'n/a'} | Preferred {formatAdminDateTime(request.preferredTime)}
-                      </p>
-                    </div>
-                  </div>
+                    {group.requests.map((request) => {
+                      const draft = drafts[request.id] ?? {
+                        status: request.status,
+                        assignedToUserId: request.assignedToUserId ?? '',
+                      };
+                      return (
+                        <Card key={request.id} className="space-y-5">
+                          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                            <div className="space-y-3">
+                              <div className="flex flex-wrap gap-2">
+                                <StatusBadge value={request.status} />
+                                <span className="inline-flex rounded-full border border-[rgba(16,36,63,0.08)] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
+                                  {titleCase(request.requestType)}
+                                </span>
+                              </div>
+                              <div>
+                                <h2 className="text-[20px] text-[var(--primary)] [font-family:var(--font-display)]">
+                                  Preferred {formatAdminDateTime(request.preferredTime)}
+                                </h2>
+                                <p className="mt-2 text-sm text-[var(--foreground)]">{request.description}</p>
+                              </div>
+                            </div>
 
-                  <div className="rounded-[20px] border border-[var(--border)] bg-white/82 px-4 py-4 xl:min-w-[260px]">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-[var(--muted-foreground)]">Current assignee</p>
-                    <p className="mt-2 text-base font-semibold text-[var(--primary)]">{getDisplayName(request.assignedTo, 'Unassigned')}</p>
-                    <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                      {request.assignedTo?.email ?? (['completed', 'cancelled'].includes(request.status) ? 'No assignee recorded' : 'Waiting for operational pickup')}
-                    </p>
+                            <div className="rounded-[20px] border border-[var(--border)] bg-white/82 px-4 py-4 xl:min-w-[260px]">
+                              <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-[var(--muted-foreground)]">Current assignee</p>
+                              <p className="mt-2 text-base font-semibold text-[var(--primary)]">{getDisplayName(request.assignedTo, 'Unassigned')}</p>
+                              <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                                {request.assignedTo?.email ?? (['completed', 'cancelled'].includes(request.status) ? 'No assignee recorded' : 'Waiting for operational pickup')}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="grid gap-4 xl:grid-cols-[240px_260px_auto]">
+                            <select
+                              value={draft.status}
+                              onChange={(event) => updateDraft(request.id, { status: event.target.value })}
+                              className={adminSelectClassName}
+                              disabled={!canUpdate || ['completed', 'cancelled'].includes(request.status)}
+                            >
+                              {SERVICE_REQUEST_STATUS_OPTIONS.map((status) => (
+                                <option key={status} value={status}>
+                                  {titleCase(status)}
+                                </option>
+                              ))}
+                            </select>
+
+                            <select
+                              value={draft.assignedToUserId}
+                              onChange={(event) => updateDraft(request.id, { assignedToUserId: event.target.value })}
+                              className={adminSelectClassName}
+                              disabled={!canUpdate || ['completed', 'cancelled'].includes(request.status)}
+                            >
+                              <option value="">Unassigned</option>
+                              {staff.map((member) => (
+                                <option key={member.id} value={member.id}>
+                                  {getDisplayName(member, member.email ?? member.employeeCode)}
+                                </option>
+                              ))}
+                            </select>
+
+                            <div className="flex justify-start xl:justify-end">
+                              {canUpdate && (
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  className="rounded-2xl px-5"
+                                  onClick={() =>
+                                    updateRequest.mutate({
+                                      requestId: request.id,
+                                      payload: {
+                                        status: draft.status,
+                                        assignedToUserId: draft.assignedToUserId || null,
+                                      },
+                                    })
+                                  }
+                                  disabled={updateRequest.isPending || ['completed', 'cancelled'].includes(request.status)}
+                                >
+                                  Save update
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </Card>
+                      );
+                    })}
                   </div>
                 </div>
-
-                <div className="grid gap-4 xl:grid-cols-[240px_260px_auto]">
-                  <select
-                    value={draft.status}
-                    onChange={(event) => updateDraft(request.id, { status: event.target.value })}
-                    className={adminSelectClassName}
-                    disabled={!canUpdate || ['completed', 'cancelled'].includes(request.status)}
-                  >
-                    {SERVICE_REQUEST_STATUS_OPTIONS.map((status) => (
-                      <option key={status} value={status}>
-                        {titleCase(status)}
-                      </option>
-                    ))}
-                  </select>
-
-                  <select
-                    value={draft.assignedToUserId}
-                    onChange={(event) => updateDraft(request.id, { assignedToUserId: event.target.value })}
-                    className={adminSelectClassName}
-                    disabled={!canUpdate || ['completed', 'cancelled'].includes(request.status)}
-                  >
-                    <option value="">Unassigned</option>
-                    {staff.map((member) => (
-                      <option key={member.id} value={member.id}>
-                        {getDisplayName(member, member.email ?? member.employeeCode)}
-                      </option>
-                    ))}
-                  </select>
-
-                  <div className="flex justify-start xl:justify-end">
-                    {canUpdate && (
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        className="rounded-2xl px-5"
-                        onClick={() =>
-                          updateRequest.mutate({
-                            requestId: request.id,
-                            payload: {
-                              status: draft.status,
-                              assignedToUserId: draft.assignedToUserId || null,
-                            },
-                          })
-                        }
-                        disabled={updateRequest.isPending || ['completed', 'cancelled'].includes(request.status)}
-                      >
-                        Save update
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            );
-          })
+              ))}
+            </div>
         ) : (
           <Card className="space-y-3">
             <h2 className="text-xl font-semibold text-[var(--primary)]">No guest service requests found</h2>

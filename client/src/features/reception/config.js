@@ -59,13 +59,27 @@ export const chargeTypeOptions = [
 ];
 
 export const serviceRequestTypeOptions = [
-  { value: 'room_service', label: 'Room service' },
-  { value: 'wake_up_call', label: 'Wake-up call' },
-  { value: 'laundry', label: 'Laundry' },
-  { value: 'transport', label: 'Transport' },
-  { value: 'extra_bed', label: 'Extra bed' },
+  { value: 'room_service', label: 'Room Service' },
   { value: 'housekeeping', label: 'Housekeeping' },
-  { value: 'misc', label: 'Other request' },
+  { value: 'laundry', label: 'Laundry' },
+  { value: 'maintenance', label: 'Maintenance' },
+  { value: 'amenities_request', label: 'Amenities Request' },
+  { value: 'food_beverage', label: 'Food & Beverage' },
+  { value: 'wake_up_call', label: 'Wake-up Call' },
+  { value: 'transport', label: 'Transport' },
+  { value: 'luggage_assistance', label: 'Luggage Assistance' },
+  { value: 'extra_bed', label: 'Extra Bed' },
+  { value: 'internet_wifi_support', label: 'Internet/Wi-Fi Support' },
+  { value: 'late_check_out_request', label: 'Late Check-out Request' },
+  { value: 'early_check_in_request', label: 'Early Check-in Request' },
+  { value: 'booking_reservation_help', label: 'Booking/Reservation Help' },
+  { value: 'concierge_service', label: 'Concierge Service' },
+  { value: 'lost_and_found', label: 'Lost & Found' },
+  { value: 'complaint', label: 'Complaint' },
+  { value: 'medical_assistance', label: 'Medical Assistance' },
+  { value: 'security_assistance', label: 'Security Assistance' },
+  { value: 'special_occasion_request', label: 'Special Occasion Request' },
+  { value: 'other_request', label: 'Other Request' },
 ];
 
 export const serviceRequestStatusOptions = [

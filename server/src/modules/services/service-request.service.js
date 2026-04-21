@@ -19,7 +19,13 @@ const getEntityId = (value) => {
 const serializeRequest = (requestItem) => ({
     id: requestItem._id.toString(),
     reservationId: getEntityId(requestItem.reservationId),
-    reservation: requestItem.reservationId ?? null,
+    reservation: requestItem.reservationId
+        ? {
+            ...requestItem.reservationId,
+            room: requestItem.reservationId?.roomId ?? null,
+            roomId: getEntityId(requestItem.reservationId?.roomId),
+          }
+        : null,
     guestUserId: getEntityId(requestItem.guestUserId),
     guest: requestItem.guestUserId ?? null,
     requestType: requestItem.requestType,

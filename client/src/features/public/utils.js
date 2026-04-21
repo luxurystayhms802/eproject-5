@@ -10,6 +10,20 @@ export const formatCurrency = (value) => {
   }).format(Number.isFinite(numericValue) ? numericValue : 0);
 };
 
+export const formatTimeFromSettings = (timeString) => {
+  if (!timeString) return '2:00 PM';
+  const match = timeString.match(/^(\d{1,2}):(\d{2})$/);
+  if (match) {
+    let hours = parseInt(match[1], 10);
+    const minutes = match[2];
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    return `${hours}:${minutes} ${ampm}`;
+  }
+  return timeString;
+};
+
 export const getPrimaryImage = (roomType) => {
   if (!roomType?.images?.length) {
     return null;

@@ -43,6 +43,10 @@ export const useReceptionGuests = (filters = {}) => useQuery({
     queryKey: receptionQueryKeys.guests(filters),
     queryFn: () => receptionApi.listGuests(filters),
 });
+export const useReceptionUsers = (filters = {}) => useQuery({
+    queryKey: ['reception', 'users', filters],
+    queryFn: () => receptionApi.listUsers(filters),
+});
 export const useReceptionRoomTypes = () => useQuery({
     queryKey: receptionQueryKeys.roomTypes,
     queryFn: () => receptionApi.listRoomTypes(),

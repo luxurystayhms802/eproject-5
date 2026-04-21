@@ -28,10 +28,13 @@ import {
   RESERVATION_STATUS_OPTIONS,
   formatAdminCurrency,
   formatAdminDate,
+  formatAdminDateTime,
 } from '@/features/admin/config';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { getDisplayName } from '@/features/admin/display-utils';
 import { validateAdminReservationForm } from '@/features/admin/form-utils';
+import { useHotelSettings } from '@/features/public/hooks';
+import { formatTimeFromSettings } from '@/features/public/utils';
 import {
   useAdminGuests,
   useAdminReservations,
@@ -242,6 +245,10 @@ export const AdminReservationsPage = () => {
   });
   const guestsQuery = useAdminGuests();
   const roomTypesQuery = useAdminRoomTypes({ isActive: true });
+  const hotelSettingsQuery = useHotelSettings();
+
+  const defaultCheckInTime = formatTimeFromSettings(hotelSettingsQuery.data?.checkInTime);
+
   const roomInventoryQuery = useAdminRooms(
     {
       roomTypeId: form.roomTypeId || undefined,
@@ -843,7 +850,11 @@ export const AdminReservationsPage = () => {
                     <span>Guests: <strong className="font-semibold text-[var(--primary)]">{reservation.adults}A / {reservation.children}C</strong></span>
                     <span>Room: <strong className="font-semibold text-[var(--primary)]">{reservation.room?.roomNumber ? `#${reservation.room.roomNumber}` : 'Not assigned'}</strong></span>
                     <span>Nights: <strong className="font-semibold text-[var(--primary)]">{reservation.nights}</strong></span>
-                    <span>Arrival time: <strong className="font-semibold text-[var(--primary)]">{reservation.arrivalTime || 'n/a'}</strong></span>
+                    {reservation.checkedInAt ? (
+                      <span><strong>Checked in:</strong> <strong className="font-semibold text-[var(--primary)]">{formatAdminDateTime(reservation.checkedInAt)}</strong></span>
+                    ) : (
+                      <span>Exp. arrival: <strong className="font-semibold text-[var(--primary)]">{reservation.arrivalTime || defaultCheckInTime}</strong></span>
+                    )}
                   </div>
                 </div>
 
@@ -1268,8 +1279,14 @@ export const AdminReservationsPage = () => {
               <AdminDetailGrid>
                 <AdminDetailItem label="Status" value={selectedReservation.status} emphasis />
                 <AdminDetailItem label="Booking source" value={selectedReservation.bookingSource} />
-                <AdminDetailItem label="Check-in" value={formatAdminDate(selectedReservation.checkInDate)} />
-                <AdminDetailItem label="Check-out" value={formatAdminDate(selectedReservation.checkOutDate)} />
+                <AdminDetailItem label="Check-in date" value={formatAdminDate(selectedReservation.checkInDate)} />
+                <AdminDetailItem label="Check-out date" value={formatAdminDate(selectedReservation.checkOutDate)} />
+                {selectedReservation.checkedInAt && (
+                   <AdminDetailItem label="Actual Check-in" value={formatAdminDateTime(selectedReservation.checkedInAt)} />
+                )}
+                {selectedReservation.checkedOutAt && (
+                   <AdminDetailItem label="Actual Check-out" value={formatAdminDateTime(selectedReservation.checkedOutAt)} />
+                )}
                 <AdminDetailItem label="Adults" value={String(selectedReservation.adults)} />
                 <AdminDetailItem label="Children" value={String(selectedReservation.children)} />
               </AdminDetailGrid>

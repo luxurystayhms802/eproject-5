@@ -33,6 +33,7 @@ import { usersRouter } from '../modules/users/user.routes.js';
 import { errorHandler } from '../shared/middleware/error-handler.js';
 import { notFoundHandler } from '../shared/middleware/not-found.js';
 export const app = express();
+app.set('trust proxy', true);
 const httpLogger = pinoHttp({
     logger,
     quietReqLogger: true,

@@ -170,4 +170,8 @@ export const receptionApi = {
     const response = await http.post('/maintenance/requests', payload);
     return response.data.data;
   },
+  listUsers: async (params = {}) => {
+    const response = await http.get('/users', withParams({ limit: 100, ...params }));
+    return response.data.data;
+  },
 };

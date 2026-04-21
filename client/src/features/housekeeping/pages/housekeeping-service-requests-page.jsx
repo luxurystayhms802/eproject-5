@@ -44,6 +44,22 @@ export const HousekeepingServiceRequestsPage = () => {
     [requests]
   );
 
+  const groupedRequests = useMemo(() => {
+    const groups = {};
+    for (const req of requests) {
+      const resId = req.reservation?.id || 'unlinked';
+      if (!groups[resId]) {
+        groups[resId] = {
+          reservation: req.reservation,
+          guest: req.guest,
+          requests: [],
+        };
+      }
+      groups[resId].requests.push(req);
+    }
+    return Object.values(groups);
+  }, [requests]);
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -100,68 +116,80 @@ export const HousekeepingServiceRequestsPage = () => {
               ))}
             </div>
           ) : requests.length > 0 ? (
-            <div className="space-y-3">
-              {requests.map((request) => {
-                const draftStatus = statusDrafts[request.id] ?? request.status;
-                const isCompleted = ['completed', 'cancelled'].includes(request.status);
-                
-                return (
-                  <div
-                    key={request.id}
-                    className="grid gap-4 rounded-[24px] border border-[var(--border)] bg-white/80 p-5 xl:grid-cols-[minmax(0,1.2fr)_auto]"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <StatusBadge value={request.status} />
-                        <StatusBadge value={request.requestType} className="bg-slate-100 text-slate-700" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl text-[var(--primary)] [font-family:var(--font-display)]">
-                          {getDisplayName(request.reservation?.guest, 'Guest service')}
-                        </h3>
-                        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                          {request.reservation?.reservationCode ?? 'Reservation'} | Preferred {request.preferredTime || 'Immediate'}
-                        </p>
-                      </div>
-                      <p className="text-sm leading-6 text-[var(--muted-foreground)]">{request.description}</p>
-                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
-                        Created {formatReceptionDateTime(request.createdAt)}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-3 xl:min-w-[220px]">
-                      <select
-                        className={receptionFieldClassName}
-                        name={`service-status-${request.id}`}
-                        value={draftStatus}
-                        onChange={(event) =>
-                          setStatusDrafts((current) => ({ ...current, [request.id]: event.target.value }))
-                        }
-                        disabled={isCompleted}
-                      >
-                        {serviceRequestStatusOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        disabled={updateRequestMutation.isPending || draftStatus === request.status || isCompleted}
-                        onClick={() =>
-                          updateRequestMutation.mutate({
-                            requestId: request.id,
-                            payload: { status: draftStatus },
-                          })
-                        }
-                      >
-                        Save status
-                      </Button>
-                    </div>
+            <div className="space-y-4">
+              {groupedRequests.map((group) => (
+                <div key={group.reservation?.id || 'unlinked'} className="space-y-3 rounded-xl border border-[rgba(16,36,63,0.06)] bg-slate-50/50 p-3 shadow-sm">
+                  <div className="flex items-center gap-2 px-2 pt-1 pb-2 border-b border-[rgba(16,36,63,0.04)]">
+                    <ConciergeBell className="h-4 w-4 text-[var(--accent)]" />
+                    <h3 className="text-[12px] font-bold uppercase tracking-[0.16em] text-[var(--primary)]">
+                      {group.reservation ? `${group.reservation.room?.roomNumber ? `Room ${group.reservation.room.roomNumber} | ` : ''}${getDisplayName(group.guest, 'Guest')}` : 'Unlinked / General Requests'}
+                    </h3>
                   </div>
-                );
-              })}
+                  <div className="space-y-3">
+                    {group.requests.map((request) => {
+                      const draftStatus = statusDrafts[request.id] ?? request.status;
+                      const isCompleted = ['completed', 'cancelled'].includes(request.status);
+                      
+                      return (
+                        <div
+                          key={request.id}
+                          className="grid gap-4 rounded-[20px] border border-[var(--border)] bg-white p-5 xl:grid-cols-[minmax(0,1.2fr)_auto]"
+                        >
+                          <div className="space-y-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <StatusBadge value={request.status} />
+                              <StatusBadge value={request.requestType} className="bg-slate-100 text-slate-700" />
+                            </div>
+                            <div>
+                              <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                                Preferred timing: {request.preferredTime ? formatReceptionDateTime(request.preferredTime) : 'Immediate fulfillment'}
+                              </p>
+                            </div>
+                            <p className="text-sm leading-6 font-medium text-[var(--primary)]">{request.description}</p>
+                            <div className="flex flex-wrap items-center gap-4">
+                              <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[var(--muted-foreground)] whitespace-nowrap">
+                                Created {formatReceptionDateTime(request.createdAt)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-3 xl:min-w-[220px]">
+                            <select
+                              className={receptionFieldClassName}
+                              name={`service-status-${request.id}`}
+                              value={draftStatus}
+                              onChange={(event) =>
+                                setStatusDrafts((current) => ({ ...current, [request.id]: event.target.value }))
+                              }
+                              disabled={isCompleted}
+                            >
+                              {serviceRequestStatusOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+
+                            <Button
+                              type="button"
+                              variant="outline"
+                              disabled={updateRequestMutation.isPending || isCompleted || draftStatus === request.status}
+                              onClick={() =>
+                                updateRequestMutation.mutate({
+                                  requestId: request.id,
+                                  payload: { status: draftStatus },
+                                })
+                              }
+                            >
+                              Save status
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-[var(--border)] bg-white/60 p-6 text-sm text-[var(--muted-foreground)]">

@@ -57,6 +57,9 @@ export const ROUTE_PERMISSIONS = {
   '/reception/maintenance': 'maintenance.read',
   '/reception/inquiries': 'inquiries.read',
   '/reception/notifications': 'notifications.read',
+  '/reception/faqs': 'faqs.read',
+  '/reception/arrivals': 'reservations.read',
+  '/reception/departures': 'reservations.read',
 
   '/manager/occupancy': 'rooms.read',
   '/manager/reservations': 'reservations.read',

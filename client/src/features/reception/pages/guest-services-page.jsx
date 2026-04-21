@@ -22,8 +22,11 @@ import {
   useCreateReceptionServiceRequest,
   useReceptionServiceRequests,
   useUpdateReceptionServiceRequest,
+  useReceptionUsers,
 } from '@/features/reception/hooks';
 import { validateReceptionServiceRequestForm } from '@/features/reception/utils';
+
+const SUPPORTABLE_ROLES = ['admin', 'manager', 'receptionist', 'housekeeping', 'maintenance'];
 
 const initialServiceDraft = {
   reservationId: '',
@@ -38,10 +41,23 @@ export const GuestServicesPage = () => {
   const requestsQuery = useReceptionServiceRequests();
   const createRequestMutation = useCreateReceptionServiceRequest();
   const updateRequestMutation = useUpdateReceptionServiceRequest();
+  const usersQuery = useReceptionUsers({ limit: 100 });
+
+  const staff = useMemo(
+    () => (usersQuery.data ?? []).filter((item) => SUPPORTABLE_ROLES.includes(item.role)),
+    [usersQuery.data],
+  );
 
   const [filters, setFilters] = useState({ status: '', requestType: '' });
   const [draft, setDraft] = useState(initialServiceDraft);
-  const [statusDrafts, setStatusDrafts] = useState({});
+  const [drafts, setDrafts] = useState({});
+
+  const updateDraft = (requestId, patch) => {
+    setDrafts((current) => ({
+      ...current,
+      [requestId]: { ...(current[requestId] || {}), ...patch },
+    }));
+  };
 
   const eligibleReservations = useMemo(() => {
     const merged = [...(checkedInQuery.data ?? []), ...(confirmedQuery.data ?? [])];
@@ -73,6 +89,22 @@ export const GuestServicesPage = () => {
     }),
     [eligibleReservations.length, requests],
   );
+
+  const groupedRequests = useMemo(() => {
+    const groups = {};
+    for (const req of requests) {
+      const resId = req.reservation?.id || 'unlinked';
+      if (!groups[resId]) {
+        groups[resId] = {
+          reservation: req.reservation,
+          guest: req.guest,
+          requests: [],
+        };
+      }
+      groups[resId].requests.push(req);
+    }
+    return Object.values(groups);
+  }, [requests]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -224,65 +256,98 @@ export const GuestServicesPage = () => {
             </div>
           ) : requests.length > 0 ? (
             <div className="space-y-3">
-              {requests.map((request) => {
-                const draftStatus = statusDrafts[request.id] ?? request.status;
-                return (
-                  <div
-                    key={request.id}
-                    className="grid gap-4 rounded-[24px] border border-[var(--border)] bg-white/80 p-5 xl:grid-cols-[minmax(0,1.2fr)_auto]"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <StatusBadge value={request.status} />
-                        <StatusBadge value={request.requestType} className="bg-slate-100 text-slate-700" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl text-[var(--primary)] [font-family:var(--font-display)]">
-                          {getDisplayName(request.reservation?.guest, 'Guest service')}
-                        </h3>
-                        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                          {request.reservation?.reservationCode ?? 'Reservation pending'} | Preferred {request.preferredTime || 'Immediate'}
-                        </p>
-                      </div>
-                      <p className="text-sm leading-6 text-[var(--muted-foreground)]">{request.description}</p>
-                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
-                        Created {formatReceptionDateTime(request.createdAt)}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-3 xl:min-w-[220px]">
-                      <select
-                        className={receptionFieldClassName}
-                        name={`service-status-${request.id}`}
-                        value={draftStatus}
-                        onChange={(event) =>
-                          setStatusDrafts((current) => ({ ...current, [request.id]: event.target.value }))
-                        }
-                        disabled={['completed', 'cancelled'].includes(request.status)}
-                      >
-                        {serviceRequestStatusOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        disabled={updateRequestMutation.isPending || draftStatus === request.status || ['completed', 'cancelled'].includes(request.status)}
-                        onClick={() =>
-                          updateRequestMutation.mutate({
-                            requestId: request.id,
-                            payload: { status: draftStatus },
-                          })
-                        }
-                      >
-                        Save status
-                      </Button>
-                    </div>
+              {groupedRequests.map((group) => (
+                <div key={group.reservation?.id || 'unlinked'} className="space-y-3 rounded-xl border border-[rgba(16,36,63,0.06)] bg-white/40 p-3 shadow-sm">
+                  <div className="flex items-center gap-2 px-2 pt-1 pb-2 border-b border-[rgba(16,36,63,0.04)]">
+                    <ConciergeBell className="h-4 w-4 text-[var(--accent)]" />
+                    <h3 className="text-[12px] font-bold uppercase tracking-[0.16em] text-[var(--primary)]">
+                      {group.reservation ? `${group.reservation.room?.roomNumber ? `Room ${group.reservation.room.roomNumber} | ` : ''}${getDisplayName(group.guest, 'Guest')} (${group.reservation.reservationCode})` : 'Unlinked / General Requests'}
+                    </h3>
                   </div>
-                );
-              })}
+                  <div className="space-y-3">
+                    {group.requests.map((request) => {
+                      const requestDraft = drafts[request.id] ?? {
+                        status: request.status,
+                        assignedToUserId: request.assignedToUserId ?? '',
+                      };
+                      return (
+                        <div
+                          key={request.id}
+                          className="grid gap-4 rounded-[20px] border border-[var(--border)] bg-white p-5 xl:grid-cols-[minmax(0,1.2fr)_auto]"
+                        >
+                          <div className="space-y-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <StatusBadge value={request.status} />
+                              <StatusBadge value={request.requestType} className="bg-slate-100 text-slate-700" />
+                            </div>
+                            <div>
+                              <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                                Preferred timing: {request.preferredTime ? formatReceptionDateTime(request.preferredTime) : 'Immediate fulfillment'}
+                              </p>
+                            </div>
+                            <p className="text-sm leading-6 font-medium text-[var(--primary)]">{request.description}</p>
+                            <div className="flex flex-wrap items-center gap-4">
+                              <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
+                                Assigned to: <strong className="font-semibold text-[var(--primary)]">{getDisplayName(request.assignedTo, 'Unassigned')}</strong>
+                              </p>
+                              <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[var(--muted-foreground)] border-l border-slate-200 pl-4">
+                                Created {formatReceptionDateTime(request.createdAt)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-3 xl:min-w-[220px]">
+                            <select
+                              className={receptionFieldClassName}
+                              value={requestDraft.status}
+                              onChange={(event) => updateDraft(request.id, { status: event.target.value })}
+                              disabled={['completed', 'cancelled'].includes(request.status)}
+                            >
+                              {serviceRequestStatusOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                            
+                            <select
+                              className={receptionFieldClassName}
+                              value={requestDraft.assignedToUserId}
+                              onChange={(event) => updateDraft(request.id, { assignedToUserId: event.target.value })}
+                              disabled={['completed', 'cancelled'].includes(request.status)}
+                            >
+                              <option value="">Unassigned</option>
+                              {staff.map((member) => (
+                                <option key={member.id} value={member.id}>
+                                  {getDisplayName(member, member.email)}
+                                </option>
+                              ))}
+                            </select>
+
+                            <Button
+                              type="button"
+                              variant="outline"
+                              disabled={
+                                updateRequestMutation.isPending || 
+                                (requestDraft.status === request.status && requestDraft.assignedToUserId === (request.assignedToUserId ?? '')) || 
+                                ['completed', 'cancelled'].includes(request.status)
+                              }
+                              onClick={() =>
+                                updateRequestMutation.mutate({
+                                  requestId: request.id,
+                                  payload: { status: requestDraft.status, assignedToUserId: requestDraft.assignedToUserId || null },
+                                })
+                              }
+                            >
+                              Save update
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-[var(--border)] bg-white/60 p-6 text-sm text-[var(--muted-foreground)]">

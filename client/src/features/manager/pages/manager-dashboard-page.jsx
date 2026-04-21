@@ -160,7 +160,7 @@ export const ManagerDashboardPage = () => {
         </div>
       </PageHeader>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <StatsCard title="Occupancy" value={`${cards?.occupancyPercentage ?? 0}%`} description="Live share" icon={Building2} />
         <StatsCard title="Revenue 30d" value={formatCurrency(cards?.revenueThisMonth ?? 0)} description="Captured" icon={Wallet} />
         <StatsCard title="Arrivals" value={String(cards?.todayArrivals ?? 0)} description="Today" icon={ClipboardList} />
