@@ -81,9 +81,10 @@ export const AdminServiceRequestsPage = () => {
   const groupedRequests = useMemo(() => {
     const groups = {};
     for (const req of filteredRequests) {
-      const resId = req.reservation?.id || 'unlinked';
+      const resId = req.reservationId || 'unlinked';
       if (!groups[resId]) {
         groups[resId] = {
+          id: resId,
           reservation: req.reservation,
           guest: req.guest,
           requests: [],
@@ -173,7 +174,7 @@ export const AdminServiceRequestsPage = () => {
         ) : filteredRequests.length ? (
             <div className="space-y-4">
               {groupedRequests.map((group) => (
-                <div key={group.reservation?.id || 'unlinked'} className="space-y-3 rounded-xl border border-[rgba(16,36,63,0.06)] bg-slate-50/50 p-3 shadow-sm">
+                <div key={group.id} className="space-y-3 rounded-xl border border-[rgba(16,36,63,0.06)] bg-slate-50/50 p-3 shadow-sm">
                   <div className="flex items-center gap-2 px-2 pt-1 pb-2 border-b border-[rgba(16,36,63,0.04)]">
                     <h3 className="text-[12px] font-bold uppercase tracking-[0.16em] text-[var(--primary)]">
                       {group.reservation ? `${group.reservation.room?.roomNumber ? `Room ${group.reservation.room.roomNumber} | ` : ''}${getDisplayName(group.guest, 'Guest')} (${group.reservation.reservationCode})` : 'Unlinked / General Requests'}

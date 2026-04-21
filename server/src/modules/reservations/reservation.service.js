@@ -957,4 +957,70 @@ export const reservationService = {
             housekeepingTask,
         };
     },
+    async handleOverstays(settings, context) {
+        const todayMidnight = getStartOfDay(new Date());
+        
+        // Find overdue checked-in reservations
+        const overdueReservations = await ReservationModel.find({
+            deletedAt: null,
+            status: 'checked_in',
+            checkOutDate: { $lt: todayMidnight }
+        }).lean();
+
+        if (overdueReservations.length === 0) return 0;
+
+        const overstayFlatFee = settings.nightAuditSettings?.overstayFlatFee ?? 0;
+        let processedCount = 0;
+
+        for (const reservation of overdueReservations) {
+            try {
+                const chargeAmount = overstayFlatFee > 0 ? overstayFlatFee : Number(reservation.roomRate);
+                
+                const newCheckOutDate = new Date(reservation.checkOutDate);
+                newCheckOutDate.setDate(newCheckOutDate.getDate() + 1);
+
+                const updatedReservation = await reservationRepository.updateById(reservation._id.toString(), {
+                    checkOutDate: newCheckOutDate,
+                    nights: reservation.nights + 1,
+                    notes: reservation.notes ? `${reservation.notes}\n[System] Auto-extended for overstay.` : '[System] Auto-extended for overstay.'
+                });
+
+                if (updatedReservation) {
+                    await auditService.createLog({
+                        userId: context.actorUserId,
+                        action: 'reservation.auto_extend',
+                        entityType: 'reservation',
+                        entityId: reservation._id.toString(),
+                        before: serializeReservation(reservation),
+                        after: serializeReservation(updatedReservation.toObject()),
+                        ip: null,
+                        userAgent: 'System Night Audit',
+                    });
+
+                    await billingService.createFolioCharge({
+                        reservationId: reservation._id.toString(),
+                        chargeType: 'late_checkout',
+                        description: 'System Auto-charge: Late Checkout / Overstay penalty',
+                        unitPrice: chargeAmount,
+                        quantity: 1,
+                        chargeDate: new Date(),
+                    }, context);
+
+                    await notificationsService.createNotification({
+                        type: 'reservation',
+                        title: 'Guest overstayed - Auto extended',
+                        message: `Reservation ${reservation.reservationCode} has overstayed. It was extended by 1 day and an overstay fee was charged.`,
+                        targetRoles: ['admin', 'receptionist', 'manager'],
+                        targetUserIds: [getEntityId(reservation.guestUserId)],
+                        link: `/admin/reservations`,
+                        priority: 'medium',
+                    });
+                    processedCount++;
+                }
+            } catch (err) {
+                console.error({ err, reservationId: reservation._id }, 'Failed to auto-extend overstay reservation');
+            }
+        }
+        return processedCount;
+    },
 };

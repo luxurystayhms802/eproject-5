@@ -47,9 +47,10 @@ export const HousekeepingServiceRequestsPage = () => {
   const groupedRequests = useMemo(() => {
     const groups = {};
     for (const req of requests) {
-      const resId = req.reservation?.id || 'unlinked';
+      const resId = req.reservationId || 'unlinked';
       if (!groups[resId]) {
         groups[resId] = {
+          id: resId,
           reservation: req.reservation,
           guest: req.guest,
           requests: [],
@@ -118,7 +119,7 @@ export const HousekeepingServiceRequestsPage = () => {
           ) : requests.length > 0 ? (
             <div className="space-y-4">
               {groupedRequests.map((group) => (
-                <div key={group.reservation?.id || 'unlinked'} className="space-y-3 rounded-xl border border-[rgba(16,36,63,0.06)] bg-slate-50/50 p-3 shadow-sm">
+                <div key={group.id} className="space-y-3 rounded-xl border border-[rgba(16,36,63,0.06)] bg-slate-50/50 p-3 shadow-sm">
                   <div className="flex items-center gap-2 px-2 pt-1 pb-2 border-b border-[rgba(16,36,63,0.04)]">
                     <ConciergeBell className="h-4 w-4 text-[var(--accent)]" />
                     <h3 className="text-[12px] font-bold uppercase tracking-[0.16em] text-[var(--primary)]">

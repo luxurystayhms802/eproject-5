@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import { logger } from '../../config/logger.js';
 import { ReservationModel } from '../reservations/reservation.model.js';
 import { reservationService } from '../reservations/reservation.service.js';
+import { SettingModel } from '../settings/setting.model.js';
 import { getStartOfDay } from '../../shared/utils/reservations.js';
 
 let activeNightAuditTask = null;
@@ -29,29 +30,39 @@ export const cronService = {
                     checkInDate: { $lt: todayMidnight }
                 }).select('_id').lean();
 
-                if (overdueReservations.length === 0) {
-                    logger.info('Night audit complete: No overdue arrivals found.');
-                    return;
-                }
-
-                logger.info(`Night audit found ${overdueReservations.length} overdue arrivals. Processing...`);
-
                 const systemContext = {
                     actorRole: 'system',
                     request: null
                 };
 
-                let processedCount = 0;
-                for (const reservation of overdueReservations) {
-                    try {
-                        await reservationService.markAsMissedArrival(reservation._id.toString(), systemContext);
-                        processedCount++;
-                    } catch (error) {
-                        logger.error({ err: error, reservationId: reservation._id }, 'Failed to mark reservation as missed arrival during night audit');
+                // Section 1: Handle Missed Arrivals
+                let missedCount = 0;
+                if (overdueReservations.length > 0) {
+                    logger.info(`Night audit found ${overdueReservations.length} overdue arrivals. Processing...`);
+                    for (const reservation of overdueReservations) {
+                        try {
+                            await reservationService.markAsMissedArrival(reservation._id.toString(), systemContext);
+                            missedCount++;
+                        } catch (error) {
+                            logger.error({ err: error, reservationId: reservation._id }, 'Failed to mark reservation as missed arrival during night audit');
+                        }
                     }
+                    logger.info(`Night audit: Successfully marked ${missedCount}/${overdueReservations.length} reservations as missed arrival.`);
+                } else {
+                    logger.info('Night audit: No overdue arrivals found.');
                 }
 
-                logger.info(`Night audit complete: Successfully marked ${processedCount}/${overdueReservations.length} reservations as missed arrival.`);
+                // Section 2: Handle Overstays
+                const settings = await SettingModel.findOne().sort({ createdAt: -1 }).lean();
+                if (settings?.nightAuditSettings?.enableAutoExtendOverstay) {
+                    logger.info('Night audit: Processing auto-extend for overstays based on hotel settings...');
+                    const overstayCount = await reservationService.handleOverstays(settings, systemContext);
+                    logger.info(`Night audit: Successfully auto-extended and charged ${overstayCount} overstay reservations.`);
+                } else {
+                    logger.info('Night audit: Overstay auto-extend is disabled in hotel settings.');
+                }
+
+                logger.info('Night audit job completed successfully.');
             } catch (error) {
                 logger.error({ err: error }, 'Night audit job failed');
             }

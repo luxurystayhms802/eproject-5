@@ -26,6 +26,10 @@ const settingSchema = new Schema({
     checkInTime: { type: String, required: true, default: '14:00' },
     checkOutTime: { type: String, required: true, default: '12:00' },
     nightAuditTime: { type: String, required: true, default: '02:00' },
+    nightAuditSettings: {
+        enableAutoExtendOverstay: { type: Boolean, default: false },
+        overstayFlatFee: { type: Number, default: 0 },
+    },
     cancellationPolicy: { type: String, required: true },
     invoiceTerms: { type: String, required: true },
     logoUrl: { type: String, default: null },

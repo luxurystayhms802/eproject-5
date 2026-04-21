@@ -120,164 +120,257 @@ const buildPaymentsTable = (payments = []) => {
 const baseStyles = `
   :root {
     color-scheme: light;
-    --ink: #10243f;
-    --muted: #5d6b7e;
-    --line: #d9e2ec;
+    --ink: #111827;
+    --ink-light: #374151;
+    --muted: #6b7280;
+    --border: #e5e7eb;
     --accent: #b88c4a;
-    --paper: #fffdf9;
-    --soft: #f6efe3;
+    --accent-light: rgba(184, 140, 74, 0.08);
+    --paper: #ffffff;
+    --surface: #f9fafb;
   }
 
   * { box-sizing: border-box; }
 
+  @page {
+    size: A4;
+    margin: 0mm;
+  }
+
   body {
     margin: 0;
-    padding: 32px;
-    background: var(--paper);
+    padding: 0;
+    background: #e2e8f0;
     color: var(--ink);
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
 
   .sheet {
-    max-width: 980px;
-    margin: 0 auto;
-    border: 1px solid var(--line);
-    border-radius: 24px;
-    overflow: hidden;
-    background: white;
+    max-width: 210mm;
+    margin: 40px auto;
+    background: var(--paper);
+    padding: 40px 50px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    min-height: 297mm;
   }
 
   .header {
-    padding: 28px 32px 20px;
-    border-bottom: 1px solid var(--line);
-    background: linear-gradient(135deg, #ffffff 0%, var(--soft) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-bottom: 30px;
+    border-bottom: 2px solid var(--accent-light);
+    margin-bottom: 30px;
+  }
+
+  .logo {
+    height: 80px;
+    max-width: 200px;
+    object-fit: contain;
+    margin-bottom: 16px;
   }
 
   .eyebrow {
-    margin: 0 0 10px;
+    margin: 0 0 12px;
     font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.28em;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
     color: var(--accent);
-    font-family: Arial, sans-serif;
   }
 
   h1 {
-    margin: 0;
-    font-size: 38px;
-    line-height: 1.08;
-    font-weight: 600;
+    margin: 0 0 8px;
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--ink);
+    font-family: "Georgia", serif;
   }
 
   .copy {
-    margin: 12px 0 0;
+    margin: 0;
     color: var(--muted);
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    line-height: 1.7;
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 400px;
   }
 
   .section {
-    padding: 24px 32px;
-    border-bottom: 1px solid var(--line);
+    margin-bottom: 32px;
   }
 
   .grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    gap: 20px;
   }
 
-  .card {
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    padding: 16px 18px;
-    background: #ffffff;
+  .info-group {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
   }
 
-  .card-label {
-    margin: 0;
+  .info-group .label {
+    margin: 0 0 6px;
     font-size: 10px;
     font-weight: 700;
-    letter-spacing: 0.24em;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--muted);
-    font-family: Arial, sans-serif;
   }
 
-  .card-value {
-    margin: 10px 0 0;
-    font-size: 22px;
+  .info-group .value {
+    margin: 0 0 4px;
+    font-size: 16px;
     font-weight: 600;
+    color: var(--ink);
   }
 
-  .card-copy {
-    margin: 8px 0 0;
-    color: var(--muted);
-    font-family: Arial, sans-serif;
+  .info-group .sub-value {
+    margin: 0;
     font-size: 13px;
-    line-height: 1.6;
+    color: var(--ink-light);
   }
 
   h2 {
-    margin: 0 0 14px;
-    font-size: 22px;
-    font-weight: 600;
+    margin: 0 0 16px;
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
   }
 
   table {
     width: 100%;
-    border-collapse: collapse;
-    font-family: Arial, sans-serif;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
   }
 
   th,
   td {
-    border: 1px solid var(--line);
-    padding: 12px 14px;
+    padding: 12px 16px;
     text-align: left;
-    vertical-align: top;
     font-size: 13px;
-    line-height: 1.6;
+    line-height: 1.5;
   }
 
   th {
-    background: #f8fafc;
+    background: var(--surface);
     color: var(--muted);
-    font-size: 11px;
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
   }
 
-  .totals {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
+  td {
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-light);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  .totals-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+  }
+
+  .totals-box {
+    width: 320px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .totals-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--ink-light);
+  }
+
+  .totals-row.grand-total {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .totals-row.balance {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--accent);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
   }
 
   .empty-state {
-    border: 1px dashed var(--line);
-    border-radius: 16px;
-    padding: 18px;
+    padding: 24px;
+    text-align: center;
     color: var(--muted);
-    font-family: Arial, sans-serif;
     font-size: 13px;
-    line-height: 1.7;
-    background: #fbfdff;
+    background: var(--surface);
+    border-radius: 8px;
+    border: 1px dashed var(--border);
   }
 
   .footer {
-    padding: 18px 32px 28px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    text-align: center;
     color: var(--muted);
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-    line-height: 1.8;
+    font-size: 11px;
+    line-height: 1.6;
   }
 
+  .stamp {
+    position: absolute;
+    top: 60px;
+    right: 50px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    padding: 8px 16px;
+    border: 2px solid;
+    border-radius: 4px;
+    transform: rotate(15deg);
+    opacity: 0.7;
+    text-transform: uppercase;
+  }
+
+  .stamp.paid { color: #16a34a; border-color: #16a34a; }
+  .stamp.void { color: #dc2626; border-color: #dc2626; }
+
   @media print {
-    body { padding: 0; background: white; }
-    .sheet { border: 0; border-radius: 0; }
+    body { background: white; padding: 0; }
+    .sheet { 
+      margin: 15mm auto !important; 
+      box-shadow: none; 
+      max-width: 100%; 
+      border-radius: 0; 
+      padding: 0 10mm; 
+    }
   }
 `;
 
@@ -322,8 +415,12 @@ export const printInvoiceDocument = ({
   const roomLabel = invoice?.reservation?.roomType?.name ?? invoice?.reservation?.roomTypeSnapshot?.name ?? 'Hotel stay';
 
   const bodyHtml = `
-    <div class="sheet">
+    <div class="sheet" style="position: relative;">
+      ${invoice?.status === 'paid' ? '<div class="stamp paid">PAID IN FULL</div>' : ''}
+      ${invoice?.status === 'void' ? '<div class="stamp void">VOIDED</div>' : ''}
+      
       <section class="header">
+        <img src="/invoice.png" alt="Logo" class="logo" onerror="this.src='/favicon.svg'; this.onerror=null;" />
         <p class="eyebrow">${escapeHtml(brandLabel)}</p>
         <h1>${escapeHtml(brandName)}</h1>
         <p class="copy">Professional invoice generated from the LuxuryStay hospitality billing workflow.</p>
@@ -331,25 +428,20 @@ export const printInvoiceDocument = ({
 
       <section class="section">
         <div class="grid">
-          <div class="card">
-            <p class="card-label">Invoice number</p>
-            <p class="card-value">${formatLabel(invoice?.invoiceNumber, 'Invoice pending')}</p>
-            <p class="card-copy">Issued ${formatDate(invoice?.issuedAt)}</p>
+          <div class="info-group">
+            <p class="label">Invoice number</p>
+            <p class="value">${formatLabel(invoice?.invoiceNumber, 'Invoice pending')}</p>
+            <p class="sub-value">Issued ${formatDate(invoice?.issuedAt)}</p>
           </div>
-          <div class="card">
-            <p class="card-label">Status</p>
-            <p class="card-value">${formatLabel(invoice?.status, 'draft')}</p>
-            <p class="card-copy">Balance due ${formatCurrency(invoice?.balanceAmount)}</p>
+          <div class="info-group">
+            <p class="label">Reservation Code</p>
+            <p class="value">${formatLabel(reservationCode)}</p>
+            <p class="sub-value">${formatLabel(roomLabel)}</p>
           </div>
-          <div class="card">
-            <p class="card-label">Guest</p>
-            <p class="card-value">${escapeHtml(guestName)}</p>
-            <p class="card-copy">${formatLabel(invoice?.guest?.email, 'No guest email')}</p>
-          </div>
-          <div class="card">
-            <p class="card-label">Reservation</p>
-            <p class="card-value">${formatLabel(reservationCode)}</p>
-            <p class="card-copy">${formatLabel(roomLabel)}</p>
+          <div class="info-group" style="grid-column: span 2;">
+            <p class="label">Guest Details</p>
+            <p class="value">${escapeHtml(guestName)}</p>
+            <p class="sub-value">${formatLabel(invoice?.guest?.email, 'No guest email')} • ${formatLabel(invoice?.guest?.phone, 'No phone number')}</p>
           </div>
         </div>
       </section>
@@ -359,36 +451,50 @@ export const printInvoiceDocument = ({
         ${buildLineItemsTable(charges)}
       </section>
 
+      ${payments.length > 0 ? `
       <section class="section">
         <h2>Payment movement</h2>
         ${buildPaymentsTable(payments)}
       </section>
+      ` : ''}
 
       <section class="section">
-        <h2>Invoice totals</h2>
-        <div class="totals">
-          <div class="card">
-            <p class="card-label">Subtotal</p>
-            <p class="card-value">${formatCurrency(invoice?.subtotal)}</p>
-          </div>
-          <div class="card">
-            <p class="card-label">Tax</p>
-            <p class="card-value">${formatCurrency(invoice?.taxAmount)}</p>
-          </div>
-          <div class="card">
-            <p class="card-label">Discount</p>
-            <p class="card-value">${formatCurrency(invoice?.discountAmount)}</p>
-          </div>
-          <div class="card">
-            <p class="card-label">Total due</p>
-            <p class="card-value">${formatCurrency(invoice?.totalAmount)}</p>
-            <p class="card-copy">Paid ${formatCurrency(invoice?.paidAmount)} | Balance ${formatCurrency(invoice?.balanceAmount)}</p>
+        <div class="totals-container">
+          <div class="totals-box">
+            <div class="totals-row">
+              <span>Subtotal</span>
+              <span>${formatCurrency(invoice?.subtotal)}</span>
+            </div>
+            <div class="totals-row">
+              <span>Taxes</span>
+              <span>${formatCurrency(invoice?.taxAmount)}</span>
+            </div>
+            ${Number(invoice?.discountAmount) > 0 ? `
+            <div class="totals-row" style="color: #16a34a;">
+              <span>Discounts Applied</span>
+              <span>-${formatCurrency(invoice?.discountAmount)}</span>
+            </div>
+            ` : ''}
+            
+            <div class="totals-row grand-total">
+              <span>Total Amount</span>
+              <span>${formatCurrency(invoice?.totalAmount)}</span>
+            </div>
+            <div class="totals-row" style="margin-top: 8px;">
+              <span>Amount Paid</span>
+              <span>${formatCurrency(invoice?.paidAmount)}</span>
+            </div>
+            <div class="totals-row balance">
+              <span>Balance Due</span>
+              <span>${formatCurrency(invoice?.balanceAmount)}</span>
+            </div>
           </div>
         </div>
       </section>
 
       <section class="footer">
-        <strong>Invoice terms:</strong> ${escapeHtml(invoiceTerms || invoice?.notes || 'All payments are subject to LuxuryStay Hospitality billing policies and operational review.')}
+        <p><strong>Invoice terms:</strong> ${escapeHtml(invoiceTerms || invoice?.notes || 'All payments are subject to LuxuryStay Hospitality billing policies.')}</p>
+        <p style="margin-top: 8px;">Thank you for choosing ${escapeHtml(brandName)}. We hope to welcome you back soon.</p>
       </section>
     </div>
   `;
@@ -407,53 +513,58 @@ export const printPaymentReceiptDocument = ({
   const receiverName = getReceiverName(payment?.receivedBy);
 
   const bodyHtml = `
-    <div class="sheet">
-      <section class="header">
+    <div class="sheet" style="max-width: 170mm; min-height: 0;">
+      <section class="header" style="padding-bottom: 24px; margin-bottom: 24px;">
+        <img src="/invoice.png" alt="Logo" class="logo" onerror="this.src='/favicon.svg'; this.onerror=null;" style="height: 60px;" />
         <p class="eyebrow">${escapeHtml(brandLabel)}</p>
-        <h1>${escapeHtml(brandName)}</h1>
-        <p class="copy">Payment receipt issued from the LuxuryStay billing and settlement workflow.</p>
+        <h1 style="font-size: 26px;">Official Receipt</h1>
+        <p class="copy" style="font-size: 12px;">Payment acknowledged from the LuxuryStay billing and settlement workflow.</p>
       </section>
 
       <section class="section">
         <div class="grid">
-          <div class="card">
-            <p class="card-label">Invoice</p>
-            <p class="card-value">${formatLabel(invoiceLabel)}</p>
-            <p class="card-copy">${formatLabel(reservationCode)}</p>
+          <div class="info-group">
+            <p class="label">Invoice Reference</p>
+            <p class="value">${formatLabel(invoiceLabel)}</p>
+            <p class="sub-value">${formatLabel(reservationCode)}</p>
           </div>
-          <div class="card">
-            <p class="card-label">Payment amount</p>
-            <p class="card-value">${formatCurrency(payment?.amount)}</p>
-            <p class="card-copy">${formatLabel(payment?.status, 'pending')} via ${formatLabel(payment?.method, 'payment')}</p>
+          <div class="info-group" style="background: var(--accent-light); border-color: var(--accent);">
+            <p class="label" style="color: var(--accent);">Amount Paid</p>
+            <p class="value" style="color: var(--ink); font-size: 22px;">${formatCurrency(payment?.amount)}</p>
+            <p class="sub-value" style="color: var(--accent); font-weight: 600;">${formatLabel(payment?.status, 'pending').toUpperCase()}</p>
           </div>
-          <div class="card">
-            <p class="card-label">Guest</p>
-            <p class="card-value">${escapeHtml(guestName)}</p>
-            <p class="card-copy">${formatLabel(payment?.guest?.email, 'No guest email')}</p>
+          <div class="info-group">
+            <p class="label">Received From</p>
+            <p class="value">${escapeHtml(guestName)}</p>
+            <p class="sub-value">${formatLabel(payment?.guest?.email, 'No guest email')}</p>
           </div>
-          <div class="card">
-            <p class="card-label">Received by</p>
-            <p class="card-value">${escapeHtml(receiverName)}</p>
-            <p class="card-copy">${formatDate(payment?.paidAt)}</p>
+          <div class="info-group">
+            <p class="label">Processed By</p>
+            <p class="value">${escapeHtml(receiverName)}</p>
+            <p class="sub-value">${formatDate(payment?.paidAt)}</p>
           </div>
         </div>
       </section>
 
       <section class="section">
-        <h2>Receipt details</h2>
+        <h2>Transaction Details</h2>
         <table>
           <tbody>
-            <tr><th>Reference</th><td>${formatLabel(payment?.referenceNumber, 'No payment reference supplied')}</td></tr>
-            <tr><th>Method</th><td>${formatLabel(payment?.method, 'n/a')}</td></tr>
-            <tr><th>Status</th><td>${formatLabel(payment?.status, 'n/a')}</td></tr>
-            <tr><th>Paid at</th><td>${formatDate(payment?.paidAt)}</td></tr>
-            <tr><th>Notes</th><td>${formatLabel(payment?.notes, 'No payment notes recorded')}</td></tr>
+            <tr><th style="width: 30%;">Payment Method</th><td><strong style="color: var(--ink);">${formatLabel(payment?.method, 'n/a').toUpperCase()}</strong></td></tr>
+            <tr><th>Reference ID</th><td style="font-family: monospace; font-size: 14px;">${formatLabel(payment?.referenceNumber, 'No reference supplied')}</td></tr>
+            <tr><th>Transaction Status</th><td>${formatLabel(payment?.status, 'n/a')}</td></tr>
+            <tr><th>Date & Time</th><td>${formatDate(payment?.paidAt)}</td></tr>
+            ${payment?.notes ? `<tr><th>Comments</th><td>${formatLabel(payment?.notes)}</td></tr>` : ''}
           </tbody>
         </table>
       </section>
 
-      <section class="footer">
-        This receipt reflects the recorded payment state at print time and should be retained alongside the corresponding invoice for audit and guest-service reference.
+      <section class="footer" style="margin-top: 24px; padding-top: 24px; display: flex; flex-direction: column; align-items: center;">
+        <div style="margin-bottom: 24px; width: 200px; text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+          <img src="/e-sign.png" alt="Authorized Signature" style="max-height: 50px; width: auto; display: block; margin: 0 auto 8px;" onerror="this.style.display='none'" />
+          <p style="margin: 0; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink);">Authorized Signature</p>
+        </div>
+        <p style="margin: 0; max-width: 80%;">This receipt reflects the recorded payment state at print time. Please retain this alongside the corresponding invoice for your records.</p>
       </section>
     </div>
   `;
@@ -468,10 +579,10 @@ const buildMetricCards = (metrics = []) =>
         ${metrics
           .map(
             (metric) => `
-              <div class="card">
-                <p class="card-label">${formatLabel(metric.label)}</p>
-                <p class="card-value">${formatLabel(metric.value)}</p>
-                <p class="card-copy">${formatLabel(metric.helper, '')}</p>
+              <div class="info-group">
+                <p class="label">${formatLabel(metric.label)}</p>
+                <p class="value">${formatLabel(metric.value)}</p>
+                <p class="sub-value">${formatLabel(metric.helper, '')}</p>
               </div>
             `,
           )
@@ -498,10 +609,10 @@ const buildSummarySections = (sections = []) =>
                   ${section.rows
                     .map(
                       (row) => `
-                        <div class="card">
-                          <p class="card-label">${formatLabel(row.label)}</p>
-                          <p class="card-value">${formatLabel(row.value)}</p>
-                          <p class="card-copy">${formatLabel(row.helper, '')}</p>
+                        <div class="info-group">
+                          <p class="label">${formatLabel(row.label)}</p>
+                          <p class="value">${formatLabel(row.value)}</p>
+                          <p class="sub-value">${formatLabel(row.helper, '')}</p>
                         </div>
                       `,
                     )
@@ -534,15 +645,15 @@ export const printManagementReportDocument = ({
 
       <section class="section">
         <div class="grid">
-          <div class="card">
-            <p class="card-label">Report title</p>
-            <p class="card-value">${formatLabel(title)}</p>
-            <p class="card-copy">Generated ${formatDate(new Date())}</p>
+          <div class="info-group">
+            <p class="label">Report title</p>
+            <p class="value">${formatLabel(title)}</p>
+            <p class="sub-value">Generated ${formatDate(new Date())}</p>
           </div>
-          <div class="card">
-            <p class="card-label">Reporting range</p>
-            <p class="card-value">${formatLabel(rangeLabel)}</p>
-            <p class="card-copy">Prepared for management oversight and review.</p>
+          <div class="info-group">
+            <p class="label">Reporting range</p>
+            <p class="value">${formatLabel(rangeLabel)}</p>
+            <p class="sub-value">Prepared for management oversight and review.</p>
           </div>
         </div>
       </section>

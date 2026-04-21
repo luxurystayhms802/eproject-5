@@ -158,6 +158,38 @@ export const AdminSettingsPage = () => {
               <label className={adminLabelClassName}><span className={adminLabelTextClassName}>Check-in time</span><input name="checkInTime" type="time" className={adminInputClassName} value={form.checkInTime} onChange={(event) => setForm((current) => ({ ...current, checkInTime: event.target.value }))} /></label>
               <label className={adminLabelClassName}><span className={adminLabelTextClassName}>Check-out time</span><input name="checkOutTime" type="time" className={adminInputClassName} value={form.checkOutTime} onChange={(event) => setForm((current) => ({ ...current, checkOutTime: event.target.value }))} /></label>
               <label className={adminLabelClassName}><span className={adminLabelTextClassName}>Night audit time</span><input name="nightAuditTime" type="time" className={adminInputClassName} value={form.nightAuditTime} onChange={(event) => setForm((current) => ({ ...current, nightAuditTime: event.target.value }))} /></label>
+              
+              <div className="md:col-span-2 space-y-4 rounded-2xl border border-[var(--border)] bg-slate-50/50 p-5 mt-2">
+                <h3 className="text-sm font-semibold text-[var(--primary)] mb-2">Automated Actions (Night Audit)</h3>
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-[var(--accent)] focus:ring-[var(--accent)]"
+                    checked={form.nightAuditSettings?.enableAutoExtendOverstay ?? false}
+                    onChange={(event) => updateNestedField('nightAuditSettings', 'enableAutoExtendOverstay', event.target.checked)}
+                  />
+                  <div className="space-y-1">
+                    <span className="text-sm font-semibold text-[var(--primary)]">Auto-Extend Overstays</span>
+                    <p className="text-xs text-[var(--muted-foreground)]">Automatically extend reservations by 1 day and add an extra charge if guests do not check out on their departure date.</p>
+                  </div>
+                </label>
+                
+                {form.nightAuditSettings?.enableAutoExtendOverstay && (
+                  <label className={`${adminLabelClassName} mt-4`}>
+                    <span className={adminLabelTextClassName}>Overstay / Late Checkout Penalty (PKR)</span>
+                    <input 
+                      name="overstayFlatFee" 
+                      type="number" 
+                      min="0"
+                      className={adminInputClassName} 
+                      value={form.nightAuditSettings?.overstayFlatFee ?? 0} 
+                      onChange={(event) => updateNestedField('nightAuditSettings', 'overstayFlatFee', Number(event.target.value))} 
+                    />
+                    <p className="mt-1.5 text-xs text-[var(--muted-foreground)]">If set to 0 PKR, the system will automatically charge the room's full original night rate.</p>
+                  </label>
+                )}
+              </div>
+
               <label className={adminLabelClassName}><span className={adminLabelTextClassName}>Primary color</span><input name="primaryColor" className={adminInputClassName} value={form.themeSettings?.primaryColor ?? '#10243f'} onChange={(event) => updateNestedField('themeSettings', 'primaryColor', event.target.value)} /></label>
               <label className={adminLabelClassName}><span className={adminLabelTextClassName}>Accent color</span><input name="accentColor" className={adminInputClassName} value={form.themeSettings?.accentColor ?? '#b88c4a'} onChange={(event) => updateNestedField('themeSettings', 'accentColor', event.target.value)} /></label>
             </div>
