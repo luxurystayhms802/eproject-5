@@ -30,6 +30,7 @@ export const BookingPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const resultsRef = useRef(null);
+  const checkoutFormRef = useRef(null);
   const user = useAuthStore((state) => state.user);
   const settingsQuery = useHotelSettings();
   const roomTypesQuery = useRoomTypes({ isActive: true, limit: 24 });
@@ -60,6 +61,30 @@ export const BookingPage = () => {
   const adults = Number.isNaN(rawAdults) ? 1 : Math.max(1, rawAdults);
   const children = Number.isNaN(rawChildren) ? 0 : Math.max(0, rawChildren);
 
+  const slowScrollTo = (ref) => {
+    if (!ref.current) return;
+    const targetPosition = ref.current.getBoundingClientRect().top + window.pageYOffset - 190;
+    const startPosition = window.pageYOffset;
+    const distance = targetPosition - startPosition;
+    let startTime = null;
+
+    const animation = (currentTime) => {
+      if (startTime === null) startTime = currentTime;
+      const timeElapsed = currentTime - startTime;
+      // easeInOutQuad
+      let t = timeElapsed / (1500 / 2); // 1.5 seconds duration
+      let run = 0;
+      if (t < 1) run = (distance / 2) * t * t + startPosition;
+      else {
+        t--;
+        run = (-distance / 2) * (t * (t - 2) - 1) + startPosition;
+      }
+      window.scrollTo(0, run);
+      if (timeElapsed < 1500) requestAnimationFrame(animation);
+    };
+    requestAnimationFrame(animation);
+  };
+
   useEffect(() => {
     setSearchParams({
       roomTypeId: roomTypeId || '',
@@ -71,11 +96,19 @@ export const BookingPage = () => {
   }, [adults, checkInDate, checkOutDate, children, roomTypeId, setSearchParams]);
 
   useEffect(() => {
-    // If the user arrived with a checkInDate in the URL (e.g. from homepage search), auto-scroll to results
-    if (window.location.search.includes('checkInDate') && resultsRef.current) {
+    // Force scroll to top on mount so the smooth scroll effect is visible to the user
+    window.scrollTo(0, 0);
+
+    // If the user arrived with a checkInDate in the URL (e.g. from homepage search), auto-scroll
+    if (window.location.search.includes('checkInDate')) {
       setTimeout(() => {
-        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 500); // Small delay to let the page render properly
+        // If they already have a room selected, scroll to the checkout form. Otherwise, scroll to the grid.
+        if (window.location.search.includes('roomTypeId=') && checkoutFormRef.current) {
+          slowScrollTo(checkoutFormRef);
+        } else if (resultsRef.current) {
+          slowScrollTo(resultsRef);
+        }
+      }, 800); // Increased delay to let the page render and user register the top before scrolling
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -166,34 +199,34 @@ export const BookingPage = () => {
       </section>
 
       {/* Step 1: Stay Configuration Bar */}
-      <section className="px-4 md:px-6 relative lg:sticky lg:top-24 z-30">
+      <section className="px-4 md:px-6 relative lg:sticky lg:top-20 z-30">
         <div className="mx-auto max-w-[1380px]">
-          <Card className="rounded-[32px] border border-[var(--border)] bg-white/95 p-4 shadow-xl backdrop-blur-xl transition-all hover:bg-white md:p-6">
-            <form className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 items-end">
-              <div className="space-y-2 lg:col-span-1">
-                <label className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)] ml-2">Check-in</label>
-                <input type="date" min={getTodayString()} className="w-full rounded-[20px] bg-[var(--accent-soft)] px-5 py-3 font-medium text-[var(--foreground)] border-none outline-none focus:ring-2 focus:ring-[var(--primary)]" {...form.register('checkInDate')} />
+          <Card className="rounded-[24px] border border-[var(--border)] bg-white/95 p-3 shadow-xl backdrop-blur-xl transition-all hover:bg-white md:p-4">
+            <form className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 items-end">
+              <div className="space-y-1 lg:col-span-1">
+                <label className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--muted-foreground)] ml-2">Check-in</label>
+                <input type="date" min={getTodayString()} className="w-full rounded-[16px] bg-[var(--accent-soft)] px-4 py-2.5 text-sm font-medium text-[var(--foreground)] border-none outline-none focus:ring-2 focus:ring-[var(--primary)]" {...form.register('checkInDate')} />
               </div>
-              <div className="space-y-2 lg:col-span-1">
-                <label className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)] ml-2">Check-out</label>
-                <input type="date" min={checkInDate || getTodayString()} className="w-full rounded-[20px] bg-[var(--accent-soft)] px-5 py-3 font-medium text-[var(--foreground)] border-none outline-none focus:ring-2 focus:ring-[var(--primary)]" {...form.register('checkOutDate')} />
+              <div className="space-y-1 lg:col-span-1">
+                <label className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--muted-foreground)] ml-2">Check-out</label>
+                <input type="date" min={checkInDate || getTodayString()} className="w-full rounded-[16px] bg-[var(--accent-soft)] px-4 py-2.5 text-sm font-medium text-[var(--foreground)] border-none outline-none focus:ring-2 focus:ring-[var(--primary)]" {...form.register('checkOutDate')} />
               </div>
-              <div className="space-y-2 lg:col-span-1">
-                <label className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)] ml-2">Adults</label>
-                <input type="number" min={1} className="w-full rounded-[20px] bg-[var(--accent-soft)] px-5 py-3 font-medium text-[var(--foreground)] border-none outline-none focus:ring-2 focus:ring-[var(--primary)]" {...form.register('adults', { valueAsNumber: true })} />
+              <div className="space-y-1 lg:col-span-1">
+                <label className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--muted-foreground)] ml-2">Adults</label>
+                <input type="number" min={1} className="w-full rounded-[16px] bg-[var(--accent-soft)] px-4 py-2.5 text-sm font-medium text-[var(--foreground)] border-none outline-none focus:ring-2 focus:ring-[var(--primary)]" {...form.register('adults', { valueAsNumber: true })} />
               </div>
-              <div className="space-y-2 lg:col-span-1">
-                <label className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)] ml-2">Children</label>
-                <input type="number" min={0} className="w-full rounded-[20px] bg-[var(--accent-soft)] px-5 py-3 font-medium text-[var(--foreground)] border-none outline-none focus:ring-2 focus:ring-[var(--primary)]" {...form.register('children', { valueAsNumber: true })} />
+              <div className="space-y-1 lg:col-span-1">
+                <label className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--muted-foreground)] ml-2">Children</label>
+                <input type="number" min={0} className="w-full rounded-[16px] bg-[var(--accent-soft)] px-4 py-2.5 text-sm font-medium text-[var(--foreground)] border-none outline-none focus:ring-2 focus:ring-[var(--primary)]" {...form.register('children', { valueAsNumber: true })} />
               </div>
-              <div className="flex h-full items-end pb-1 lg:col-span-1">
+              <div className="flex h-full items-end lg:col-span-1">
                  {availabilityQuery.isFetching ? (
-                   <div className="h-11 w-full rounded-full flex items-center justify-center bg-slate-100 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)]">
-                     Checking Availability...
+                   <div className="h-10 w-full rounded-full flex items-center justify-center bg-slate-100 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--muted-foreground)]">
+                     Checking...
                    </div>
                  ) : (
-                   <div className="h-11 w-full rounded-full flex items-center justify-center bg-emerald-50 text-emerald-700 text-[11px] font-semibold uppercase tracking-[0.22em]">
-                     {availableCategoryCount} Accommodations Open
+                   <div className="h-10 w-full rounded-full flex items-center justify-center bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-[0.2em]">
+                     {availableCategoryCount} Available
                    </div>
                  )}
               </div>
@@ -228,7 +261,27 @@ export const BookingPage = () => {
               ) : availableRoomTypes.length > 0 ? (
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                   {availableRoomTypes.map((room) => (
-                    <Card key={room.id} className="overflow-hidden rounded-[32px] flex flex-col hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                    <Card 
+                      key={room.id} 
+                      className="overflow-hidden rounded-[32px] flex flex-col hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
+                      onClick={() => {
+                        form.setValue('roomTypeId', room.id);
+                        
+                        // Wait for React to render the new checkout DOM
+                        setTimeout(() => {
+                          // 1. Instantly jump to the top of the section (where 'Back to Rooms' is)
+                          if (resultsRef.current) {
+                            const topTarget = resultsRef.current.getBoundingClientRect().top + window.pageYOffset - 190;
+                            window.scrollTo({ top: topTarget, behavior: 'instant' });
+                          }
+                          
+                          // 2. Smoothly scroll down to the Checkout Form after a tiny delay
+                          setTimeout(() => {
+                            slowScrollTo(checkoutFormRef);
+                          }, 50);
+                        }, 0);
+                      }}
+                    >
                       <div className="h-56 w-full relative">
                         <img src={getPrimaryImage(room)} alt={room.name} className="h-full w-full object-cover" />
                         <div className="absolute bottom-4 left-4 rounded-full bg-white/90 backdrop-blur-md px-4 py-1.5 text-xs font-bold shadow-md text-[var(--primary)]">
@@ -253,11 +306,7 @@ export const BookingPage = () => {
                             )}
                           </div>
                           <Button 
-                            className="w-full rounded-full py-6 text-sm font-semibold tracking-wide" 
-                            onClick={() => {
-                              form.setValue('roomTypeId', room.id);
-                              window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }}
+                            className="w-full rounded-full py-6 text-sm font-semibold tracking-wide pointer-events-none" 
                           >
                             Select this room
                           </Button>
@@ -275,19 +324,19 @@ export const BookingPage = () => {
               )}
             </div>
           ) : (
-            <div className="space-y-6">
-              <Button variant="ghost" className="pl-0 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted-foreground)] hover:text-[var(--primary)]" onClick={() => form.setValue('roomTypeId', '')}>
-                <ChevronLeft className="w-4 h-4 mr-1" /> Back to room Selection
+            <div className="space-y-6 mt-4">
+              <Button variant="outline" className="rounded-full bg-white text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted-foreground)] hover:text-[var(--primary)] shadow-sm hover:shadow-md transition-all border-[var(--border)] px-5 h-10" onClick={() => form.setValue('roomTypeId', '')}>
+                <ChevronLeft className="w-4 h-4 mr-1" /> Back to Rooms
               </Button>
               <div className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr] items-start">
                 
                 {/* Left Column: Room Preview */}
-                <div className="space-y-6">
-                  <Card className="overflow-hidden rounded-[32px] p-0 border border-[var(--border)]">
-                    <div className="h-[400px] w-full" style={buildImageBackdrop(selectedImage, 0)}>
-                      <div className="flex h-[400px] items-end bg-[linear-gradient(180deg,rgba(8,24,44,0.02),rgba(8,24,44,0.55))] p-8 text-white">
-                        <div className="space-y-3">
-                          <h2 className="font-[var(--font-display)] text-5xl leading-none text-white drop-shadow-md">
+                <div className="space-y-4">
+                  <Card className="overflow-hidden rounded-[24px] p-0 border border-[var(--border)]">
+                    <div className="h-[250px] w-full" style={buildImageBackdrop(selectedImage, 0)}>
+                      <div className="flex h-[250px] items-end bg-[linear-gradient(180deg,rgba(8,24,44,0.02),rgba(8,24,44,0.55))] p-6 text-white">
+                        <div className="space-y-2">
+                          <h2 className="font-[var(--font-display)] text-4xl leading-none text-white drop-shadow-md">
                             {selectedRoomType?.name}
                           </h2>
                           <div className="flex flex-wrap gap-3">
@@ -300,31 +349,31 @@ export const BookingPage = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="p-8">
-                       <h3 className="text-xl font-semibold mb-3">Room Overview</h3>
-                       <p className="text-lg leading-relaxed text-[var(--muted-foreground)]">{selectedRoomType?.description || selectedRoomType?.shortDescription || 'An elegant accommodation offering exceptional comfort and refined aesthetics, tailored for your premium stay.'}</p>
+                    <div className="p-6">
+                       <h3 className="text-lg font-semibold mb-2">Room Overview</h3>
+                       <p className="text-[15px] leading-relaxed text-[var(--muted-foreground)]">{selectedRoomType?.description || selectedRoomType?.shortDescription || 'An elegant accommodation offering exceptional comfort and refined aesthetics, tailored for your premium stay.'}</p>
                     </div>
                   </Card>
 
-                  <Card className="rounded-[32px] bg-[linear-gradient(145deg,#091220,#132540)] p-8 text-white before:hidden shadow-xl">
-                    <div className="space-y-5">
-                      <span className="inline-flex rounded-full border border-white/12 bg-white/10 px-4 py-1 text-[10px] font-semibold uppercase tracking-[0.34em] text-[#f3d7aa]">
-                        Important Stay Policies
+                  <Card className="rounded-[24px] bg-[linear-gradient(145deg,#091220,#132540)] p-6 text-white before:hidden shadow-xl">
+                    <div className="space-y-4">
+                      <span className="inline-flex rounded-full border border-white/12 bg-white/10 px-3 py-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-[#f3d7aa]">
+                        Stay Policies
                       </span>
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div className="rounded-[22px] border border-white/12 bg-white/5 p-5">
-                          <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/50">
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <div className="rounded-[16px] border border-white/12 bg-white/5 p-4">
+                          <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-white/50">
                             <ShieldCheck className="h-4 w-4 text-[#f3d7aa]" />
-                            Flexible Cancellation
+                            Cancellation
                           </p>
-                          <p className="mt-3 text-sm leading-6 text-white/80">{branding.cancellationPolicy}</p>
+                          <p className="mt-2 text-[13px] leading-5 text-white/80">{branding.cancellationPolicy}</p>
                         </div>
-                        <div className="rounded-[22px] border border-white/12 bg-white/5 p-5">
-                          <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/50">
+                        <div className="rounded-[16px] border border-white/12 bg-white/5 p-4">
+                          <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-white/50">
                             <Users className="h-4 w-4 text-[#f3d7aa]" />
-                            Guest Account Needed
+                            Guest Account
                           </p>
-                          <p className="mt-3 text-sm leading-6 text-white/80">You'll need a guest account to complete this booking, providing a single portal for all invoices, key updates, and operational support.</p>
+                          <p className="mt-2 text-[13px] leading-5 text-white/80">You'll need a guest account to complete this booking, providing a single portal for all invoices, key updates, and operational support.</p>
                         </div>
                       </div>
                     </div>
@@ -332,19 +381,17 @@ export const BookingPage = () => {
                 </div>
 
                 {/* Right Column: Sticky Checkout Form */}
-                <div className="sticky top-28">
+                <div className="sticky top-20" ref={checkoutFormRef}>
                   <form onSubmit={handleCreateReservation}>
-                    <Card className="rounded-[32px] p-6 md:p-8 shadow-[0_20px_40px_rgba(16,36,63,0.06)] border border-[var(--border)] relative overflow-hidden">
-                      <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
-                        <Sparkles className="w-48 h-48" />
+                    <Card className="rounded-[24px] p-5 md:p-6 shadow-[0_20px_40px_rgba(16,36,63,0.06)] border border-[var(--border)] relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                        <Sparkles className="w-32 h-32" />
                       </div>
                       
-                      <PublicSectionHeading
-                        eyebrow="Finalize Reservation"
-                        title="Checkout Summary"
-                        description=""
-                        className="mb-8"
-                      />
+                      <div className="mb-6">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--accent)] mb-1">Finalize Reservation</p>
+                        <h2 className="font-[var(--font-display)] text-3xl leading-tight text-[var(--primary)]">Checkout Summary</h2>
+                      </div>
 
                       {/* Availability feedback */}
                       <div className="mb-8">
@@ -379,26 +426,36 @@ export const BookingPage = () => {
                       </div>
 
                       {/* Key details */}
-                      <div className="space-y-4 mb-8 opacity-90">
+                      <div className="space-y-3 mb-6 opacity-90">
                         {bookingSummaryItems.map((item) => (
-                          <div key={item.label} className="flex items-center justify-between border-b border-slate-100 pb-4 last:border-0 last:pb-0">
-                            <p className="text-sm font-semibold text-[var(--muted-foreground)]">{item.label}</p>
-                            <p className="font-[var(--font-display)] text-2xl text-[var(--primary)]">{item.value}</p>
+                          <div key={item.label} className="flex items-center justify-between border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                            <p className="text-xs font-semibold text-[var(--muted-foreground)]">{item.label}</p>
+                            <p className="font-[var(--font-display)] text-xl text-[var(--primary)]">{item.value}</p>
                           </div>
                         ))}
                       </div>
 
-                      <div className="space-y-3 mb-8">
-                        <label className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--muted-foreground)]">Any special requests?</label>
-                        <textarea rows={4} className="w-full rounded-[20px] border border-[var(--border)] bg-[var(--accent-soft)] px-5 py-4 text-sm focus:ring-2 focus:ring-[var(--primary)] outline-none transition-colors" placeholder="Arrival preferences, celebration notes, or room setup expectations." {...form.register('specialRequests')} />
+                      <div className="space-y-2 mb-6">
+                        <label className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--muted-foreground)] flex items-center justify-between">
+                          <span>Any special requests?</span>
+                          {form.formState.errors.specialRequests && (
+                            <span className="text-rose-500 lowercase normal-case tracking-normal text-xs">{form.formState.errors.specialRequests.message}</span>
+                          )}
+                        </label>
+                        <textarea 
+                          rows={2} 
+                          className={`w-full rounded-[16px] border ${form.formState.errors.specialRequests ? 'border-rose-500/50 focus:ring-rose-500/20' : 'border-[var(--border)] focus:ring-[var(--primary)]'} bg-[var(--accent-soft)] px-4 py-3 text-[13px] focus:ring-2 outline-none transition-colors`} 
+                          placeholder="Arrival preferences, celebration notes, or room setup expectations." 
+                          {...form.register('specialRequests')} 
+                        />
                       </div>
 
-                      <div className="space-y-4 pt-4 border-t border-slate-200">
+                      <div className="space-y-3 pt-3 border-t border-slate-200">
                         <Button
                           type="submit"
                           variant="secondary"
-                          className="w-full rounded-full py-7 text-lg font-bold tracking-wide shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
-                          disabled={!isValidDateRange || createReservation.isPending || roomTypesQuery.isLoading || availabilityQuery.isFetching || !selectedRoomType || !isSelectedRoomAvailable}
+                          className="w-full rounded-[16px] py-5 text-sm font-bold tracking-wide shadow-md hover:shadow-lg transition-all disabled:opacity-50"
+                          disabled={!isValidDateRange || createReservation.isPending || roomTypesQuery.isLoading || availabilityQuery.isFetching || !selectedRoomType || !isSelectedRoomAvailable || (adults > selectedRoomType?.maxAdults || children > selectedRoomType?.maxChildren)}
                         >
                           {createReservation.isPending
                             ? 'Creating reservation...'

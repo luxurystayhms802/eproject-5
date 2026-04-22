@@ -175,8 +175,8 @@ export const getPublicBranding = (settings) => ({
     loginHeroImageUrl: settings?.websiteSettings?.loginHeroImageUrl || '',
     registerHeroImageUrl: settings?.websiteSettings?.registerHeroImageUrl || '',
   },
-  checkInTime: settings?.checkInTime || '14:00',
-  checkOutTime: settings?.checkOutTime || '12:00',
+  checkInTime: formatTimeFromSettings(settings?.checkInTime || '14:00'),
+  checkOutTime: formatTimeFromSettings(settings?.checkOutTime || '12:00'),
   currency: 'PKR',
   cancellationPolicy:
     settings?.cancellationPolicy || 'Free cancellation up to 24 hours before arrival.',
