@@ -314,12 +314,12 @@ export const AboutPage = () => {
            
            <div className="flex flex-col sm:flex-row gap-6 items-center justify-center w-full max-w-lg mx-auto">
              <Link to="/rooms" className="w-full">
-               <Button className="w-full h-16 md:h-16 rounded-[12px] bg-[#c5a059] text-[11px] font-black uppercase tracking-[0.2em] text-[#0c1622] shadow-[0_0_40px_rgba(197,160,89,0.2)] hover:-translate-y-1 hover:bg-[#d4b272] transition-all">
+               <Button className="w-full h-16 md:h-16 rounded-[12px] bg-[#c5a059] text-[11px] font-black uppercase tracking-[0.2em] text-[#0c1622] shadow-[0_0_40px_rgba(197,160,89,0.2)] hover:bg-[#d4b272] transition-all">
                  View Rooms
                </Button>
              </Link>
              <Link to="/booking" className="w-full">
-               <Button variant="outline" className="w-full h-16 md:h-16 rounded-[12px] border-white/20 bg-transparent text-[11px] font-black uppercase tracking-[0.2em] text-white hover:border-white hover:bg-white/5 transition-all">
+               <Button variant="outline" className="w-full h-16 md:h-16 rounded-[12px] border-white/20 bg-transparent text-[11px] font-black uppercase tracking-[0.2em] text-white hover:border-white hover:bg-white/5 hover:text-white transition-all">
                  Book Now
                </Button>
              </Link>

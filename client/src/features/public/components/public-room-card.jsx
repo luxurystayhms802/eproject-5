@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { BedDouble, Ruler, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, getPrimaryImage } from '@/features/public/utils';
@@ -18,8 +18,13 @@ export const PublicRoomCard = ({
   const roomRouteId = room.slug || room.id;
   const detailsUrl = `/rooms/${roomRouteId}?checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&adults=${adults}&children=${children}`;
 
+  const navigate = useNavigate();
+
   return (
-    <article className={`group flex flex-col ${align === 'horizontal' ? 'lg:flex-row lg:items-center gap-10 lg:gap-20 py-8 lg:py-12 border-b border-black/[0.06] last:border-0' : 'gap-8 mb-16'}`}>
+    <article 
+      onClick={() => navigate(detailsUrl)} 
+      className={`group flex flex-col cursor-pointer transition-colors hover:bg-[#fbf9f6]/30 rounded-[32px] ${align === 'horizontal' ? 'lg:flex-row lg:items-center gap-10 lg:gap-20 py-8 lg:py-12 border-b border-black/[0.06] last:border-0' : 'gap-8 mb-16'}`}
+    >
       
       {/* 📸 Image Section (Standalone, Clean Crop) */}
       <div className={`relative overflow-hidden w-full ${align === 'horizontal' ? 'lg:w-[48%]' : ''}`}>
@@ -103,12 +108,12 @@ export const PublicRoomCard = ({
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-            <Link to={detailsUrl} className="w-full sm:w-auto">
-              <Button variant="ghost" className="w-full rounded-full h-[3.4rem] px-8 text-[#0c1622] hover:bg-[#fbf9f6] text-[11px] font-bold tracking-[0.15em] uppercase hover:text-[#c5a059] transition-colors">
+            <Link to={detailsUrl} className="w-full sm:w-auto" onClick={(e) => e.stopPropagation()}>
+              <Button variant="ghost" className="w-full rounded-full h-[3.4rem] px-8 text-[#0c1622] hover:bg-[#fbf9f6] text-[11px] font-bold tracking-[0.15em] uppercase hover:text-[#c5a059] transition-colors pointer-events-none">
                 View Details
               </Button>
             </Link>
-            <Link to={`/booking?roomTypeId=${room.id}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&adults=${adults}&children=${children}`} className="w-full sm:w-auto">
+            <Link to={`/booking?roomTypeId=${room.id}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&adults=${adults}&children=${children}`} className="w-full sm:w-auto" onClick={(e) => e.stopPropagation()}>
               <Button className="w-full rounded-full h-[3.4rem] px-10 bg-[#0c1622] text-[#ecd3a8] hover:bg-[#152336] shadow-xl hover:shadow-2xl hover:-translate-y-1 text-[11px] font-black tracking-[0.2em] uppercase transition-all duration-300 border-none">
                 Reserve
               </Button>

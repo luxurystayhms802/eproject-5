@@ -3,12 +3,12 @@ import { AuthHero } from '@/features/auth/components/auth-hero';
 export const AuthPageLayout = ({ title, description, children }) => (
   <div className="flex min-h-screen w-full bg-[#f8f5ef] overflow-hidden selection:bg-[var(--accent)]/30 selection:text-[var(--primary)]">
     {/* Left pane - Hero Cinematic */}
-    <div className="hidden lg:block lg:flex-[1.2] relative overflow-hidden">
+    <div className="hidden lg:block lg:flex-[1.5] xl:flex-[1.8] relative overflow-hidden">
       <AuthHero title={title} description={description} />
     </div>
 
     {/* Right pane - Elegant Form Workspace */}
-    <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 sm:px-12 xl:px-24">
+    <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 sm:px-12 lg:pl-10 lg:pr-16 xl:pl-16 xl:pr-24">
       {/* Mobile-only condensed hero */}
       <div className="w-full max-w-md mb-12 lg:hidden text-center space-y-4 animate-in fade-in slide-in-from-top-6 duration-1000">
          <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-[var(--accent)]">Guest Portal</p>

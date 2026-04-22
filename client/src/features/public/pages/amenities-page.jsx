@@ -141,12 +141,7 @@ export const AmenitiesPage = () => {
                     {item.description}
                   </p>
                   
-                  <div className="mt-6 flex items-center">
-                    <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--accent)] opacity-60 transition-opacity group-hover:opacity-100">
-                      Discover More
-                    </span>
-                    <div className="ml-3 h-px w-0 bg-[var(--accent)] transition-all duration-500 group-hover:w-8 opacity-60" />
-                  </div>
+
                 </div>
               );
             })}
