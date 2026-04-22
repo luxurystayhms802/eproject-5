@@ -116,12 +116,12 @@ export const PublicLayout = () => {
             {branding.logoUrl ? (
               <img src={branding.logoUrl} alt={branding.brandName} className="h-16 w-16 rounded-full object-cover text-transparent" />
             ) : (
-              <div className="h-16 w-16 rounded-full border border-white/14 bg-white/8" />
+              <div className="h-16 w-16 rounded-full border border-white/20 bg-white/10" />
             )}
 
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-[#ecd3a8]">{branding.brandName}</p>
-              <p className="mt-1 text-xl leading-none text-white">{branding.hotelName}</p>
+            <div className="flex flex-col justify-center">
+              <p className="hidden md:block text-[10px] font-semibold uppercase tracking-[0.32em] text-[#ecd3a8]">{branding.brandName}</p>
+              <p className="text-lg md:mt-1 md:text-xl leading-none text-white">{branding.hotelName}</p>
             </div>
           </Link>
 
@@ -159,7 +159,7 @@ export const PublicLayout = () => {
 
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/16 bg-white/8 text-white transition hover:bg-white/12 lg:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/12 lg:hidden"
             aria-label={isMenuOpen ? 'Close navigation' : 'Open navigation'}
             onClick={() => setIsMenuOpen((current) => !current)}
           >
@@ -168,7 +168,7 @@ export const PublicLayout = () => {
         </div>
 
         {isMenuOpen ? (
-          <div className="mx-auto mt-3 max-w-[1320px] rounded-[24px] border border-white/14 bg-[rgba(10,18,28,0.94)] p-4 shadow-[0_20px_52px_rgba(10,18,28,0.18)] backdrop-blur-xl lg:hidden">
+          <div className="mx-auto mt-3 max-w-[1320px] rounded-[24px] border border-white/20 bg-[rgba(10,18,28,0.94)] p-4 shadow-[0_20px_52px_rgba(10,18,28,0.18)] backdrop-blur-xl lg:hidden">
             <nav className="grid gap-1">
               {navItems.map((item) => (
                 <NavLink
@@ -177,7 +177,7 @@ export const PublicLayout = () => {
                   className={({ isActive }) =>
                     [
                       'rounded-[16px] px-4 py-3 text-sm transition',
-                      isActive ? 'bg-white/10 text-white' : 'text-white/76 hover:bg-white/8 hover:text-white',
+                      isActive ? 'bg-white/10 !text-white' : '!text-white/70 hover:bg-white/10 hover:!text-white',
                     ].join(' ')
                   }
                 >
@@ -189,7 +189,7 @@ export const PublicLayout = () => {
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <Link
                 to={dashboardPath}
-                className="inline-flex items-center justify-center rounded-full border border-white/16 bg-white/8 px-4 py-2.5 text-sm font-medium !text-white visited:!text-white transition hover:bg-white/12 hover:!text-white"
+                className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-medium !text-white visited:!text-white transition hover:bg-white/12 hover:!text-white"
               >
                 {user ? 'My Account' : 'Sign In'}
               </Link>
@@ -216,14 +216,14 @@ export const PublicLayout = () => {
                 <div className="space-y-2.5">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-[#ecd3a8]">{branding.brandName}</p>
                   <h2 className="text-[1.7rem] leading-none text-white">{branding.hotelName}</h2>
-                  <p className="max-w-sm text-sm leading-6 text-white/64">{branding.footerDescription}</p>
+                  <p className="max-w-sm text-sm leading-6 text-white/60">{branding.footerDescription}</p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <span className="rounded-full border border-white/10 bg-white/6 px-3 py-2 text-xs font-medium text-white/74">
+                  <span className="rounded-full border border-white/10 bg-white/6 px-3 py-2 text-xs font-medium text-white/75">
                     {branding.checkInTime} check-in
                   </span>
-                  <span className="rounded-full border border-white/10 bg-white/6 px-3 py-2 text-xs font-medium text-white/74">
+                  <span className="rounded-full border border-white/10 bg-white/6 px-3 py-2 text-xs font-medium text-white/75">
                     {branding.checkOutTime} check-out
                   </span>
                 </div>
@@ -237,7 +237,7 @@ export const PublicLayout = () => {
                   </Link>
                   <Link
                     to={dashboardPath}
-                    className="inline-flex items-center justify-center rounded-full border border-white/14 bg-white/8 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/12"
+                    className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/12"
                   >
                     {user ? 'My Account' : 'Guest Access'}
                   </Link>
@@ -248,14 +248,14 @@ export const PublicLayout = () => {
                 <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#ecd3a8]">Quick Links</p>
                 <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
                   {navItems.map((item) => (
-                    <Link key={item.href} to={item.href} className="text-white/68 transition hover:text-white">
+                    <Link key={item.href} to={item.href} className="text-white/70 transition hover:text-white">
                       {item.label}
                     </Link>
                   ))}
-                  <Link to="/booking" className="text-white/68 transition hover:text-white">
+                  <Link to="/booking" className="text-white/70 transition hover:text-white">
                     Booking
                   </Link>
-                  <Link to="/faq" className="text-white/68 transition hover:text-white">
+                  <Link to="/faq" className="text-white/70 transition hover:text-white">
                     FAQ
                   </Link>
                 </div>
@@ -263,7 +263,7 @@ export const PublicLayout = () => {
 
               <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4.5">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#ecd3a8]">Contact</p>
-                <div className="mt-3 space-y-3.5 text-sm text-white/68">
+                <div className="mt-3 space-y-3.5 text-sm text-white/70">
                   <div className="flex items-start gap-3">
                     <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#ecd3a8]" />
                     <span>{branding.address}</span>
@@ -294,7 +294,7 @@ export const PublicLayout = () => {
                           target="_blank"
                           rel="noreferrer"
                           aria-label={item.label}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/6 text-white/74 transition hover:-translate-y-0.5 hover:bg-white/10 hover:text-white"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/6 text-white/75 transition hover:-translate-y-0.5 hover:bg-white/10 hover:text-white"
                         >
                           <Icon className="h-4 w-4" />
                         </a>
@@ -305,7 +305,7 @@ export const PublicLayout = () => {
               </div>
             </div>
 
-            <div className="mt-6 flex flex-col gap-2.5 border-t border-white/10 pt-4 text-xs text-white/44 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-6 flex flex-col gap-2.5 border-t border-white/10 pt-4 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between">
               <p>&copy; {new Date().getFullYear()} {branding.brandName}. All rights reserved.</p>
               <p>Luxury hospitality, calm booking, and polished guest care.</p>
             </div>

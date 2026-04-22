@@ -166,7 +166,7 @@ export const BookingPage = () => {
       </section>
 
       {/* Step 1: Stay Configuration Bar */}
-      <section className="px-4 md:px-6 sticky top-24 z-30">
+      <section className="px-4 md:px-6 relative lg:sticky lg:top-24 z-30">
         <div className="mx-auto max-w-[1380px]">
           <Card className="rounded-[32px] border border-[var(--border)] bg-white/95 p-4 shadow-xl backdrop-blur-xl transition-all hover:bg-white md:p-6">
             <form className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 items-end">

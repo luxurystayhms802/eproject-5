@@ -374,7 +374,7 @@ const baseStyles = `
   }
 `;
 
-const openPrintWindow = (title, bodyHtml) => {
+const openPrintWindow = (title, bodyHtml, extraStyles = '') => {
   const printWindow = window.open('', '_blank', 'width=1080,height=920');
 
   if (!printWindow) {
@@ -390,7 +390,8 @@ const openPrintWindow = (title, bodyHtml) => {
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>${escapeHtml(title)}</title>
-        <style>${baseStyles}</style>
+        <style>${baseStyles}
+${extraStyles}</style>
       </head>
       <body>${bodyHtml}</body>
     </html>
@@ -636,12 +637,17 @@ export const printManagementReportDocument = ({
   sections = [],
 }) => {
   const bodyHtml = `
-    <div class="sheet">
-      <section class="header">
-        <p class="eyebrow">${escapeHtml(brandLabel)}</p>
-        <h1>${escapeHtml(brandName)}</h1>
-        <p class="copy">${escapeHtml(subtitle)}</p>
-      </section>
+    <div class="sheet report-sheet">
+      <div class="report-header">
+        <div class="report-header-left">
+          <p class="eyebrow">${escapeHtml(brandLabel)}</p>
+          <h1 class="report-title">${escapeHtml(brandName)}</h1>
+        </div>
+        <div class="report-header-right">
+          <h2 class="report-subtitle">${escapeHtml(title)}</h2>
+          <p class="copy">${escapeHtml(subtitle)}</p>
+        </div>
+      </div>
 
       <section class="section">
         <div class="grid">
@@ -671,5 +677,58 @@ export const printManagementReportDocument = ({
     </div>
   `;
 
-  openPrintWindow(`${brandName} ${title}`, bodyHtml);
+  const reportStyles = `
+    .report-sheet {
+      max-width: 250mm;
+      padding: 50px 60px;
+      border-top: 8px solid var(--ink);
+      border-radius: 4px;
+    }
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 20px;
+      margin-bottom: 40px;
+    }
+    .report-header-left h1.report-title {
+      margin: 0;
+      font-family: 'Helvetica Neue', Helvetica, sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+    }
+    .report-header-right {
+      text-align: right;
+    }
+    .report-header-right h2.report-subtitle {
+      margin: 0 0 4px;
+      font-size: 18px;
+      border: none;
+      padding: 0;
+      color: var(--accent);
+    }
+    .report-sheet .info-group {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .report-sheet h2 {
+      font-family: 'Helvetica Neue', Helvetica, sans-serif;
+      color: var(--ink);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 8px;
+    }
+    @media print {
+      .report-sheet {
+        border-top: 8px solid var(--ink) !important;
+      }
+    }
+  `;
+
+  openPrintWindow(`${brandName} ${title}`, bodyHtml, reportStyles);
 };
