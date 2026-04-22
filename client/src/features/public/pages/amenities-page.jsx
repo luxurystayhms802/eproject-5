@@ -149,7 +149,7 @@ export const AmenitiesPage = () => {
         </div>
       </section>
 
-      <section className="bg-[linear-gradient(to_bottom,transparent,rgba(184,140,74,0.03),transparent)] py-24 mt-12 mb-8 relative">
+      <section className="bg-[linear-gradient(to_bottom,transparent,rgba(184,140,74,0.03),transparent)] pt-20 pb-8 mt-12 mb-0 relative">
         <div className="mx-auto max-w-[1380px] px-4 md:px-8 relative z-10">
           <div className="mb-16 flex flex-col items-center text-center">
             <span className="inline-flex rounded-full border border-[var(--accent)]/20 bg-[var(--accent)]/5 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.34em] text-[var(--accent)] shadow-sm mb-6">

@@ -270,7 +270,7 @@ export const RoomDetailsPage = () => {
   ];
 
   return (
-    <div className="space-y-16 lg:space-y-24 pb-20">
+    <div className="space-y-16 lg:space-y-24 pb-0">
       {/* 📸 HERO SECTION (VIP Edge-to-Edge feel) */}
       <section className="px-4 md:px-8 mt-4 lg:mt-6">
         <div className="mx-auto max-w-[1400px]">
@@ -313,10 +313,10 @@ export const RoomDetailsPage = () => {
         <div className="mx-auto grid max-w-[1400px] gap-12 lg:gap-20 xl:grid-cols-[1fr,420px] items-start">
           
           {/* 🖋 LEFT COLUMN: Editorial Content */}
-          <div className="space-y-16 lg:space-y-20">
+          <div className="space-y-8 lg:space-y-10">
             
             {/* Description & Inline VIP Stats */}
-            <div className="space-y-10">
+            <div className="space-y-6">
               <p className="text-[1.15rem] leading-[1.8] text-[#1a2433] max-w-[55ch]">
                 {roomType.description || roomType.shortDescription}
               </p>
@@ -340,9 +340,9 @@ export const RoomDetailsPage = () => {
             </div>
 
             {/* Elegant Pills Amenities (Not peeka) */}
-            <div className="border-t border-[#0c1622]/5 pt-12">
-              <h2 className="text-2xl font-[var(--font-display)] text-[#0c1622] mb-5">In-room amenities</h2>
-              <div className="flex flex-wrap gap-2.5">
+            <div className="border-t border-[#0c1622]/5 pt-8">
+              <h2 className="text-xl font-[var(--font-display)] text-[#0c1622] mb-4">In-room amenities</h2>
+              <div className="flex flex-wrap gap-2">
                 {(roomType.amenities ?? []).map((item, i) => (
                   <span key={i} className="bg-white border border-[#0c1622]/10 shadow-sm rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[#556375]">
                     {item}
@@ -354,7 +354,7 @@ export const RoomDetailsPage = () => {
             {/* VIP Gallery Grid (Bento Style) */}
             {galleryImages.length > 1 && (
               <div>
-                <h2 className="text-[11px] font-black uppercase tracking-[0.3em] text-[#0c1622] mb-8">Visual Exploration</h2>
+                <h2 className="text-[11px] font-black uppercase tracking-[0.3em] text-[#0c1622] mb-5">Visual Exploration</h2>
                 <div className={`grid gap-4 ${galleryImages.length === 2 ? 'grid-cols-2' : 'grid-cols-2 lg:grid-cols-4'}`}>
                   {galleryImages.slice(0, 5).map((image, index) => (
                     <button
@@ -386,12 +386,12 @@ export const RoomDetailsPage = () => {
             )}
 
             {/* Signature Inclusions (Structured list) */}
-            <div className="border-t border-[#0c1622]/5 pt-14">
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#c5a059] mb-3">Highlights</p>
-              <h2 className="text-3xl font-[var(--font-display)] text-[#0c1622] mb-8">Stay Signatures</h2>
-              <div className="grid gap-6 md:grid-cols-2">
+            <div className="border-t border-[#0c1622]/5 pt-8">
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#c5a059] mb-2">Highlights</p>
+              <h2 className="text-2xl font-[var(--font-display)] text-[#0c1622] mb-5">Stay Signatures</h2>
+              <div className="grid gap-4 md:grid-cols-2">
                 {signatureInclusions.map(({ title, description, Icon }) => (
-                  <div key={title} className="flex gap-4 items-start bg-white border border-[#c5a059]/15 rounded-[24px] p-5 shadow-sm">
+                  <div key={title} className="flex gap-3 items-start bg-white border border-[#c5a059]/15 rounded-[20px] p-4 shadow-sm">
                     <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#fbf9f6] text-[#c5a059]">
                       <Icon className="h-5 w-5" />
                     </span>
@@ -406,10 +406,10 @@ export const RoomDetailsPage = () => {
 
              {/* Guest Feedback (if any) */}
             {guestVoices.length > 0 && (
-              <div className="border-t border-[#0c1622]/5 pt-14">
-                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#c5a059] mb-3">Feedback</p>
-                <h2 className="text-4xl font-[var(--font-display)] text-[#0c1622] mb-10">Guest Impressions</h2>
-                <div className="grid gap-10 lg:grid-cols-2">
+              <div className="border-t border-[#0c1622]/5 pt-8">
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#c5a059] mb-2">Feedback</p>
+                <h2 className="text-2xl font-[var(--font-display)] text-[#0c1622] mb-6">Guest Impressions</h2>
+                <div className="grid gap-6 lg:grid-cols-2">
                   {guestVoices.map((review) => (
                     <div key={review.id} className="space-y-4">
                       <div className="flex gap-1.5 text-[#c5a059]">
@@ -528,7 +528,7 @@ export const RoomDetailsPage = () => {
 
       {/* Related Rooms - Keeping minimalist */}
       {relatedRooms.length > 0 && (
-        <section className="px-4 md:px-8 mt-32 mb-20">
+        <section className="px-4 md:px-8 mt-32 mb-0">
           <div className="bg-white rounded-[48px] shadow-[0_20px_80px_rgba(8,24,44,0.03)] border border-[#0c1622]/5 p-10 md:p-16 lg:p-20 max-w-[1500px] mx-auto">
             <div className="mx-auto max-w-[1400px] mb-16 text-center">
               <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#c5a059] mb-5">Further Options</p>

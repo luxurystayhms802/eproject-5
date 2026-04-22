@@ -160,7 +160,7 @@ export const RoomsListingPage = () => {
   ];
 
   return (
-    <div className="space-y-16 pb-8">
+    <div className="space-y-16 pb-0">
       <section className="px-4 md:px-6">
         <div className="mx-auto max-w-[1380px] overflow-hidden rounded-[34px] border border-[rgba(184,140,74,0.15)] bg-white shadow-[0_20px_60px_rgba(8,24,44,0.06)]">
           <div className="grid lg:grid-cols-2">
