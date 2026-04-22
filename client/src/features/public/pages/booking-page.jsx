@@ -363,6 +363,13 @@ export const BookingPage = () => {
                               <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                               <p className="text-sm font-semibold text-emerald-800">Your selection is available!</p>
                            </div>
+                        ) : (adults > selectedRoomType?.maxAdults || children > selectedRoomType?.maxChildren) ? (
+                           <div className="rounded-[20px] bg-rose-50 border border-rose-100 p-4 border-l-4 border-l-rose-500">
+                              <p className="text-sm font-semibold text-rose-800 mb-1">Capacity Exceeded</p>
+                              <p className="text-xs text-rose-600 leading-tight">
+                                This room can accommodate a maximum of {selectedRoomType.maxAdults} adults and {selectedRoomType.maxChildren} children. Please reduce the number of guests or select a different room.
+                              </p>
+                           </div>
                         ) : (
                            <div className="rounded-[20px] bg-rose-50 border border-rose-100 p-4 border-l-4 border-l-rose-500">
                               <p className="text-sm font-semibold text-rose-800 mb-1">Room Unavailable</p>

@@ -470,11 +470,13 @@ export const RoomDetailsPage = () => {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8896a6] ml-2">Adults</label>
-                    <input type="number" min={1} className="w-full rounded-2xl border-0 bg-white shadow-sm px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-[#c5a059]" {...form.register('adults', { valueAsNumber: true })} />
+                    <input type="number" min={1} max={roomType.maxAdults} className="w-full rounded-2xl border-0 bg-white shadow-sm px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-[#c5a059]" {...form.register('adults', { valueAsNumber: true })} />
+                    {adults > roomType.maxAdults && <p className="text-xs text-rose-500 px-2 mt-1 leading-tight">Maximum {roomType.maxAdults} adults allowed.</p>}
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8896a6] ml-2">Children</label>
-                    <input type="number" min={0} className="w-full rounded-2xl border-0 bg-white shadow-sm px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-[#c5a059]" {...form.register('children', { valueAsNumber: true })} />
+                    <input type="number" min={0} max={roomType.maxChildren} className="w-full rounded-2xl border-0 bg-white shadow-sm px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-[#c5a059]" {...form.register('children', { valueAsNumber: true })} />
+                    {children > roomType.maxChildren && <p className="text-xs text-rose-500 px-2 mt-1 leading-tight">Maximum {roomType.maxChildren} children allowed.</p>}
                   </div>
                 </div>
 
@@ -492,8 +494,13 @@ export const RoomDetailsPage = () => {
                        Dates are available
                      </p>
                      <div className="flex justify-between text-[#556375]">
-                        <span>{nights} Nights @ {formatCurrency(availabilityForRoomType.pricing.ratePerNight, branding.currency)}</span>
+                        <span>{nights} Nights @ {formatCurrency(availabilityForRoomType.pricing.totalAmount / Math.max(nights, 1), branding.currency)} / night</span>
                      </div>
+                  </div>
+                ) : (adults > roomType.maxAdults || children > roomType.maxChildren) ? (
+                  <div className="rounded-2xl bg-rose-50 p-4 border border-rose-100 border-l-4 border-l-rose-500">
+                    <p className="text-sm font-bold text-rose-800 mb-1">Capacity Exceeded</p>
+                    <p className="text-xs text-rose-700 leading-tight">This room can accommodate a maximum of {roomType.maxAdults} adults and {roomType.maxChildren} children. Please reduce the number of guests or book multiple rooms.</p>
                   </div>
                 ) : hasStayWindow ? (
                   <div className="rounded-2xl bg-rose-50 p-4 border border-rose-100 border-l-4 border-l-rose-500">
@@ -505,7 +512,7 @@ export const RoomDetailsPage = () => {
                 <Button
                   type="submit"
                   className="w-full rounded-full h-[3.8rem] px-8 bg-[#0c1622] text-[#ecd3a8] hover:bg-[#152336] shadow-xl hover:shadow-2xl hover:-translate-y-1 text-[11px] font-black tracking-[0.2em] uppercase transition-all duration-300 border-none mt-4 disabled:opacity-50 disabled:hover:shadow-none"
-                  disabled={createReservation.isPending || !isValidDateRange || availabilityQuery.isLoading || (hasStayWindow && !availabilityForRoomType)}
+                  disabled={createReservation.isPending || !isValidDateRange || availabilityQuery.isLoading || (hasStayWindow && !availabilityForRoomType) || adults > roomType.maxAdults || children > roomType.maxChildren}
                 >
                   {createReservation.isPending
                     ? 'Wait...'
