@@ -140,9 +140,10 @@ export const AdminBillingPage = () => {
   }, [filteredInvoices, selectedInvoiceId]);
 
   const summary = useMemo(() => {
-    const totalBilled = invoices.reduce((sum, invoice) => sum + Number(invoice.totalAmount ?? 0), 0);
-    const outstandingBalance = invoices.reduce((sum, invoice) => sum + Number(invoice.balanceAmount ?? 0), 0);
-    const collectedAmount = invoices.reduce((sum, invoice) => sum + Number(invoice.paidAmount ?? 0), 0);
+    const activeInvoices = invoices.filter((inv) => inv.status !== 'void');
+    const totalBilled = activeInvoices.reduce((sum, invoice) => sum + Number(invoice.totalAmount ?? 0), 0);
+    const outstandingBalance = activeInvoices.reduce((sum, invoice) => sum + Number(invoice.balanceAmount ?? 0), 0);
+    const collectedAmount = activeInvoices.reduce((sum, invoice) => sum + Number(invoice.paidAmount ?? 0), 0);
     const collectionRate = totalBilled > 0 ? Math.round((collectedAmount / totalBilled) * 100) : 0;
 
     return {

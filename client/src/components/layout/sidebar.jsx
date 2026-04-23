@@ -335,7 +335,13 @@ const SidebarContent = ({ role, onClose, isMobile = false }) => {
     // that are NOT in their base predefined sections!
     // We check by the underlying permission resource module (e.g., 'checkIn') to strictly prevent duplicating tools
     const existingResources = new Set(
-      sections.flatMap(s => s.items.map(i => ROUTE_PERMISSIONS[i.href]?.split('.')[0])).filter(Boolean)
+      sections.flatMap(s => s.items.map(i => {
+        let checkHref = i.href;
+        if (!ROUTE_PERMISSIONS[checkHref]) {
+          checkHref = checkHref.replace(/^\/(?:staff|manager|reception|housekeeping|maintenance|guest)\//, '/admin/');
+        }
+        return ROUTE_PERMISSIONS[checkHref]?.split('.')[0];
+      })).filter(Boolean)
     );
     const extraItems = [];
     

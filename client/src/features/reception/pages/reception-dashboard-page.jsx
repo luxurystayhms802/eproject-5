@@ -52,12 +52,13 @@ export const ReceptionDashboardPage = () => {
   const invoices = invoicesQuery.data ?? [];
   const payments = paymentsQuery.data ?? [];
 
-  const outstandingBalance = invoices.reduce((sum, invoice) => sum + Number(invoice.balanceAmount ?? 0), 0);
+  const activeInvoices = invoices.filter((inv) => inv.status !== 'void');
+  const outstandingBalance = activeInvoices.reduce((sum, invoice) => sum + Number(invoice.balanceAmount ?? 0), 0);
   const collectedValue = payments.reduce((sum, payment) => sum + Number(payment.amount ?? 0), 0);
   const pendingRoomCount = confirmedReservations.filter((reservation) => !reservation.roomId).length;
   const unsettledDepartures = departures.filter((reservation) => {
     const linkedInvoice = invoices.find((invoice) => invoice.reservationId === reservation.id);
-    return Number(linkedInvoice?.balanceAmount ?? 0) > 0;
+    return Number(linkedInvoice?.balanceAmount ?? 0) > 0 && linkedInvoice?.status !== 'void';
   }).length;
 
   const quickLinks = useMemo(() => {

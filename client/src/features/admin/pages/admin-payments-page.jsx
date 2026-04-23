@@ -88,7 +88,7 @@ export const AdminPaymentsPage = () => {
   const outstandingInvoices = useMemo(
     () =>
       invoices
-        .filter((invoice) => Number(invoice.balanceAmount) > 0 && INVOICE_STATUS_OPTIONS.includes(invoice.status))
+        .filter((invoice) => Number(invoice.balanceAmount) > 0 && invoice.status !== 'void' && INVOICE_STATUS_OPTIONS.includes(invoice.status))
         .sort((left, right) => Number(right.balanceAmount) - Number(left.balanceAmount)),
     [invoices],
   );
