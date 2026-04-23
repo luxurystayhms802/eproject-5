@@ -22,7 +22,13 @@ export const GuestFeedbackPage = () => {
   );
 
   const [reservationId, setReservationId] = useState('');
-  const [rating, setRating] = useState(5);
+  const [categories, setCategories] = useState({
+    overall: 5,
+    room: 5,
+    cleanliness: 5,
+    staff: 5,
+    food: 5,
+  });
   const [title, setTitle] = useState('');
   const [comment, setComment] = useState('');
 
@@ -30,7 +36,7 @@ export const GuestFeedbackPage = () => {
     event.preventDefault();
 
     const validationMessage = validateGuestFeedbackForm(
-      { reservationId, rating, title, comment },
+      { reservationId, rating: categories.overall, title, comment },
       eligibleReservations.length > 0,
     );
     if (validationMessage) {
@@ -43,21 +49,15 @@ export const GuestFeedbackPage = () => {
     createFeedback.mutate(
       {
         reservationId,
-        rating: normalizedRating,
+        rating: categories.overall,
         title: title.trim(),
         comment: comment.trim(),
-        categories: {
-          room: normalizedRating,
-          cleanliness: normalizedRating,
-          staff: normalizedRating,
-          food: Math.max(1, normalizedRating - 1),
-          overall: normalizedRating,
-        },
+        categories: categories,
       },
       {
         onSuccess: () => {
           setReservationId('');
-          setRating(5);
+          setCategories({ overall: 5, room: 5, cleanliness: 5, staff: 5, food: 5 });
           setTitle('');
           setComment('');
         },
@@ -97,18 +97,24 @@ export const GuestFeedbackPage = () => {
               </p>
             </label>
 
-            <label className="space-y-2">
-              <span className="text-sm font-semibold text-[var(--primary)]">Rating</span>
-              <input
-                className={inputClassName}
-                name="rating"
-                type="number"
-                min={1}
-                max={5}
-                value={rating}
-                onChange={(event) => setRating(Math.min(5, Math.max(1, Number(event.target.value) || 1)))}
-              />
-            </label>
+            <div className="space-y-3">
+              <span className="text-sm font-semibold text-[var(--primary)]">Ratings (1-5)</span>
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                {Object.entries(categories).map(([key, value]) => (
+                  <label key={key} className="space-y-1">
+                    <span className="text-xs font-semibold capitalize text-[var(--muted-foreground)]">{key}</span>
+                    <input
+                      className={inputClassName}
+                      type="number"
+                      min={1}
+                      max={5}
+                      value={value}
+                      onChange={(e) => setCategories(c => ({ ...c, [key]: Math.min(5, Math.max(1, Number(e.target.value) || 1)) }))}
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
 
             <label className="space-y-2">
               <span className="text-sm font-semibold text-[var(--primary)]">Title</span>

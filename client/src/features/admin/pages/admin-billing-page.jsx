@@ -154,8 +154,12 @@ export const AdminBillingPage = () => {
   }, [invoices]);
 
   const eligibleReservations = useMemo(
-    () => reservations.filter((reservation) => !['draft', 'cancelled', 'missed_arrival'].includes(reservation.status)),
-    [reservations],
+    () => reservations.filter((reservation) => {
+      const isEligibleStatus = !['draft', 'cancelled', 'missed_arrival'].includes(reservation.status);
+      const hasInvoiceAlready = invoices.some((inv) => inv.reservationId === reservation.id);
+      return isEligibleStatus && !hasInvoiceAlready;
+    }),
+    [reservations, invoices],
   );
 
   const openGenerateModal = () => {
@@ -281,9 +285,6 @@ export const AdminBillingPage = () => {
         description="Generate billing drafts, finalize invoices, and review folio charges with a cleaner admin finance desk."
         action={
           <div className="flex flex-wrap gap-3">
-            <Button variant="outline" className="rounded-2xl px-4" onClick={handlePrintInvoice} disabled={!selectedInvoice}>
-              Print invoice
-            </Button>
             {canCreateInvoice && (
               <Button variant="secondary" className="rounded-2xl px-4" onClick={openGenerateModal}>
                 Generate invoice
@@ -327,23 +328,7 @@ export const AdminBillingPage = () => {
 
       <AdminToolbar
         title="Invoice command desk"
-        description="Search active billing records, review stay charges, and open finalization actions without leaving the admin cockpit."
-        actions={
-          selectedInvoice ? (
-            <>
-              {canCreateCharge && (
-                <Button variant="outline" className="rounded-2xl px-4" onClick={openChargeModal} disabled={selectedInvoice.status === 'paid'}>
-                  Add charge
-                </Button>
-              )}
-              {canFinalizeInvoice && (
-                <Button variant="secondary" className="rounded-2xl px-4" onClick={openFinalizeModal}>
-                  Finalize invoice
-                </Button>
-              )}
-            </>
-          ) : null
-        }
+        description="Search active billing records and review stay charges without leaving the admin cockpit."
       >
         <div className="grid w-full gap-3 xl:grid-cols-[minmax(0,1.5fr)_220px]">
           <label className="relative">
@@ -463,7 +448,29 @@ export const AdminBillingPage = () => {
                 </div>
               </div>
 
-              <div className="grid gap-4 xl:grid-cols-3">
+              <div className="flex flex-wrap items-center justify-between gap-4 rounded-[22px] border border-[var(--border)] bg-[linear-gradient(135deg,rgba(255,252,247,0.98)_0%,rgba(241,231,214,0.96)_100%)] p-4 shadow-sm">
+                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-[var(--primary)] pl-2">Invoice Actions</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  {canCreateCharge && (
+                    <Button variant="outline" className="rounded-2xl border-[var(--primary)]/20 px-4 hover:bg-[var(--primary)]/5" onClick={openChargeModal} disabled={selectedInvoice.status === 'paid'}>
+                      <ClipboardPlus className="mr-2 h-4 w-4 text-[var(--accent-strong)]" />
+                      Add charge
+                    </Button>
+                  )}
+                  {canFinalizeInvoice && (
+                    <Button variant="outline" className="rounded-2xl border-[var(--primary)]/20 px-4 hover:bg-[var(--primary)]/5" onClick={openFinalizeModal} disabled={['paid', 'void'].includes(selectedInvoice.status)}>
+                      <FileText className="mr-2 h-4 w-4 text-[var(--accent-strong)]" />
+                      Finalize invoice
+                    </Button>
+                  )}
+                  <Button variant="secondary" className="rounded-2xl px-4 shadow-md" onClick={handlePrintInvoice}>
+                    <ReceiptText className="mr-2 h-4 w-4" />
+                    Print invoice
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid gap-4 xl:grid-cols-2">
                 <div className="rounded-[22px] border border-[var(--border)] bg-white/80 p-4">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--muted-foreground)]">Stay ledger</p>
                   <div className="mt-3 space-y-2 text-sm text-[var(--foreground)]">
@@ -480,27 +487,6 @@ export const AdminBillingPage = () => {
                     <p>Due date: {formatAdminDate(selectedInvoice.dueAt)}</p>
                   </div>
                 </div>
-                <div className="rounded-[22px] border border-[var(--border)] bg-white/80 p-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--muted-foreground)]">Action stack</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {canCreateCharge && (
-                      <Button variant="outline" className="rounded-2xl px-4" onClick={openChargeModal} disabled={selectedInvoice.status === 'paid'}>
-                        <ClipboardPlus className="mr-2 h-4 w-4" />
-                        Add charge
-                      </Button>
-                    )}
-                    <Button variant="outline" className="rounded-2xl px-4" onClick={handlePrintInvoice}>
-                      <ReceiptText className="mr-2 h-4 w-4" />
-                      Print invoice
-                    </Button>
-                    {canFinalizeInvoice && (
-                      <Button variant="secondary" className="rounded-2xl px-4" onClick={openFinalizeModal}>
-                        <FileText className="mr-2 h-4 w-4" />
-                        Finalize
-                      </Button>
-                    )}
-                  </div>
-                </div>
               </div>
 
               <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
@@ -510,11 +496,6 @@ export const AdminBillingPage = () => {
                       <h3 className="text-[24px] text-[var(--primary)] [font-family:var(--font-display)]">Folio charges</h3>
                       <p className="text-sm text-[var(--muted-foreground)]">Live service, minibar, and tax items shaping the billing draft.</p>
                     </div>
-                    {canCreateCharge && (
-                      <Button variant="outline" className="rounded-2xl px-4" onClick={openChargeModal} disabled={selectedInvoice.status === 'paid'}>
-                        Add charge
-                      </Button>
-                    )}
                   </div>
 
                   <div className="space-y-3">
@@ -647,7 +628,7 @@ export const AdminBillingPage = () => {
       <AdminModal
         open={finalizeModalOpen}
         onClose={() => setFinalizeModalOpen(false)}
-        title="Finalize invoice"
+        title={`Finalize invoice ${selectedInvoice ? getInvoiceLabel(selectedInvoice) : ''}`}
         description="Lock the current billing draft with optional due date and final notes for operations or guest-facing delivery."
         widthClassName="max-w-2xl"
       >

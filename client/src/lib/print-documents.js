@@ -361,6 +361,8 @@ const baseStyles = `
 
   .stamp.paid { color: #16a34a; border-color: #16a34a; }
   .stamp.void { color: #dc2626; border-color: #dc2626; }
+  .stamp.unpaid { color: #b91c1c; border-color: #b91c1c; }
+  .stamp.draft { color: #9ca3af; border-color: #9ca3af; }
 
   @media print {
     body { background: white; padding: 0; }
@@ -405,12 +407,13 @@ ${extraStyles}</style>
 
 export const printInvoiceDocument = ({
   brandName = 'LuxuryStay Hospitality',
-  brandLabel = 'LuxuryStay Admin',
+  brandLabel: _ignoredBrandLabel,
   invoice,
   charges = [],
   payments = [],
   invoiceTerms = '',
 }) => {
+  const brandLabel = 'LuxuryStay Hospitality';
   const guestName = getGuestName(invoice?.guest);
   const reservationCode = invoice?.reservation?.reservationCode ?? invoice?.reservationCode ?? 'Reservation pending';
   const roomLabel = invoice?.reservation?.roomType?.name ?? invoice?.reservation?.roomTypeSnapshot?.name ?? 'Hotel stay';
@@ -419,6 +422,9 @@ export const printInvoiceDocument = ({
     <div class="sheet" style="position: relative;">
       ${invoice?.status === 'paid' ? '<div class="stamp paid">PAID IN FULL</div>' : ''}
       ${invoice?.status === 'void' ? '<div class="stamp void">VOIDED</div>' : ''}
+      ${invoice?.status === 'unpaid' ? '<div class="stamp unpaid">UNPAID</div>' : ''}
+      ${invoice?.status === 'partially_paid' ? '<div class="stamp unpaid">PARTIAL PAYMENT</div>' : ''}
+      ${invoice?.status === 'draft' ? '<div class="stamp draft">DRAFT BILL</div>' : ''}
       
       <section class="header">
         <img src="/invoice.png" alt="Logo" class="logo" onerror="this.src='/favicon.svg'; this.onerror=null;" />
@@ -505,9 +511,10 @@ export const printInvoiceDocument = ({
 
 export const printPaymentReceiptDocument = ({
   brandName = 'LuxuryStay Hospitality',
-  brandLabel = 'LuxuryStay Finance',
+  brandLabel: _ignoredBrandLabel,
   payment,
 }) => {
+  const brandLabel = 'LuxuryStay Hospitality';
   const invoiceLabel = payment?.invoice?.invoiceNumber ?? 'Invoice pending';
   const reservationCode = payment?.reservation?.reservationCode ?? 'Reservation pending';
   const guestName = getGuestName(payment?.guest);

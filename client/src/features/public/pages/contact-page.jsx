@@ -198,7 +198,6 @@ export const ContactPage = () => {
                 submitInquiry.mutate(values, {
                   onSuccess: () => {
                     form.reset();
-                    toast.success("Your inquiry has been sent successfully. We will get back to you shortly.");
                   },
                 });
               })}

@@ -317,23 +317,13 @@ export const HomePage = () => {
     }
   }, [activeHeroIndex, heroImages.length]);
 
-  const fallbackTestimonials = guestTestimonials.map((item, index) => ({
-    id: `fallback-${index}`,
-    name: item.name,
-    quote: item.quote,
-    rating: 5,
-    location: item.role,
+  const testimonials = (reviewsQuery.data ?? []).slice(0, 3).map((review, index) => ({
+    id: review.id || `review-${index}`,
+    name: review.guestName || 'LuxuryStay Guest',
+    quote: review.comment || review.title || 'A memorable stay shaped by calm service and refined comfort.',
+    rating: Number(review.rating || 5),
+    location: review.roleLabel || 'Verified guest',
   }));
-
-  const testimonials = (reviewsQuery.data ?? []).length
-    ? reviewsQuery.data.slice(0, 3).map((review, index) => ({
-        id: review.id || `review-${index}`,
-        name: review.guestName || 'LuxuryStay Guest',
-        quote: review.comment || review.title || 'A memorable stay shaped by calm service and refined comfort.',
-        rating: Number(review.rating || 5),
-        location: review.roleLabel || 'Verified guest',
-      }))
-    : fallbackTestimonials;
 
   const homePageSettings = branding.homePageSettings || {};
 
@@ -548,47 +538,49 @@ export const HomePage = () => {
         </div>
       </section>
 
-      <section className="pt-2 pb-6 border-t border-[rgba(184,140,74,0.15)] bg-[#fbf9f6] !mt-0">
-        <div className="mx-auto max-w-[1320px] px-4 md:px-6">
-          <div className="pt-4 md:pt-6">
-            <SectionHeading
-              centered
-              eyebrow="Guest Impressions"
-              title="Consistent comfort, warmth, and presence."
-              description="A restrained selection of guest feedback reflecting our daily atmosphere."
-            />
-          </div>
-          
-          <div className="mt-4 lg:mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.slice(0, 3).map((review) => (
-              <div key={review.id} className="rounded-2xl bg-white p-6 md:p-8 shadow-[0_4px_20px_rgba(8,24,44,0.03)] border border-black/5 flex flex-col justify-between h-full group hover:-translate-y-1 transition-transform duration-500">
-                <div>
-                   <div className="flex items-center gap-1 mb-4 text-[var(--accent)]">
-                     {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-3.5 w-3.5 fill-current" />
-                     ))}
-                   </div>
-                   <p className="text-[1.05rem] leading-[1.7] text-[var(--primary)] font-medium italic mb-6">
-                     "{review.quote}"
-                   </p>
-                </div>
-                
-                <div className="flex items-center justify-between border-t border-[rgba(184,140,74,0.1)] pt-4 mt-2">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 flex items-center justify-center rounded-full bg-[rgba(184,140,74,0.1)] text-[var(--accent-strong)] text-[14px] font-[var(--font-display)] uppercase">
-                      {review.name ? review.name.charAt(0) : 'G'}
-                    </div>
-                    <div>
-                      <p className="text-[13px] font-semibold text-[var(--primary)]">{review.name}</p>
-                      <p className="text-[10px] text-[var(--muted-foreground)] uppercase tracking-[0.1em] mt-0.5">{review.location}</p>
+      {testimonials.length > 0 && (
+        <section className="pt-2 pb-6 border-t border-[rgba(184,140,74,0.15)] bg-[#fbf9f6] !mt-0">
+          <div className="mx-auto max-w-[1320px] px-4 md:px-6">
+            <div className="pt-4 md:pt-6">
+              <SectionHeading
+                centered
+                eyebrow="Guest Impressions"
+                title="Consistent comfort, warmth, and presence."
+                description="A restrained selection of guest feedback reflecting our daily atmosphere."
+              />
+            </div>
+            
+            <div className="mt-4 lg:mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+              {testimonials.map((review) => (
+                <div key={review.id} className="rounded-2xl bg-white p-6 md:p-8 shadow-[0_4px_20px_rgba(8,24,44,0.03)] border border-black/5 flex flex-col justify-between h-full group hover:-translate-y-1 transition-transform duration-500">
+                  <div>
+                     <div className="flex items-center gap-1 mb-4 text-[var(--accent)]">
+                       {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-3.5 w-3.5 fill-current" />
+                       ))}
+                     </div>
+                     <p className="text-[1.05rem] leading-[1.7] text-[var(--primary)] font-medium italic mb-6">
+                       "{review.quote}"
+                     </p>
+                  </div>
+                  
+                  <div className="flex items-center justify-between border-t border-[rgba(184,140,74,0.1)] pt-4 mt-2">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 flex items-center justify-center rounded-full bg-[rgba(184,140,74,0.1)] text-[var(--accent-strong)] text-[14px] font-[var(--font-display)] uppercase">
+                        {review.name ? review.name.charAt(0) : 'G'}
+                      </div>
+                      <div>
+                        <p className="text-[13px] font-semibold text-[var(--primary)]">{review.name}</p>
+                        <p className="text-[10px] text-[var(--muted-foreground)] uppercase tracking-[0.1em] mt-0.5">{review.location}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="py-4 bg-white shrink-0 !mt-0">
         <div className="mx-auto max-w-[1320px] px-4 md:px-6">
