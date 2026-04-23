@@ -399,8 +399,8 @@ export const AdminBillingPage = () => {
                       </div>
 
                       <div className="text-right">
-                        <p className="text-lg font-semibold text-[var(--primary)]">{formatAdminCurrency(invoice.totalAmount)}</p>
-                        <p className="text-sm text-[var(--muted-foreground)]">Balance {formatAdminCurrency(invoice.balanceAmount)}</p>
+                        <p className="text-lg font-semibold text-[var(--primary)]">{formatAdminCurrency(invoice.status === 'void' ? 0 : invoice.totalAmount)}</p>
+                        <p className="text-sm text-[var(--muted-foreground)]">Balance {formatAdminCurrency(invoice.status === 'void' ? 0 : invoice.balanceAmount)}</p>
                       </div>
                     </div>
                   </button>
@@ -437,13 +437,13 @@ export const AdminBillingPage = () => {
                   <div className="rounded-[20px] border border-[var(--border)] bg-white/82 px-4 py-3">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--muted-foreground)]">Total amount</p>
                     <p className="mt-2 text-[28px] text-[var(--primary)] [font-family:var(--font-display)]">
-                      {formatAdminCurrency(selectedInvoice.totalAmount)}
+                      {formatAdminCurrency(selectedInvoice.status === 'void' ? 0 : selectedInvoice.totalAmount)}
                     </p>
                   </div>
                   <div className="rounded-[20px] border border-[var(--border)] bg-white/82 px-4 py-3">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--muted-foreground)]">Balance due</p>
                     <p className="mt-2 text-[28px] text-[var(--primary)] [font-family:var(--font-display)]">
-                      {formatAdminCurrency(selectedInvoice.balanceAmount)}
+                      {formatAdminCurrency(selectedInvoice.status === 'void' ? 0 : selectedInvoice.balanceAmount)}
                     </p>
                   </div>
                 </div>
@@ -453,7 +453,7 @@ export const AdminBillingPage = () => {
                 <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-[var(--primary)] pl-2">Invoice Actions</p>
                 <div className="flex flex-wrap items-center gap-2">
                   {canCreateCharge && (
-                    <Button variant="outline" className="rounded-2xl border-[var(--primary)]/20 px-4 hover:bg-[var(--primary)]/5" onClick={openChargeModal} disabled={selectedInvoice.status === 'paid'}>
+                    <Button variant="outline" className="rounded-2xl border-[var(--primary)]/20 px-4 hover:bg-[var(--primary)]/5" onClick={openChargeModal} disabled={['paid', 'void'].includes(selectedInvoice.status)}>
                       <ClipboardPlus className="mr-2 h-4 w-4 text-[var(--accent-strong)]" />
                       Add charge
                     </Button>
@@ -475,16 +475,16 @@ export const AdminBillingPage = () => {
                 <div className="rounded-[22px] border border-[var(--border)] bg-white/80 p-4">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--muted-foreground)]">Stay ledger</p>
                   <div className="mt-3 space-y-2 text-sm text-[var(--foreground)]">
-                    <p>Subtotal: {formatAdminCurrency(selectedInvoice.subtotal)}</p>
-                    <p>Tax: {formatAdminCurrency(selectedInvoice.taxAmount)}</p>
-                    <p>Discount: {formatAdminCurrency(selectedInvoice.discountAmount)}</p>
+                    <p>Subtotal: {formatAdminCurrency(selectedInvoice.status === 'void' ? 0 : selectedInvoice.subtotal)}</p>
+                    <p>Tax: {formatAdminCurrency(selectedInvoice.status === 'void' ? 0 : selectedInvoice.taxAmount)}</p>
+                    <p>Discount: {formatAdminCurrency(selectedInvoice.status === 'void' ? 0 : selectedInvoice.discountAmount)}</p>
                   </div>
                 </div>
                 <div className="rounded-[22px] border border-[var(--border)] bg-white/80 p-4">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--muted-foreground)]">Collection posture</p>
                   <div className="mt-3 space-y-2 text-sm text-[var(--foreground)]">
                     <p>Paid: {formatAdminCurrency(selectedInvoice.paidAmount)}</p>
-                    <p>Balance: {formatAdminCurrency(selectedInvoice.balanceAmount)}</p>
+                    <p>Balance: {formatAdminCurrency(selectedInvoice.status === 'void' ? 0 : selectedInvoice.balanceAmount)}</p>
                     <p>Due date: {formatAdminDate(selectedInvoice.dueAt)}</p>
                   </div>
                 </div>

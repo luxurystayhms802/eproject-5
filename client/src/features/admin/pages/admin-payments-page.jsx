@@ -193,13 +193,7 @@ export const AdminPaymentsPage = () => {
       <AdminToolbar
         title="Collections desk"
         description="Search payment records, filter by method or status, and capture outstanding balances from one managed surface."
-        actions={
-          canCreate ? (
-            <Button variant="secondary" className="rounded-2xl px-4" onClick={() => openPaymentModal()}>
-              Record payment
-            </Button>
-          ) : null
-        }
+        actions={null}
       >
         <div className="grid w-full gap-3 xl:grid-cols-[minmax(0,1.4fr)_210px_210px]">
           <label className="relative">

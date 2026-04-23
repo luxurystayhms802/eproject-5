@@ -29,12 +29,12 @@ export const DeparturesBoardPage = () => {
   const overdue = departures.filter((reservation) => new Date(reservation.checkOutDate) < today);
   const withBalance = departures.filter((reservation) => {
     const invoice = invoices.find((item) => item.reservationId === reservation.id);
-    return Number(invoice?.balanceAmount ?? 0) > 0;
+    return Number(invoice?.balanceAmount ?? 0) > 0 && invoice?.status !== 'void';
   });
 
   const totalBalance = withBalance.reduce((sum, reservation) => {
     const invoice = invoices.find((item) => item.reservationId === reservation.id);
-    return sum + Number(invoice?.balanceAmount ?? 0);
+    return sum + (invoice?.status === 'void' ? 0 : Number(invoice?.balanceAmount ?? 0));
   }, 0);
 
   return (
@@ -73,7 +73,7 @@ export const DeparturesBoardPage = () => {
           <div className="space-y-3">
             {departures.map((reservation) => {
               const invoice = invoices.find((item) => item.reservationId === reservation.id);
-              const balance = Number(invoice?.balanceAmount ?? 0);
+              const balance = invoice?.status === 'void' ? 0 : Number(invoice?.balanceAmount ?? 0);
               const isOverdue = new Date(reservation.checkOutDate) < today;
 
               return (

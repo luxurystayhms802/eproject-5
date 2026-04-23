@@ -169,14 +169,14 @@ export const ReceptionDashboardPage = () => {
                         Room {reservation.room?.roomNumber ?? 'Pending'} | {formatReceptionDate(reservation.checkOutDate)}
                       </p>
                       <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                        Balance {formatReceptionCurrency(linkedInvoice?.balanceAmount ?? 0)}
+                        Balance {formatReceptionCurrency(linkedInvoice?.status === 'void' ? 0 : (linkedInvoice?.balanceAmount ?? 0))}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <StatusBadge value={reservation.status} />
                       <StatusBadge
-                        value={Number(linkedInvoice?.balanceAmount ?? 0) > 0 ? 'pending' : 'paid'}
-                        className={Number(linkedInvoice?.balanceAmount ?? 0) > 0 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}
+                        value={(linkedInvoice?.status === 'void' ? 0 : Number(linkedInvoice?.balanceAmount ?? 0)) > 0 ? 'pending' : 'paid'}
+                        className={(linkedInvoice?.status === 'void' ? 0 : Number(linkedInvoice?.balanceAmount ?? 0)) > 0 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}
                       />
                     </div>
                   </div>
