@@ -261,11 +261,11 @@ const VIPTestimonialCarousel = ({ testimonials }) => {
 
   return (
     <div 
-      className="relative w-full max-w-7xl mx-auto overflow-hidden py-10 lg:py-20 flex flex-col justify-center items-center min-h-[500px]"
+      className="relative w-full max-w-7xl mx-auto overflow-hidden py-10 lg:py-14 flex flex-col justify-center items-center min-h-[400px]"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative w-full max-w-[1000px] h-[360px] md:h-[380px] lg:h-[400px] flex items-center justify-center perspective-[1000px]">
+      <div className="relative w-full max-w-[1000px] h-[300px] md:h-[320px] lg:h-[340px] flex items-center justify-center perspective-[1000px]">
         {testimonials.map((review, index) => {
           let diff = index - activeIndex;
           if (diff < -testimonials.length / 2) diff += testimonials.length;
@@ -278,43 +278,43 @@ const VIPTestimonialCarousel = ({ testimonials }) => {
             positionClass = 'translate-x-0 scale-100 opacity-100 blur-none';
             zIndexClass = 'z-30';
           } else if (diff === -1) {
-            positionClass = 'translate-x-0 md:-translate-x-[55%] lg:-translate-x-[65%] scale-[0.85] opacity-0 md:opacity-60 blur-none md:blur-[2px] cursor-pointer';
+            positionClass = 'translate-x-0 md:-translate-x-[65%] lg:-translate-x-[85%] scale-[0.75] opacity-0 md:opacity-50 blur-none md:blur-[3px] cursor-pointer';
             zIndexClass = 'z-20';
           } else if (diff === 1) {
-            positionClass = 'translate-x-0 md:translate-x-[55%] lg:translate-x-[65%] scale-[0.85] opacity-0 md:opacity-60 blur-none md:blur-[2px] cursor-pointer';
+            positionClass = 'translate-x-0 md:translate-x-[65%] lg:translate-x-[85%] scale-[0.75] opacity-0 md:opacity-50 blur-none md:blur-[3px] cursor-pointer';
             zIndexClass = 'z-20';
           } else {
-            positionClass = `${diff < 0 ? '-translate-x-full' : 'translate-x-full'} scale-75 opacity-0 blur-[4px] pointer-events-none`;
+            positionClass = `${diff < 0 ? '-translate-x-[120%]' : 'translate-x-[120%]'} scale-50 opacity-0 blur-[6px] pointer-events-none`;
             zIndexClass = 'z-0';
           }
 
           return (
             <div
               key={review.id}
-              className={`absolute top-0 left-1/2 -ml-[160px] md:-ml-[200px] lg:-ml-[240px] w-[320px] md:w-[400px] lg:w-[480px] h-full transition-all duration-[800ms] ease-[cubic-bezier(0.25,1,0.5,1)] ${positionClass} ${zIndexClass}`}
+              className={`absolute top-0 left-1/2 -ml-[140px] sm:-ml-[160px] md:-ml-[190px] lg:-ml-[210px] w-[280px] sm:w-[320px] md:w-[380px] lg:w-[420px] h-full transition-all duration-[800ms] ease-[cubic-bezier(0.25,1,0.5,1)] ${positionClass} ${zIndexClass}`}
               onClick={() => {
                 if (Math.abs(diff) === 1) setActiveIndex(index);
               }}
             >
-              <div className="w-full h-full bg-white rounded-[2rem] shadow-[0_24px_54px_rgba(10,20,30,0.08)] border border-black/[0.04] p-8 lg:p-10 flex flex-col justify-between">
+              <div className="w-full h-full bg-white rounded-3xl shadow-[0_24px_54px_rgba(10,20,30,0.08)] border border-black/[0.04] p-6 lg:p-8 flex flex-col justify-between">
                 <div>
-                  <div className="flex gap-1.5 mb-6 text-[var(--accent)]">
+                  <div className="flex gap-1 mb-4 lg:mb-5 text-[var(--accent)]">
                     {[...Array(review.rating || 5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 lg:h-5 w-5 fill-current" />
+                      <Star key={i} className="h-4 w-4 fill-current" />
                     ))}
                   </div>
-                  <p className="text-[1.15rem] lg:text-[1.35rem] leading-[1.6] text-[var(--primary)] font-[var(--font-display)] italic">
+                  <p className="text-[0.95rem] lg:text-[1.1rem] leading-[1.6] text-[var(--primary)] font-[var(--font-display)] italic line-clamp-4">
                     "{review.quote}"
                   </p>
                 </div>
                 
-                <div className="flex items-center gap-4 mt-8 border-t border-black/[0.04] pt-6">
-                  <div className="h-12 w-12 flex items-center justify-center rounded-full bg-[var(--accent)]/10 text-[var(--accent-strong)] text-[16px] font-[var(--font-display)] uppercase shrink-0">
+                <div className="flex items-center gap-3 mt-4 border-t border-black/[0.04] pt-4">
+                  <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[var(--accent)]/10 text-[var(--accent-strong)] text-[14px] font-[var(--font-display)] uppercase shrink-0">
                     {review.name ? review.name.charAt(0) : 'G'}
                   </div>
                   <div>
-                    <p className="text-[15px] font-semibold tracking-wide text-[var(--primary)]">{review.name}</p>
-                    <p className="text-[12px] text-[var(--muted-foreground)] uppercase tracking-[0.15em] mt-0.5">{review.location}</p>
+                    <p className="text-[14px] font-semibold tracking-wide text-[var(--primary)]">{review.name}</p>
+                    <p className="text-[11px] text-[var(--muted-foreground)] uppercase tracking-[0.15em] mt-0.5">{review.location}</p>
                   </div>
                 </div>
               </div>
