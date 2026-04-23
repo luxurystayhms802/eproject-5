@@ -74,7 +74,7 @@ const ReservationDeskPage = lazyPage(() => import('@/features/reception/pages/re
 const WalkInBookingPage = lazyPage(() => import('@/features/reception/pages/walk-in-booking-page'), 'WalkInBookingPage');
 const CheckInDeskPage = lazyPage(() => import('@/features/reception/pages/check-in-desk-page'), 'CheckInDeskPage');
 const CheckOutDeskPage = lazyPage(() => import('@/features/reception/pages/check-out-desk-page'), 'CheckOutDeskPage');
-const BillingSummaryPage = lazyPage(() => import('@/features/reception/pages/billing-summary-page'), 'BillingSummaryPage');
+
 const GuestServicesPage = lazyPage(() => import('@/features/reception/pages/guest-services-page'), 'GuestServicesPage');
 const ReceptionMaintenancePage = lazyPage(() => import('@/features/reception/pages/reception-maintenance-page'), 'ReceptionMaintenancePage');
 
@@ -248,7 +248,7 @@ const router = createBrowserRouter([
           { path: 'walk-ins', element: renderLazy(WalkInBookingPage, 'Loading walk-in booking') },
           { path: 'check-in', element: renderLazy(CheckInDeskPage, 'Loading check-in desk') },
           { path: 'check-out', element: renderLazy(CheckOutDeskPage, 'Loading check-out desk') },
-          { path: 'billing', element: renderLazy(BillingSummaryPage, 'Loading billing summary') },
+
           { path: 'services', element: renderLazy(GuestServicesPage, 'Loading guest services') },
           { path: 'maintenance', element: renderLazy(ReceptionMaintenancePage, 'Loading maintenance') },
           { path: 'inquiries', element: renderLazy(AdminInquiriesPage, 'Loading inquiries') },

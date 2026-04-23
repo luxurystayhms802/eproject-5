@@ -178,7 +178,8 @@ const NAV_ITEMS = {
       { label: 'Check-out Desk', href: '/reception/check-out', icon: ReceiptText },
     ]),
     createSection('Guest Care', [
-      { label: 'Billing', href: '/reception/billing', icon: Wallet },
+      { label: 'Billing & Invoices', href: '/reception/billing', icon: ReceiptText },
+      { label: 'Payments', href: '/reception/payments', icon: Wallet },
       { label: 'Guest Services', href: '/reception/services', icon: Sparkles },
       { label: 'Maintenance', href: '/reception/maintenance', icon: Wrench },
       { label: 'Inquiries', href: '/reception/inquiries', icon: MailQuestion },
