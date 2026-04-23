@@ -470,30 +470,30 @@ export const printInvoiceDocument = ({
           <div class="totals-box">
             <div class="totals-row">
               <span>Subtotal</span>
-              <span>${formatCurrency(invoice?.subtotal)}</span>
+              <span>${formatCurrency(invoice?.status === 'void' ? 0 : invoice?.subtotal)}</span>
             </div>
             <div class="totals-row">
               <span>Taxes</span>
-              <span>${formatCurrency(invoice?.taxAmount)}</span>
+              <span>${formatCurrency(invoice?.status === 'void' ? 0 : invoice?.taxAmount)}</span>
             </div>
             ${Number(invoice?.discountAmount) > 0 ? `
             <div class="totals-row" style="color: #16a34a;">
               <span>Discounts Applied</span>
-              <span>-${formatCurrency(invoice?.discountAmount)}</span>
+              <span>-${formatCurrency(invoice?.status === 'void' ? 0 : invoice?.discountAmount)}</span>
             </div>
             ` : ''}
             
             <div class="totals-row grand-total">
               <span>Total Amount</span>
-              <span>${formatCurrency(invoice?.totalAmount)}</span>
+              <span>${formatCurrency(invoice?.status === 'void' ? 0 : invoice?.totalAmount)}</span>
             </div>
             <div class="totals-row" style="margin-top: 8px;">
               <span>Amount Paid</span>
-              <span>${formatCurrency(invoice?.paidAmount)}</span>
+              <span>${formatCurrency(invoice?.status === 'void' ? 0 : invoice?.paidAmount)}</span>
             </div>
             <div class="totals-row balance">
               <span>Balance Due</span>
-              <span>${formatCurrency(invoice?.balanceAmount)}</span>
+              <span>${formatCurrency(invoice?.status === 'void' ? 0 : invoice?.balanceAmount)}</span>
             </div>
           </div>
         </div>

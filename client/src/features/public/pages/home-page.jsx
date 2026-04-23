@@ -245,33 +245,80 @@ const RoomCard = ({ room, currency, checkInDate, checkOutDate, adults }) => {
   );
 };
 
-const TestimonialCard = ({ review, featured = false }) => (
-  <article
-    className={
-      featured
-        ? 'rounded-[28px] bg-[linear-gradient(145deg,#0d1724,#18293f)] p-7 text-white shadow-[0_24px_54px_rgba(10,20,30,0.14)]'
-        : 'rounded-[24px] bg-white/88 p-6 shadow-[0_14px_30px_rgba(13,28,46,0.05)] ring-1 ring-black/5'
-    }
-  >
-    <div className={`flex items-center gap-1 ${featured ? 'text-[#ecd3a8]' : 'text-[var(--accent-strong)]'}`}>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <Star key={`${review.name}-${index}`} className={`h-4 w-4 ${index < Number(review.rating || 5) ? 'fill-current' : ''}`} />
-      ))}
+const VIPTestimonialCarousel = ({ testimonials }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    if (testimonials.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveIndex((current) => (current + 1) % testimonials.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [testimonials.length]);
+
+  if (!testimonials.length) return null;
+
+  return (
+    <div className="relative w-full max-w-5xl mx-auto mt-10 lg:mt-14">
+      <div className="relative min-h-[340px] md:min-h-[280px] overflow-hidden flex items-center justify-center">
+        {testimonials.map((review, index) => {
+          let position = 'translate-x-full opacity-0 scale-95';
+          let zIndex = 0;
+          
+          if (index === activeIndex) {
+            position = 'translate-x-0 opacity-100 scale-100';
+            zIndex = 20;
+          } else if (index === (activeIndex - 1 + testimonials.length) % testimonials.length) {
+            position = '-translate-x-full opacity-0 scale-95';
+            zIndex = 10;
+          }
+
+          return (
+            <div 
+              key={review.id} 
+              className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-[1200ms] ease-[cubic-bezier(0.25,1,0.5,1)] ${position}`}
+              style={{ zIndex }}
+            >
+              <div className="text-[var(--accent)] mb-6 flex gap-1.5">
+                {[...Array(review.rating || 5)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 fill-current" />
+                ))}
+              </div>
+              <p className="text-[1.35rem] md:text-[1.85rem] leading-[1.6] text-[var(--primary)] font-[var(--font-display)] italic text-center max-w-3xl mb-8 px-4">
+                "{review.quote}"
+              </p>
+              <div className="flex flex-col items-center text-center">
+                <div className="h-11 w-11 mb-3 flex items-center justify-center rounded-full bg-[var(--accent)]/10 text-[var(--accent-strong)] text-[15px] font-[var(--font-display)] uppercase">
+                  {review.name ? review.name.charAt(0) : 'G'}
+                </div>
+                <p className="text-[14px] font-semibold tracking-wide text-[var(--primary)]">{review.name}</p>
+                <p className="text-[11px] text-[var(--muted-foreground)] uppercase tracking-[0.15em] mt-1">{review.location}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      
+      <div className="flex justify-center gap-3 mt-10">
+        {testimonials.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setActiveIndex(idx)}
+            aria-label={`View testimonial ${idx + 1}`}
+            className={`h-1.5 rounded-full transition-all duration-500 ${
+              idx === activeIndex ? 'w-10 bg-[var(--accent)]' : 'w-2 bg-[var(--accent)]/30 hover:bg-[var(--accent)]/50'
+            }`}
+          />
+        ))}
+      </div>
     </div>
-    <p className={`mt-4 ${featured ? 'max-w-[22ch] text-[1.5rem] leading-[1.24] text-white' : 'text-[15px] leading-7 text-[var(--foreground)]'}`}>
-      "{review.quote}"
-    </p>
-    <div className={`mt-5 pt-4 ${featured ? 'border-t border-white/10' : 'border-t border-black/6'}`}>
-      <p className={`text-sm font-semibold ${featured ? 'text-white' : 'text-[var(--primary)]'}`}>{review.name}</p>
-      <p className={`text-sm ${featured ? 'text-white/66' : 'text-[var(--muted-foreground)]'}`}>{review.location}</p>
-    </div>
-  </article>
-);
+  );
+};
 
 export const HomePage = () => {
   const navigate = useNavigate();
   const settingsQuery = useHotelSettings();
-  const reviewsQuery = usePublishedFeedback({ limit: 3 });
+  const reviewsQuery = usePublishedFeedback({ limit: 10 });
   const featuredRoomTypesQuery = useRoomTypes({ featured: true, isActive: true, limit: 3 });
   const activeRoomTypesQuery = useRoomTypes({ isActive: true, limit: 6 });
   const roomsQuery = useRooms({ isActive: true, limit: 120 });
@@ -317,7 +364,7 @@ export const HomePage = () => {
     }
   }, [activeHeroIndex, heroImages.length]);
 
-  const testimonials = (reviewsQuery.data ?? []).slice(0, 3).map((review, index) => ({
+  const testimonials = (reviewsQuery.data ?? []).map((review, index) => ({
     id: review.id || `review-${index}`,
     name: review.guestName || 'LuxuryStay Guest',
     quote: review.comment || review.title || 'A memorable stay shaped by calm service and refined comfort.',
@@ -550,34 +597,7 @@ export const HomePage = () => {
               />
             </div>
             
-            <div className="mt-4 lg:mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-              {testimonials.map((review) => (
-                <div key={review.id} className="rounded-2xl bg-white p-6 md:p-8 shadow-[0_4px_20px_rgba(8,24,44,0.03)] border border-black/5 flex flex-col justify-between h-full group hover:-translate-y-1 transition-transform duration-500">
-                  <div>
-                     <div className="flex items-center gap-1 mb-4 text-[var(--accent)]">
-                       {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="h-3.5 w-3.5 fill-current" />
-                       ))}
-                     </div>
-                     <p className="text-[1.05rem] leading-[1.7] text-[var(--primary)] font-medium italic mb-6">
-                       "{review.quote}"
-                     </p>
-                  </div>
-                  
-                  <div className="flex items-center justify-between border-t border-[rgba(184,140,74,0.1)] pt-4 mt-2">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 flex items-center justify-center rounded-full bg-[rgba(184,140,74,0.1)] text-[var(--accent-strong)] text-[14px] font-[var(--font-display)] uppercase">
-                        {review.name ? review.name.charAt(0) : 'G'}
-                      </div>
-                      <div>
-                        <p className="text-[13px] font-semibold text-[var(--primary)]">{review.name}</p>
-                        <p className="text-[10px] text-[var(--muted-foreground)] uppercase tracking-[0.1em] mt-0.5">{review.location}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <VIPTestimonialCarousel testimonials={testimonials} />
           </div>
         </section>
       )}
