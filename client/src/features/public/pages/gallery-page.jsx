@@ -54,10 +54,12 @@ export const GalleryPage = () => {
               <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[var(--accent)] text-shadow-sm">Visual library</p>
               <p className="mt-2 font-[var(--font-display)] text-4xl !text-white">{galleryItems.length}+</p>
             </div>
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[var(--accent)] text-shadow-sm">Categories</p>
-              <p className="mt-2 font-[var(--font-display)] text-4xl !text-white">{categories.length - 1}</p>
-            </div>
+            {categories.length > 2 && (
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[var(--accent)] text-shadow-sm">Categories</p>
+                <p className="mt-2 font-[var(--font-display)] text-4xl !text-white">{categories.length - 1}</p>
+              </div>
+            )}
           </div>
         </div>
       </section>

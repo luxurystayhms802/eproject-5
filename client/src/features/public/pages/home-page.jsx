@@ -247,69 +247,112 @@ const RoomCard = ({ room, currency, checkInDate, checkOutDate, adults }) => {
 
 const VIPTestimonialCarousel = ({ testimonials }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
-    if (testimonials.length <= 1) return;
+    if (testimonials.length <= 1 || isHovered) return;
     const interval = setInterval(() => {
       setActiveIndex((current) => (current + 1) % testimonials.length);
-    }, 6000);
+    }, 5000);
     return () => clearInterval(interval);
-  }, [testimonials.length]);
+  }, [testimonials.length, isHovered]);
 
-  if (!testimonials.length) return null;
+  if (!testimonials || testimonials.length === 0) return null;
 
   return (
-    <div className="relative w-full max-w-5xl mx-auto mt-10 lg:mt-14">
-      <div className="relative min-h-[340px] md:min-h-[280px] overflow-hidden flex items-center justify-center">
+    <div 
+      className="relative w-full max-w-7xl mx-auto overflow-hidden py-10 lg:py-20 flex flex-col justify-center items-center min-h-[500px]"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="relative w-full max-w-[1000px] h-[360px] md:h-[380px] lg:h-[400px] flex items-center justify-center perspective-[1000px]">
         {testimonials.map((review, index) => {
-          let position = 'translate-x-full opacity-0 scale-95';
-          let zIndex = 0;
+          let diff = index - activeIndex;
+          if (diff < -testimonials.length / 2) diff += testimonials.length;
+          if (diff > testimonials.length / 2) diff -= testimonials.length;
+
+          let positionClass = '';
+          let zIndexClass = '';
           
-          if (index === activeIndex) {
-            position = 'translate-x-0 opacity-100 scale-100';
-            zIndex = 20;
-          } else if (index === (activeIndex - 1 + testimonials.length) % testimonials.length) {
-            position = '-translate-x-full opacity-0 scale-95';
-            zIndex = 10;
+          if (diff === 0) {
+            positionClass = 'translate-x-0 scale-100 opacity-100 blur-none';
+            zIndexClass = 'z-30';
+          } else if (diff === -1) {
+            positionClass = 'translate-x-0 md:-translate-x-[55%] lg:-translate-x-[65%] scale-[0.85] opacity-0 md:opacity-60 blur-none md:blur-[2px] cursor-pointer';
+            zIndexClass = 'z-20';
+          } else if (diff === 1) {
+            positionClass = 'translate-x-0 md:translate-x-[55%] lg:translate-x-[65%] scale-[0.85] opacity-0 md:opacity-60 blur-none md:blur-[2px] cursor-pointer';
+            zIndexClass = 'z-20';
+          } else {
+            positionClass = `${diff < 0 ? '-translate-x-full' : 'translate-x-full'} scale-75 opacity-0 blur-[4px] pointer-events-none`;
+            zIndexClass = 'z-0';
           }
 
           return (
-            <div 
-              key={review.id} 
-              className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-[1200ms] ease-[cubic-bezier(0.25,1,0.5,1)] ${position}`}
-              style={{ zIndex }}
+            <div
+              key={review.id}
+              className={`absolute top-0 left-1/2 -ml-[160px] md:-ml-[200px] lg:-ml-[240px] w-[320px] md:w-[400px] lg:w-[480px] h-full transition-all duration-[800ms] ease-[cubic-bezier(0.25,1,0.5,1)] ${positionClass} ${zIndexClass}`}
+              onClick={() => {
+                if (Math.abs(diff) === 1) setActiveIndex(index);
+              }}
             >
-              <div className="text-[var(--accent)] mb-6 flex gap-1.5">
-                {[...Array(review.rating || 5)].map((_, i) => (
-                  <Star key={i} className="h-5 w-5 fill-current" />
-                ))}
-              </div>
-              <p className="text-[1.35rem] md:text-[1.85rem] leading-[1.6] text-[var(--primary)] font-[var(--font-display)] italic text-center max-w-3xl mb-8 px-4">
-                "{review.quote}"
-              </p>
-              <div className="flex flex-col items-center text-center">
-                <div className="h-11 w-11 mb-3 flex items-center justify-center rounded-full bg-[var(--accent)]/10 text-[var(--accent-strong)] text-[15px] font-[var(--font-display)] uppercase">
-                  {review.name ? review.name.charAt(0) : 'G'}
+              <div className="w-full h-full bg-white rounded-[2rem] shadow-[0_24px_54px_rgba(10,20,30,0.08)] border border-black/[0.04] p-8 lg:p-10 flex flex-col justify-between">
+                <div>
+                  <div className="flex gap-1.5 mb-6 text-[var(--accent)]">
+                    {[...Array(review.rating || 5)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 lg:h-5 w-5 fill-current" />
+                    ))}
+                  </div>
+                  <p className="text-[1.15rem] lg:text-[1.35rem] leading-[1.6] text-[var(--primary)] font-[var(--font-display)] italic">
+                    "{review.quote}"
+                  </p>
                 </div>
-                <p className="text-[14px] font-semibold tracking-wide text-[var(--primary)]">{review.name}</p>
-                <p className="text-[11px] text-[var(--muted-foreground)] uppercase tracking-[0.15em] mt-1">{review.location}</p>
+                
+                <div className="flex items-center gap-4 mt-8 border-t border-black/[0.04] pt-6">
+                  <div className="h-12 w-12 flex items-center justify-center rounded-full bg-[var(--accent)]/10 text-[var(--accent-strong)] text-[16px] font-[var(--font-display)] uppercase shrink-0">
+                    {review.name ? review.name.charAt(0) : 'G'}
+                  </div>
+                  <div>
+                    <p className="text-[15px] font-semibold tracking-wide text-[var(--primary)]">{review.name}</p>
+                    <p className="text-[12px] text-[var(--muted-foreground)] uppercase tracking-[0.15em] mt-0.5">{review.location}</p>
+                  </div>
+                </div>
               </div>
             </div>
           );
         })}
       </div>
       
-      <div className="flex justify-center gap-3 mt-10">
-        {testimonials.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => setActiveIndex(idx)}
-            aria-label={`View testimonial ${idx + 1}`}
-            className={`h-1.5 rounded-full transition-all duration-500 ${
-              idx === activeIndex ? 'w-10 bg-[var(--accent)]' : 'w-2 bg-[var(--accent)]/30 hover:bg-[var(--accent)]/50'
-            }`}
-          />
-        ))}
+      {/* Navigation Controls */}
+      <div className="flex items-center justify-center gap-6 mt-12 z-40">
+        <button 
+          onClick={() => setActiveIndex((activeIndex - 1 + testimonials.length) % testimonials.length)}
+          className="h-10 w-10 flex items-center justify-center rounded-full border border-black/10 text-[var(--primary)] hover:bg-[var(--accent)]/10 hover:text-[var(--accent-strong)] hover:border-[var(--accent)]/30 transition-all"
+          aria-label="Previous testimonial"
+        >
+          <ArrowRight className="h-4 w-4 rotate-180" />
+        </button>
+        
+        <div className="flex justify-center gap-2.5">
+          {testimonials.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setActiveIndex(idx)}
+              aria-label={`View testimonial ${idx + 1}`}
+              className={`h-2 rounded-full transition-all duration-500 ${
+                idx === activeIndex ? 'w-8 bg-[var(--accent)]' : 'w-2 bg-[var(--accent)]/30 hover:bg-[var(--accent)]/50'
+              }`}
+            />
+          ))}
+        </div>
+        
+        <button 
+          onClick={() => setActiveIndex((activeIndex + 1) % testimonials.length)}
+          className="h-10 w-10 flex items-center justify-center rounded-full border border-black/10 text-[var(--primary)] hover:bg-[var(--accent)]/10 hover:text-[var(--accent-strong)] hover:border-[var(--accent)]/30 transition-all"
+          aria-label="Next testimonial"
+        >
+          <ArrowRight className="h-4 w-4" />
+        </button>
       </div>
     </div>
   );
