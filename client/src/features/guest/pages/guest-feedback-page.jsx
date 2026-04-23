@@ -44,7 +44,6 @@ export const GuestFeedbackPage = () => {
       return;
     }
 
-    const normalizedRating = Math.min(5, Math.max(1, Number(rating) || 1));
 
     createFeedback.mutate(
       {
@@ -151,7 +150,6 @@ export const GuestFeedbackPage = () => {
                       <p className="mt-1 text-sm text-[var(--muted-foreground)]">{item.comment}</p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <StatusBadge value={item.isPublished ? 'active' : 'inactive'} />
                       <span className="text-sm font-semibold text-[var(--accent)]">{item.rating}/5</span>
                     </div>
                   </div>
