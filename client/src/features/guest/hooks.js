@@ -47,7 +47,14 @@ export const useGuestDashboard = () => {
         };
     });
     const totalSpend = reservations.reduce((sum, reservation) => {
+        // Only include stays that are currently happening or completed in the total spend calculation
+        if (!['checked_in', 'checked_out'].includes(reservation.status)) {
+            return sum;
+        }
         const linkedInvoice = invoiceTotalsByReservation.get(reservation.id);
+        if (linkedInvoice && linkedInvoice.status === 'void') {
+            return sum;
+        }
         return sum + Number(linkedInvoice?.totalAmount ?? reservation.totalAmount ?? 0);
     }, 0);
     const summary = {

@@ -21,13 +21,23 @@ export const cronService = {
             logger.info(`Starting nightly audit job for missed arrivals (Scheduled for ${timeStr})...`);
             
             try {
-                const todayMidnight = getStartOfDay(new Date());
+                const now = new Date();
+                const currentHour = now.getHours();
+
+                // Determine the business date being audited
+                // If running in the morning (e.g., 01:00 to 11:59), we are auditing yesterday's check-ins
+                // If running in the afternoon/evening (e.g., 12:00 to 23:59), we are auditing today's check-ins
+                const auditBusinessDate = new Date(now);
+                if (currentHour < 12) {
+                    auditBusinessDate.setDate(auditBusinessDate.getDate() - 1);
+                }
+                const auditBusinessDateStart = getStartOfDay(auditBusinessDate);
                 
-                // Find pending or confirmed reservations whose checkInDate is strictly before today
+                // Find pending or confirmed reservations whose checkInDate is on or before the audit business date
                 const overdueReservations = await ReservationModel.find({
                     deletedAt: null,
                     status: { $in: ['pending', 'confirmed'] },
-                    checkInDate: { $lt: todayMidnight }
+                    checkInDate: { $lte: auditBusinessDateStart }
                 }).select('_id').lean();
 
                 const systemContext = {
