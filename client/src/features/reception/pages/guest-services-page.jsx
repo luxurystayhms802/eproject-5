@@ -26,6 +26,11 @@ import {
 } from '@/features/reception/hooks';
 import { validateReceptionServiceRequestForm } from '@/features/reception/utils';
 
+const getLocalISODateTime = (date) => {
+  const tzOffset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
+};
+
 const SUPPORTABLE_ROLES = ['admin', 'manager', 'receptionist', 'housekeeping', 'maintenance'];
 
 const initialServiceDraft = {
@@ -70,6 +75,20 @@ export const GuestServicesPage = () => {
       return true;
     });
   }, [checkedInQuery.data, confirmedQuery.data]);
+
+  const selectedReservation = useMemo(
+    () => eligibleReservations.find((res) => res.id === draft.reservationId),
+    [eligibleReservations, draft.reservationId],
+  );
+
+  const minDateTime = useMemo(() => getLocalISODateTime(new Date()), []);
+
+  const maxDateTime = useMemo(() => {
+    if (!selectedReservation || !selectedReservation.checkOutDate) return undefined;
+    const maxDate = new Date(selectedReservation.checkOutDate);
+    maxDate.setHours(23, 59, 0, 0);
+    return getLocalISODateTime(maxDate);
+  }, [selectedReservation]);
 
   const requests = useMemo(() => {
     const all = requestsQuery.data ?? [];
@@ -120,7 +139,7 @@ export const GuestServicesPage = () => {
       await createRequestMutation.mutateAsync({
         reservationId: draft.reservationId,
         requestType: draft.requestType,
-        preferredTime: draft.preferredTime || null,
+        preferredTime: draft.preferredTime ? new Date(draft.preferredTime).toISOString() : null,
         description: draft.description.trim(),
       });
       setDraft(initialServiceDraft);
@@ -189,9 +208,11 @@ export const GuestServicesPage = () => {
               <input
                 className={receptionFieldClassName}
                 name="preferredTime"
+                type="datetime-local"
+                min={minDateTime}
+                max={maxDateTime}
                 value={draft.preferredTime}
                 onChange={(event) => setDraft((current) => ({ ...current, preferredTime: event.target.value }))}
-                placeholder="Immediately or 8:30 PM"
               />
             </label>
 

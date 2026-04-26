@@ -21,3 +21,17 @@ export const requirePermissions = (...permissions) => (request, response, next) 
     }
     return next();
 };
+export const requireAnyPermission = (...permissions) => (request, response, next) => {
+    if (request.authUser?.role === 'admin') {
+        return next();
+    }
+    const userPermissions = request.authUser?.permissions ?? [];
+    const isAllowed = permissions.some((permission) => userPermissions.includes(permission));
+    if (!isAllowed) {
+        return response.status(403).json({
+            success: false,
+            message: 'Missing required permissions',
+        });
+    }
+    return next();
+};

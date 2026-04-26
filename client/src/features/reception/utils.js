@@ -112,6 +112,10 @@ export const validateReceptionServiceRequestForm = (form) => {
     return 'Select a service type.';
   }
 
+  if (!form.preferredTime) {
+    return 'Select a preferred time.';
+  }
+
   if (String(form.description ?? '').trim().length < 8) {
     return 'Description should be at least 8 characters.';
   }

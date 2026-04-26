@@ -81,7 +81,7 @@ export const GuestServiceRequestsPage = () => {
     event.preventDefault();
 
     const validationMessage = validateGuestServiceRequestForm(
-      { reservationId, description },
+      { reservationId, description, preferredTime },
       eligibleReservations.length > 0,
     );
     if (validationMessage) {

@@ -57,6 +57,7 @@ export const validateGuestProfileForm = (form) => {
 export const validateGuestServiceRequestForm = (form, hasEligibleReservations) => {
   if (!hasEligibleReservations) return 'No confirmed or checked-in stays are available for service requests right now.';
   if (isBlank(form.reservationId)) return 'Select the stay you want to attach this request to.';
+  if (isBlank(form.preferredTime)) return 'Select a preferred time.';
   if (String(form.description ?? '').trim().length < 8) return 'Add a request description with at least 8 characters.';
   return null;
 };
